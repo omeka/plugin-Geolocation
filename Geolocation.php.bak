@@ -1,11 +1,13 @@
 <?php
+//Include the ActiveRecord model
+require_once 'Location.php';
 /**
  * 
  *
  * @package Omeka
  * 
  **/
-class GeoLocation extends Kea_Plugin
+class Geolocation extends Kea_Plugin
 {	
 	protected $metaInfo = array(
 			'description'=>'Uses the Google Maps API to allow Items to be associated with a geographical location.',
@@ -16,59 +18,57 @@ class GeoLocation extends Kea_Plugin
 		$this->hasConfig('Default Longitude', 'The default longitude for the map.', 70);
 		$this->hasConfig('Default ZoomLevel', 'The default zoom level for the map.', 5);
 		$this->hasConfig('Google Maps API Key', 'The API key (plugin will not work properly without this).');
+	
 		
-		$this->hasMetafield('Map Latitude', 'The latitude on the map.');
-		$this->hasMetafield('Map Longitude', 'The longitude on the map.');
-		$this->hasMetafield('Map Zoom Level', 'The zoom level on the map.');
-		$this->hasMetafield('Map Street Address');
-		$this->hasMetafield('Map Zipcode');
-		
-		$this->hasType('Building', 'A man-made edifice', 
+/*
+			$this->hasType('Building', 'A man-made edifice', 
 			array(
 				array('name'=>'City', 'description'=>'The city in which a building is located.'),
 				array('name'=>'County', 'description'=>'The county in which a building is located.'),
 				array('name'=>'Owner Name', 'description'=>'The name of the person or entity who owns the building.')));
-				
-		$this->typeHasMetafield('Event', 'Extra Map Field', 'This is a fake metafield to test adding metafields to types.');
+*/	
 	}
 	
-	public function addNavigation($text, $link) {
-		if($text == 'Themes') {
-			return array('Foo', $this->uri('bar'));
+	public function customInstall()
+	{
+		//Create the locations table
+		$this->getDbConn()->execute("CREATE TABLE `locations` (
+			`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+			`item_id` BIGINT UNSIGNED NOT NULL ,
+			`latitude` DOUBLE NOT NULL ,
+			`longitude` DOUBLE NOT NULL ,
+			`zipcode` INT NOT NULL ,
+			`zoom_level` INT NOT NULL ,
+			`map_type` VARCHAR( 255 ) NOT NULL ,
+			`address` TEXT NOT NULL ,
+			INDEX ( `item_id` )
+			) ENGINE = MYISAM ;");
+	}
+
+} // END class FooPlugin
+
+
+/**
+ * Return a multidimensional array of location info
+ *
+ * @param array|int $item_id
+ * @return array
+ **/
+function get_location_for_item($item_id)
+{
+	$select = new Kea_Select;
+	$select->from(array('Location', 'l'), 'l.*');
+	
+	if(is_array($item_id)) {
+		foreach ($item_id as $id) {
+			$select->orWhere('l.item_id = ?', $id);
 		}
 	}
 	
-	public function routeStartup()
-    {
-//        $this->getResponse()->appendBody('<p>routeStartup() called</p>');
-    }
-
-    public function routeShutdown($request)
-    {
-//        $this->getResponse()->appendBody('<p>routeShutdown() called</p>');
-    }
-
-    public function dispatchLoopStartup($request)
-    {
-//        $this->getResponse()->appendBody('<p>dispatchLoopStartup() called</p>');
-    }
-
-    public function preDispatch($request)
-    {
-//        $this->getResponse()->appendBody('<p>preDispatch() called</p>');
-    }
-
-    public function postDispatch($request)
-    {
-//        $this->getResponse()->appendBody('<p>postDispatch() called</p>');
-    }
-
-    public function dispatchLoopShutdown()
-    {
-//        $this->getResponse()->appendBody('<p>dispatchLoopShutdown() called</p>');
-    }
-
-} // END class FooPlugin
+	echo $select;exit;
+		
+	return $location;
+}
 
 	/**
 	 * 
