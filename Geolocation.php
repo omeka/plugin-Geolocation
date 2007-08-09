@@ -45,7 +45,32 @@ class Geolocation extends Kea_Plugin
 			) ENGINE = MYISAM ;");
 	}
 
-} // END class FooPlugin
+	/**
+	 * Let the plugin know that it should throw some hooks into the items browsing to 
+	 * filter out items based whether or not they have locations associated with them
+	 *
+	 * @return void
+	 **/
+	public function setMapDisplay($bool=true)
+	{
+		$this->displayMap = true;
+	}
+	
+	/**
+	 * Plugin must be able to add SQL to the master query that pulls down a list of items
+	 *
+	 * @return void
+	 **/
+	public function filterBrowse($select, $recordType)
+	{
+		if( ($recordType == 'Item') and $this->displayMap) {
+			
+			//INNER JOIN the locations table
+			$select->innerJoin(array('Location', 'l'), 'l.item_id = i.id');
+		}
+	}
+	
+} // END class Geolocation
 
 
 /**
@@ -59,15 +84,38 @@ function get_location_for_item($item_id)
 	$select = new Kea_Select;
 	$select->from(array('Location', 'l'), 'l.*');
 	
-	if(is_array($item_id)) {
-		foreach ($item_id as $id) {
-			$select->orWhere('l.item_id = ?', $id);
-		}
-	}
-	
-	echo $select;exit;
+	//Create a WHERE condition that will pull down all the location info
+	if(count($item_id) > 1 or ($item_id instanceof Doctrine_Collection)) {
 		
-	return $location;
+		//Loop through a collection of ActiveRecord items
+		if($item_id instanceof Doctrine_Collection) {
+			foreach ($item_id as $item) {
+				$select->orWhere('l.item_id = ?', $item->id);
+			}
+		}
+		//Loop through an array of item IDs
+		else {
+			foreach ($item_id as $id) {
+				$select->orWhere('l.item_id = ?', $id);
+			}			
+		}
+		
+
+	}else {
+		$select->where('l.item_id = ?', $item_id);
+	}
+		
+	//Fetch the data
+	$array = $select->fetchAll();
+	
+	
+	//Now process into an array where the key is the item_id		
+	$locations = array();	
+	foreach ($array as $k => $row) {
+		$locations[$row['item_id']] = $row;
+	}	
+			
+	return $locations;
 }
 
 	/**
@@ -89,18 +137,19 @@ function get_location_for_item($item_id)
 	 * @param array extra options
 	 * @return string
 	 **/
-	function google_map($latitude, $longitude, $zoomLevel, $width, $height, $divName = 'map', $uri, $options = array()) {
+	function google_map($width, $height, $divName = 'map', $options = array()) {
 		echo "<div id=\"$divName\"></div>";
 		//Load this junk in from the plugin config
 		if(!$latitude || !$longitude) {
-			$latitude = $this->getConfig('Default Latitude');
-			$longitude = $this->getConfig('Default Longitude');
-			$zoomLevel = $this->getConfig('Default Zoom Level');
+			$plugin = Zend::Registry( 'Geolocation' );
+			$latitude = $plugin->getConfig('Default Latitude');
+			$longitude = $plugin->getConfig('Default Longitude');
+			$zoomLevel = $plugin->getConfig('Default Zoom Level');
 		}
 		
 		require_once 'Zend/Json.php';
 		$options = Zend_Json::encode($options);
-		echo "<script>var $divName = new OmekaMap('$divName', '$uri', $latitude, $longitude, $zoomLevel, $width, $height, $options);</script>";
+		echo "<script>var $divName = new OmekaMap('$divName', $options);</script>";
 	}
 
 ?>

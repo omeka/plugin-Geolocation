@@ -1,7 +1,6 @@
 <?php
 
 require_once 'Kea/Controller/Action.php';
-require_once MODEL_DIR.DIRECTORY_SEPARATOR.'Metafield.php';
 
 class GeoController extends Kea_Controller_Action
 {
@@ -17,11 +16,35 @@ class GeoController extends Kea_Controller_Action
 
 	public function browseAction()
 	{
-		//Add a bunch of filtering so that you can filter by collection, etc.
-		$query = new Doctrine_Query();
-		$query->from('Item i')->innerJoin('i.Metatext mt')->innerJoin('mt.Metafield mf')->where("mf.name = 'Map Latitude' AND mt.text != ''");
-		$items = $query->execute();
-		$this->render('map/browse.php', compact('items'));
+		
+		//OK This will fake a request to the ItemsController
+		$req = clone $this->getRequest();
+		$req->setControllerName('items');
+		
+		//Tell the plugin that it should filter the SQL in the items browse
+		Zend::Registry( 'Geolocation' )->setMapDisplay(true);
+		
+		require_once CONTROLLER_DIR.DIRECTORY_SEPARATOR.'ItemsController.php';
+		
+		$itemController = new ItemsController($req, $this->getResponse(), array('return'=>'items'));
+		
+		//Retrieve the items from that shit
+		$items = $itemController->browseAction();
+				
+				
+								
+		$locations = get_location_for_item($items);
+		
+		$this->render('map/browse.php', compact('items', 'locations'));
+	}
+	
+	public function showAction()
+	{
+		//Another fake request to the ItemsController
+		$req = clone $this->getRequest();
+		$req->setControllerName('items');
+		
+		$this->findById(null, 'Item');
 	}
 }
 

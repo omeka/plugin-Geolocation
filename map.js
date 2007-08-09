@@ -1,15 +1,10 @@
 	var OmekaMap = Class.create();
 	
 	OmekaMap.prototype = {
-		initialize: function(mapDiv, ajaxUri, centerLatitude, centerLongitude, centerZoomLevel, width, height, options) {
-			this.mapDiv = $(mapDiv);
-			this.ajaxUri = ajaxUri;
-			this.centerLatitude = centerLatitude;
-			this.centerLongitude = centerLongitude;
-			this.centerZoomLevel = centerZoomLevel;
-			this.width = width;
-			this.height = height;
+		initialize: function(mapDiv, options) {
 			this.options = options;
+			//Possible options ajaxUri, centerLatitude, centerLongitude, centerZoomLevel, width, height, 
+			this.mapDiv = $(mapDiv);
 			Event.observe(window,'load', this.makeMap.bindAsEventListener(this));
 		},
 		
@@ -49,7 +44,8 @@
 		       this.mapObj.setCenter( mapCenter, this.centerZoomLevel);
 			   this.mapObj.addControl(new GSmallMapControl());
 
-				var _this = this;
+/*
+					var _this = this;
 				opt = {
 					onComplete: function(t, json) {
 						_this.addPoints(t, json);
@@ -58,6 +54,7 @@
 					asynchronous:true
 				}
 				new Ajax.Request(this.ajaxUri, opt);
+*/	
 		    }
 
 		}
