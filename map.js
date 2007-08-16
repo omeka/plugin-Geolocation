@@ -4,8 +4,9 @@
 		initialize: function(mapDiv, options) {
 			this.options = options;
 
-			this.mapDiv = mapDiv;
+			this.mapDiv = $(mapDiv);
 			
+			//When the window loads, generate the map
 			Event.observe(window,'load', this.makeMap.bindAsEventListener(this));
 		},
 		
@@ -17,39 +18,38 @@
 		makeMap: function() {
 			if (GBrowserIsCompatible()) {
 				
-				var mapElement = document.getElementById(this.mapDiv);
-		 		$(mapElement).setStyle({width: (this.options.width+'px'), height: (this.options.height+'px')});
+		 		this.mapDiv.setStyle({width: (this.options.width+'px'), height: (this.options.height+'px')});
 
-		      	var mapObj = new GMap2(mapElement);
+		      	var mapObj = new GMap2(this.mapDiv);
 				
+				//Add controls to the map
 			    mapObj.addControl(new GLargeMapControl());
 				mapObj.addControl(new GMapTypeControl());
 				
+				this.mapObj = mapObj;
 				this.setCenter(mapObj);
 				
+				//Have to set the maptype manually (for some strange reason)
 				var mapType = mapObj.getMapTypes()[0];
 				mapObj.setMapType(mapType);
-				
-				this.mapObj = mapObj;
+		
 			
 				if(this.options.uri) {
 					this.populateMap(mapObj, this.options.uri);
-				}else {
-					this.setCenter(mapObj);
 				}
 		    }
 
 		},
 		
-		setCenter: function(mapObj) {
+		setCenter: function() {
 			//Set the center of the map
 			var setOverlay = this.options.centerOverlay;
 						
 			//If there are no items pulled in, or if there is more than one, then use the default values
 			if(!this.items || this.items.length > 1) {
-				var longitude = this.options.default.longitude;
-				var latitude = this.options.default.latitude;
-				var zoomLevel = this.options.default.zoomLevel;
+				var longitude = parseFloat(this.options.default.longitude);
+				var latitude = parseFloat(this.options.default.latitude);
+				var zoomLevel = parseInt(this.options.default.zoomLevel);
 								
 			}else {
 				var item = this.items[0];
@@ -64,11 +64,12 @@
 			
 			var point = new GLatLng(latitude, longitude);
 
-			mapObj.setCenter(point, zoomLevel);
+			this.mapObj.setCenter(point, zoomLevel);
+			this.mapObj.setZoom(zoomLevel);
 		
 			if(setOverlay) {
 				var marker = new GMarker(point);
-				mapObj.addOverlay(marker);
+				this.mapObj.addOverlay(marker);
 			}
 		},
 		
@@ -76,27 +77,15 @@
 			
 			var that = this;
 			
-/*
-				new Ajax.Request(uri.href, {
-				parameters: uri.params,
-				onComplete: function(t) {
-					//Parse the XML returned by the request
-					var xml = GXml.parse(t.responseText);					
-			
-				}
-			});
-*/				
-
 				var url = uri.href;
 				
+				var query = $H(uri.params).toQueryString();
+				
 				if(url.indexOf('?') != -1) {
-					url += "&output=rest";
+					url += "&" + query;
 				}else {
-					url += "?output=rest";
-				}
-/*				
-				alert($H(uri.params).toQueryString());
-*/				
+					url += "?" + query;
+				}				
 
 				GDownloadUrl(url, function(data, responseCode) {
 					var xml = GXml.parse(data);
@@ -119,9 +108,7 @@
 						var marker = createMarker(point, balloon);
 				
 						mapObj.addOverlay(marker);
-					};
-					
-					that.setCenter(mapObj);
+					};					
 			});			
 	
 		}

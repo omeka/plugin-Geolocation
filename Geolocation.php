@@ -152,7 +152,7 @@ function get_location_for_item($item_id)
 	 * @return string
 	 **/
 	function google_map($width, $height, $divName = 'map', $options = array()) {
-		echo "<div id=\"$divName\" style=\"width:{$width}px;height:{$height}px;\"></div>";
+		echo "<div id=\"$divName\"></div>";
 		//Load this junk in from the plugin config
 
 		$plugin = Zend::Registry( 'Geolocation' );
@@ -167,7 +167,11 @@ function get_location_for_item($item_id)
 			$options['uri']['href'] = uri('map/browse');
 		}
 		
-		$options['uri']['params']['output'] = 'rest';  
+		$params = $_GET;
+		$params['output'] = 'rest';
+		
+		$options['uri']['params'] = $params;
+	
 						
 		require_once 'Zend/Json.php';
 		$options = Zend_Json::encode($options);
