@@ -37,15 +37,17 @@ class GeoController extends Kea_Controller_Action
 		
 		$this->render('map/browse.php', compact('items', 'locations'));
 	}
-	
+/*
+		
 	public function showAction()
 	{
 		//Another fake request to the ItemsController
 		$req = clone $this->getRequest();
 		$req->setControllerName('items');
 		
-		$this->findById(null, 'Item');
+		require_once 'file';
 	}
+*/	
 }
 
 ?>

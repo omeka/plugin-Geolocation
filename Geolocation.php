@@ -70,6 +70,20 @@ class Geolocation extends Kea_Plugin
 		}
 	}
 	
+	public function onCommitForm($record, $post)
+	{
+		switch (get_class($record)) {
+			case 'Item':
+		//		Zend::dump( get_class($record) . '(' . count($record) . ')' );exit;
+				
+				break;
+			
+			default:
+				break;
+		}
+		
+	}
+	
 } // END class Geolocation
 
 
@@ -138,18 +152,26 @@ function get_location_for_item($item_id)
 	 * @return string
 	 **/
 	function google_map($width, $height, $divName = 'map', $options = array()) {
-		echo "<div id=\"$divName\"></div>";
+		echo "<div id=\"$divName\" style=\"width:{$width}px;height:{$height}px;\"></div>";
 		//Load this junk in from the plugin config
-		if(!$latitude || !$longitude) {
-			$plugin = Zend::Registry( 'Geolocation' );
-			$latitude = $plugin->getConfig('Default Latitude');
-			$longitude = $plugin->getConfig('Default Longitude');
-			$zoomLevel = $plugin->getConfig('Default Zoom Level');
+
+		$plugin = Zend::Registry( 'Geolocation' );
+		$options['default']['latitude'] = $plugin->getConfig('Default Latitude');
+		$options['default']['longitude'] = $plugin->getConfig('Default Longitude');
+		$options['default']['zoomLevel'] = $plugin->getConfig('Default ZoomLevel');
+		
+		$options['width'] = $width;
+		$options['height'] = $height;
+		
+		if(!isset($options['uri'])) {
+			$options['uri']['href'] = uri('map/browse');
 		}
 		
+		$options['uri']['params']['output'] = 'rest';  
+						
 		require_once 'Zend/Json.php';
 		$options = Zend_Json::encode($options);
-		echo "<script>var $divName = new OmekaMap('$divName', $options);</script>";
+		echo "<script>var ${divName}Omeka = new OmekaMap('$divName', $options);</script>";
 	}
 
 ?>
