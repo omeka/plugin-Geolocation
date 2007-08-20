@@ -3,18 +3,14 @@
 <items>
 	<?php foreach ($items as $key => $item): ?>
 		<item id="<?php echo $item->id ?>">
-		<?php common('_item', compact('item'), 'items'); ?>
+		<?php //common('_item', compact('item'), 'items'); ?>
 		
-		<location>
-			<?php 
+		<title><?php echo htmlspecialchars($item->title); ?></title>
+		
+		<?php 
 				$location = $locations[$item->id];
-			?>
-			<latitude><?php echo $location['latitude']; ?></latitude>
-			<longitude><?php echo $location['longitude']; ?></longitude>
-			<zoom_level><?php echo $location['zoom_level']; ?></zoom_level>
-			<zipcode><?php echo $location['zipcode']; ?></zipcode>
-			<address><?php echo $location['address']; ?></address>
-		</location>
+		?>
+		<?php common('_location', compact('location'), 'map'); ?>
 		
 		<thumbnail><![CDATA[
 			<?php thumbnail($item); ?>

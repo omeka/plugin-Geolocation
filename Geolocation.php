@@ -74,7 +74,7 @@ class Geolocation extends Kea_Plugin
 	{
 		switch (get_class($record)) {
 			case 'Item':
-		//		Zend::dump( get_class($record) . '(' . count($record) . ')' );exit;
+				Zend::dump( $_POST );exit;
 				
 				break;
 			
@@ -133,23 +133,11 @@ function get_location_for_item($item_id)
 }
 
 	/**
+	 *  Possible options include:
+	 *		clickable = true  (makes the map clickable)
+	 *		form = 'geolocation'  (provides the prefix for form elements that should catch the map coordinates)
+	 *		 
 	 * 
-	 * 1) Note: the width and height setters will probably break in IE, I forgot how to fix this
-	 * 3) If you want to submit these values via a form, be sure to include fields where id = latitude, longitude and zoomLevel, and each
-	 * is prefixed with the $divName
-	 * 4) This is pretty simple, but we can add all kinds of options to this in the future.
-	 *
-	 * @todo Add an option to specify an onClick handler that has been written in JavaScript elsewhere
-	 * 
-	 * @param int center latitude
-	 * @param int center longitude
-	 * @param int zoom level
-	 * @param int width of map
-	 * @param int height of map
-	 * @param string ID of the map's (empty) div
-	 * @param array Multidimensional Array like: $points[0]['latitude'] = 75, $points[0]['longitude'] = 40, etc.
-	 * @param array extra options
-	 * @return string
 	 **/
 	function google_map($width, $height, $divName = 'map', $options = array()) {
 		echo "<div id=\"$divName\"></div>";
@@ -163,19 +151,56 @@ function get_location_for_item($item_id)
 		$options['width'] = $width;
 		$options['height'] = $height;
 		
-		if(!isset($options['uri'])) {
-			$options['uri']['href'] = uri('map/browse');
+		//Right now there are only 2 URLs that can pull in map data so it makes no sense to allow other arbitrary settings
+		switch ($options['uri']) {
+			case 'browse':
+				$options['uri'] = array();
+				$options['uri']['href'] = uri('map/browse');
+				$options['uri']['type'] = 'browse';
+				break;
+			case 'show':
+				$options['uri'] = array();
+				$options['uri']['href'] = uri('map/show');
+				$options['uri']['type'] = 'show';
+				break;
+			default:
+				throw new Exception( 'URI option is required!' );
+				break;
 		}
 		
-		$params = $_GET;
-		$params['output'] = 'rest';
+		//The request parameters get put into the map options
+		$params = array();
+		if(!isset($options['params'])) {
+			$params = $_GET;
+		}else {
+			$params = array_merge($options['params'], $_GET);
+		}
 		
-		$options['uri']['params'] = $params;
-	
-						
+		//Append the 'rest' parameter to signify that we want to return XML		
+		$params['output'] = 'rest';
+		$options['uri']['params'] = $params;	
+
 		require_once 'Zend/Json.php';
 		$options = Zend_Json::encode($options);
 		echo "<script>var ${divName}Omeka = new OmekaMap('$divName', $options);</script>";
 	}
-
+	
+	function map_for_item($item, $width=200, $height=200) {		
+		google_map($width, $height, 'item_map', array('uri'=>'show','params'=>array('id'=>$item->id)));
+	}
+	
+	function map_form($item, $width=400, $height=400) { ?>
+		<fieldset id="location_form">
+			<input type="text" name="geolocation[latitude]" value="<?php echo @$_POST['geolocation']['latitude']; ?>" />
+			<input type="text" name="geolocation[longitude]" value="<?php echo @$_POST['geolocation']['latitude']; ?>" />
+			<input type="text" name="geolocation[zoom_level]" value="<?php echo @$_POST['geolocation']['zoom_level']; ?>" />
+		</fieldset>
+		
+		<?php 
+		google_map($width, $height, 'item_form', array(
+			'clickable'=>true, 
+			'form'=>'geolocation', 
+			'uri'=>'show',
+			'params'=>array('id'=>$item->id)));
+	 } 
 ?>
