@@ -9,7 +9,7 @@
 
 <?php echo pagination_links(5, null,null,null,null, uri('map/browse/')); ?>
 
-<?php google_map(700, 700, 'map', array('uri'=>'browse')); ?>
+<?php //google_map(500, 500, 'map', array('uri'=>'browse')); ?>
 
 <div id="map-links"></div>
 
@@ -26,7 +26,7 @@
 ?>
 
 	<?php 
-//		map_form($item, 600, 600); 
+		map_form($item, 600, 600); 
 	?>
 
 

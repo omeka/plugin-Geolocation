@@ -6,7 +6,11 @@
 
 			this.mapDiv = $(mapDiv);
 			
-			this.markers = [];
+			this.markers = $A();
+						
+			this.options.address_zoom = 13;
+						
+			this.geocoder = new GClientGeocoder();
 			
 			//When the window loads, generate the map
 			Event.observe(window,'load', this.makeMap.bindAsEventListener(this));
@@ -33,18 +37,116 @@
 				var mapType = mapObj.getMapTypes()[0];
 				mapObj.setMapType(mapType);
 		
+				var that = this;
+				
+				//Here's a hack that should fix the map on mouseover if Scriptaculous has messed it up
+				var resizeHandler = null;
+								
+				resizeHandler = GEvent.addListener(mapObj, 'mouseover', function() {
+					//Resize the map on mouseover and then unregister this event so we don't do that anymore
+					mapObj.checkResize();
+					GEvent.removeListener(resizeHandler);
+				});
 						
 				this.populateMap(mapObj);
 				
-				//clickable option
-				if(this.options.clickable) {
-					var that = this;
+				//Process the map form
+				if(this.options.form) {					
+					
+					//Process clicks on the map
 					GEvent.addListener(mapObj, 'click', function(marker, point) {
-						that.onClickMap(marker, point);
+						
+						//If we are clicking a new spot on the map
+						if(marker == null) {
+							that.setFormToPoint(point);
+			
+							//Add a marker to the form (or move the existing marker)
+							that.moveMarkerToPoint(point);
+						}
+						//If we clicked on the first marker
+						else {
+							//Remove marker and clear the form
+							mapObj.removeOverlay(marker);
+							that.markers = $A();
+							that.clearForm();
+						}
+						
 					});					
+				
+					//Process the find_by_address feature
+					$('find_location_by_address').onclick = function() {
+						var address = $F('geolocation_address');
+
+						that.locateAddress(address);
+						
+						//Don't submit the form
+						return false;
+					}
 				}
 		    }
 
+		},
+		
+		locateAddress: function(address) {	
+			//Variable scope hack
+			var that = this;		
+			
+			if(!address.length) return false;
+			
+			this.geocoder.getLatLng(address, function(point) {
+								
+				//If the point was found, then put the marker on that spot
+				if(point != null) {
+					var marker = that.moveMarkerToPoint(point);
+					
+					//Open a little window that verifies the address
+					
+					var html = addressBalloon(address);
+										
+					marker.openInfoWindowHtml(html);
+					
+					$('confirm_address').onclick = function() {
+						that.setFormToPoint(point);
+						marker.closeInfoWindow();
+					}
+					
+					$('wrong_address').onclick = function() {
+						marker.closeInfoWindow();
+						that.mapObj.clearOverlays();
+						that.markers = $A();
+						that.clearForm();
+					}
+					
+					//reset the zoom on the map
+					that.mapObj.setZoom(parseInt(that.options.address_zoom));
+					
+				}else {
+					
+					//Address was not found
+					
+					alert(address + ' was not found!');
+				}
+			});
+		},
+		
+		moveMarkerToPoint: function(point) {
+			//If there are no markers, add one
+			if(!this.markers.length) {
+			
+				var newMarker = new GMarker(point);
+				this.mapObj.addOverlay(newMarker);
+				this.markers.push(newMarker);
+				
+				return newMarker;
+			}
+			//If there is one marker, then move it around the screen
+			else if(this.markers.length == 1) {
+			
+				var oldMarker = this.markers[0];
+				oldMarker.setPoint(point);
+				
+				return oldMarker;
+			}							
 		},
 		
 		//Basically, set the style of controls that appear based on how big the map is
@@ -61,51 +163,39 @@
 			}
 		},
 		
-		//Right now this will process form submissions but it could also do any arbitrary thing (maybe)
-		onClickMap: function(marker, point) {
-			
-			//If no pre-existing marker has been clicked, marker == null
-			if(marker == null) {
-				this.sendClickToForm(marker, point);
-				
-				//Add a marker to the form (or move the existing marker)
-				
-				//If there are no markers, add one
-				if(!this.markers.length) {
-					
-					var newMarker = new GMarker(point);
-					this.mapObj.addOverlay(newMarker);
-					this.markers.push(newMarker);
-					
-				}
-				//If there is one marker, then move it around the screen
-				else if(this.markers.length == 1) {
-					
-					var oldMarker = this.markers[0];
-					oldMarker.setPoint(point);
-				}
+		clearForm: function() {
+			if(this.options.form) {
+				this.getFormElements();
 			}
 			
+			this.form.each( function(each) {
+				each[1].value = '';
+			});
 		},
 		
-		sendClickToForm: function(marker, point) {
+		getFormElements: function() {
+			this.form = $H();
+			
+			var prefix = this.options.form;
+			
+			this.form.latitude = document.getElementsByName(prefix + '[0][latitude]')[0];
+			this.form.longitude = document.getElementsByName(prefix + '[0][longitude]')[0];
+			this.form.zoom_level = document.getElementsByName(prefix + '[0][zoom_level]')[0];
+			this.form.address = document.getElementsByName(prefix + '[0][address]')[0];
+		},
+		
+		setFormToPoint: function(point) {
 			//If we are processing a form
 			if(this.options.form) {
 				
-				var prefix = this.options.form;
+				this.getFormElements();
+								
+				this.form.latitude.value = point.lat();
 				
-				var latitude = document.getElementsByName(prefix + '[' + 'latitude' + ']')[0];
+				this.form.longitude.value = point.lng();
 				
-				latitude.value = point.lat();
-				
-				var longitude = document.getElementsByName(prefix + '[longitude]')[0];
-				
-				longitude.value = point.lng();
-				
-				var zoom_level = document.getElementsByName(prefix + '[zoom_level]')[0];
-				
-				zoom_level.value = this.mapObj.getZoom();
-			}			
+				this.form.zoom_level.value = this.mapObj.getZoom();
+			}					
 		},
 		
 		setCenter: function() {						
@@ -223,12 +313,27 @@
 			new Insertion.Bottom(linkDiv, html);
 			
 			var link = $(linkId);
+			
+			var that = this;
 				
 			link.onclick = function() {
 				GEvent.trigger(marker, 'click');
+				that.mapObj.setCenter(marker.getPoint());
 			}
 		}
 	}
+
+function addressBalloon(address) {
+	var html = '<p>Is this address correct?</p><p>';
+	
+	html += "<p><em>" + address + '</em></p>';
+	
+	html += '<a id="confirm_address">Yes</a>';
+	
+	html += '<a id="wrong_address">No</a>';
+	
+	return html;
+}
 
 function buildBalloon(item) {
 	var description = Xml.getValue(item, 'short_description');

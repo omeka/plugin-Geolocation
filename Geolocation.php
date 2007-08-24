@@ -18,17 +18,13 @@ class Geolocation extends Kea_Plugin
 		$this->hasConfig('Default Longitude', 'The default longitude for the map.', 70);
 		$this->hasConfig('Default ZoomLevel', 'The default zoom level for the map.', 5);
 		$this->hasConfig('Google Maps API Key', 'The API key (plugin will not work properly without this).');
-	
-		
-/*
-			$this->hasType('Building', 'A man-made edifice', 
-			array(
-				array('name'=>'City', 'description'=>'The city in which a building is located.'),
-				array('name'=>'County', 'description'=>'The county in which a building is located.'),
-				array('name'=>'Owner Name', 'description'=>'The name of the person or entity who owns the building.')));
-*/	
 	}
 	
+	/**
+	 * Create the `locations` table that will store all the map locations
+	 *
+	 * @return void
+	 **/
 	public function customInstall()
 	{
 		//Create the locations table
@@ -74,7 +70,24 @@ class Geolocation extends Kea_Plugin
 	{
 		switch (get_class($record)) {
 			case 'Item':
-				Zend::dump( $_POST );exit;
+				
+				$geo_post = $post['geolocation'][0];
+				
+				//If we have filled out info for the geolocation, then submit to the db
+				if(!empty($geo_post) and !empty($geo_post['latitude']) and !empty($geo_post['longitude'])) {
+					
+					//Find the ActiveRecord location object
+					$location = Doctrine_Manager::getInstance()->getTable('Location')->findLocationByItem($record);
+					
+					if(!$location) {
+						$location = new Location;
+						$location->item_id = $record->id;
+					}
+					
+					if( $location->commitForm($geo_post) ) {
+						return true;
+					}
+				}
 				
 				break;
 			
@@ -82,6 +95,31 @@ class Geolocation extends Kea_Plugin
 				break;
 		}
 		
+	}
+	
+	/**
+	 * Append map data to relevant theme pages
+	 *
+	 * @return void
+	 **/
+	public function appendToPage($page, $options) 
+	{
+		//This should pull in the $items var
+		extract($options);
+		
+		switch ($page) {
+			case 'items/form':
+				map_form($item);
+				break;
+			
+			case 'items/show':
+				map_for_item($item);
+				break;
+				
+			default:
+				# code...
+				break;
+		}
 	}
 	
 } // END class Geolocation
@@ -97,6 +135,8 @@ function get_location_for_item($item_id)
 {
 	$select = new Kea_Select;
 	$select->from(array('Location', 'l'), 'l.*');
+	
+	$item_id = ($item_id instanceof Item) ? $item_id->id : $item_id;
 	
 	//Create a WHERE condition that will pull down all the location info
 	if(count($item_id) > 1 or ($item_id instanceof Doctrine_Collection)) {
@@ -148,6 +188,9 @@ function get_location_for_item($item_id)
 		$options['default']['longitude'] = $plugin->getConfig('Default Longitude');
 		$options['default']['zoomLevel'] = $plugin->getConfig('Default ZoomLevel');
 		
+		//Load the Key into the plugin config
+		//$options['api_key'] = $plugin->getConfig('Google Maps API Key');
+		
 		$options['width'] = $width;
 		$options['height'] = $height;
 		
@@ -190,10 +233,26 @@ function get_location_for_item($item_id)
 	}
 	
 	function map_form($item, $width=400, $height=400) { ?>
+		<?php 
+			$loc = array_pop(get_location_for_item($item));
+			
+			$longitude = $loc['longitude'] or $longitude = @$_POST['geolocation'][0]['longitude'];
+			
+			$latitude = $loc['latitude'] or $latitude = @$_POST['geolocation'][0]['latitude'];
+			
+			$zoom_level = $loc['zoom_level'] or $zoom_level = @$_POST['geolocation'][0]['zoom_level'];
+			
+			$address = $loc['address'] or $address = @$_POST['geolocation'][0]['address'];
+		?>
+		
 		<fieldset id="location_form">
-			<input type="text" name="geolocation[latitude]" value="<?php echo @$_POST['geolocation']['latitude']; ?>" />
-			<input type="text" name="geolocation[longitude]" value="<?php echo @$_POST['geolocation']['latitude']; ?>" />
-			<input type="text" name="geolocation[zoom_level]" value="<?php echo @$_POST['geolocation']['zoom_level']; ?>" />
+			<input type="hidden" name="geolocation[0][latitude]" value="<?php echo $latitude; ?>" />
+			<input type="hidden" name="geolocation[0][longitude]" value="<?php echo $longitude; ?>" />
+			<input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom_level; ?>" />
+			
+			<label>Find Your location via address:</label>
+			<input type="text" name="geolocation[0][address]" id="geolocation_address" value="<?php echo $address; ?>" />
+			<input type="submit" name="find_location_by_address" id="find_location_by_address" value="Find By Address" />
 		</fieldset>
 		
 		<?php 

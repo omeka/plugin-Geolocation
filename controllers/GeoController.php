@@ -17,24 +17,32 @@ class GeoController extends Kea_Controller_Action
 	public function browseAction()
 	{
 		
-		//OK This will fake a request to the ItemsController
-		$req = clone $this->getRequest();
-		
-		$req->setControllerName('items');
-		
 		//Tell the plugin that it should filter the SQL in the items browse
 		Zend::Registry( 'Geolocation' )->setMapDisplay(true);
 				
-		require_once CONTROLLER_DIR.DIRECTORY_SEPARATOR.'ItemsController.php';
-		
-		$itemController = new ItemsController($req, $this->getResponse(), array('return'=>'items'));
+		$c = $this->getController('items');
 		
 		//Retrieve the items from that shit
-		$items = $itemController->browseAction();
+		$items = $c->browseAction();
 								
 		$locations = get_location_for_item($items);
 			
 		$this->render('map/browse.php', compact('items', 'locations'));
+	}
+	
+	protected function getController($return) 
+	{
+		//Fake a request to the items controller
+		$req = clone $this->getRequest();
+		$req->setControllerName('items');
+		
+		$req->setParam('controller', 'items');
+		
+		require_once CONTROLLER_DIR.DIRECTORY_SEPARATOR.'ItemsController.php';
+		
+		$itemController = new ItemsController($req, $this->getResponse(), array('return'=>$return));
+		
+		return $itemController;		
 	}
 	
 	public function showAction()
@@ -42,32 +50,19 @@ class GeoController extends Kea_Controller_Action
 		if(!$this->_getParam('id')) {
 			echo "<item></item>";return;
 		}
-		//This needs to piggyback off of the permissions checks for items
+		//This needs to piggyback off of the permissions checks for items		
 		
-		//Another fake request to the ItemsController
-		$req = clone $this->getRequest();
-		$req->setControllerName('items');
-		
-		require_once CONTROLLER_DIR.DIRECTORY_SEPARATOR.'ItemsController.php';
-		
-		$itemController = new ItemsController($req, $this->getResponse(), array('return'=>'item'));
+		$itemController = $this->getController('item');
 		
 		$item = $itemController->showAction();
 		
 		$locations = get_location_for_item($item->id);
 				
-		$location = $locations[$item->id];		
-		$this->render('map/show.php', compact('item','location'));
+		$location = $locations[$item->id];	
+		
+		$has_location = !$location ? false : true;
+			
+		$this->render('map/show.php', compact('item','location', 'has_location'));
 	}
-/*
-		
-	public function showAction()
-	{
-		
-		
-		require_once 'file';
-	}
-*/	
-}
 
-?>
+}?>
