@@ -12,8 +12,8 @@ class LocationTable extends Doctrine_Table
 	 * @param array|int $item_id
 	 * @return array
 	 **/
-	public function getLocationByItem($item)
-	{
+	public function findLocationByItem($item)
+	{		
 		if($item->exists()) {
 		
 			$dql = "SELECT l.* FROM Location l WHERE l.item_id = ? LIMIT 1";
@@ -22,15 +22,9 @@ class LocationTable extends Doctrine_Table
 		
 			$q->parseQuery($dql);
 		
-			return $q->execute($item->id)->getFirst();			
+			return $q->execute(array($item->id))->getFirst();			
 		
-		} else {
-
-			return new Location;
-			
 		}
-		
-
 	}
 }
 

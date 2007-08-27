@@ -1,3 +1,5 @@
+Event.observe(window, 'unload', GUnload);
+
 	var OmekaMap = Class.create();
 	
 	OmekaMap.prototype = {
@@ -10,321 +12,380 @@
 						
 			this.options.address_zoom = 13;
 						
-			this.geocoder = new GClientGeocoder();
+			
+			
+			//Determine what kind of nonsense to run on the map depending on what is passed as an argument
+						
+			switch(this.options.type) {
+				case 'show':
+					var strategy = this.Show;
+				break;
+				case 'form':
+					var strategy = this.Form;
+					break;
+				case 'browse':
+				default:
+				 	var strategy = this.Browse;
+				break;
+			}
 			
 			//When the window loads, generate the map
-			Event.observe(window,'load', this.makeMap.bindAsEventListener(this));
+			Event.observe(window,'load', this.setup.bind(this, this.mapDiv, this.options, strategy));
 		},
-		
-		setUri: function(uri) {
-			this.options.uri = uri;
-		},
-		
-		//Make the map
-		makeMap: function() {
-			if (GBrowserIsCompatible()) {
 				
-		 		this.mapDiv.setStyle({width: (this.options.width+'px'), height: (this.options.height+'px')});
-
-		      	var mapObj = new GMap2(this.mapDiv);
+		populate: function(strategy) {			
+			if(typeof this.options.uri != 'undefined') {
+				var url = this.options.uri;
 				
-				this.setControls(mapObj);
-				
-				this.mapObj = mapObj;
-				this.setCenter();
-				
-				//Have to set the maptype manually (for some strange reason)
-				var mapType = mapObj.getMapTypes()[0];
-				mapObj.setMapType(mapType);
-		
 				var that = this;
 				
-				//Here's a hack that should fix the map on mouseover if Scriptaculous has messed it up
-				var resizeHandler = null;
-								
-				resizeHandler = GEvent.addListener(mapObj, 'mouseover', function() {
-					//Resize the map on mouseover and then unregister this event so we don't do that anymore
-					mapObj.checkResize();
-					GEvent.removeListener(resizeHandler);
-				});
-						
-				this.populateMap(mapObj);
-				
-				//Process the map form
-				if(this.options.form) {					
-					
-					//Process clicks on the map
-					GEvent.addListener(mapObj, 'click', function(marker, point) {
-						
-						//If we are clicking a new spot on the map
-						if(marker == null) {
-							that.setFormToPoint(point);
-			
-							//Add a marker to the form (or move the existing marker)
-							that.moveMarkerToPoint(point);
-						}
-						//If we clicked on the first marker
-						else {
-							//Remove marker and clear the form
-							mapObj.removeOverlay(marker);
-							that.markers = $A();
-							that.clearForm();
-						}
-						
-					});					
-				
-					//Process the find_by_address feature
-					$('find_location_by_address').onclick = function() {
-						var address = $F('geolocation_address');
-
-						that.locateAddress(address);
-						
-						//Don't submit the form
-						return false;
-					}
-				}
-		    }
-
-		},
+				var query = $H(this.options.params).toQueryString();
 		
-		locateAddress: function(address) {	
-			//Variable scope hack
-			var that = this;		
-			
-			if(!address.length) return false;
-			
-			this.geocoder.getLatLng(address, function(point) {
-								
-				//If the point was found, then put the marker on that spot
-				if(point != null) {
-					var marker = that.moveMarkerToPoint(point);
-					
-					//Open a little window that verifies the address
-					
-					var html = addressBalloon(address);
-										
-					marker.openInfoWindowHtml(html);
-					
-					$('confirm_address').onclick = function() {
-						that.setFormToPoint(point);
-						marker.closeInfoWindow();
-					}
-					
-					$('wrong_address').onclick = function() {
-						marker.closeInfoWindow();
-						that.mapObj.clearOverlays();
-						that.markers = $A();
-						that.clearForm();
-					}
-					
-					//reset the zoom on the map
-					that.mapObj.setZoom(parseInt(that.options.address_zoom));
-					
-				}else {
-					
-					//Address was not found
-					
-					alert(address + ' was not found!');
-				}
-			});
-		},
-		
-		moveMarkerToPoint: function(point) {
-			//If there are no markers, add one
-			if(!this.markers.length) {
-			
-				var newMarker = new GMarker(point);
-				this.mapObj.addOverlay(newMarker);
-				this.markers.push(newMarker);
-				
-				return newMarker;
-			}
-			//If there is one marker, then move it around the screen
-			else if(this.markers.length == 1) {
-			
-				var oldMarker = this.markers[0];
-				oldMarker.setPoint(point);
-				
-				return oldMarker;
-			}							
-		},
-		
-		//Basically, set the style of controls that appear based on how big the map is
-		setControls: function(mapObj) {
-			var width = parseInt(this.options.width);
-			var height = parseInt(this.options.height);
-			
-			if(width > 300) {
-				//Add controls to the map
-			    mapObj.addControl(new GLargeMapControl());
-				mapObj.addControl(new GMapTypeControl());
-			}else {
-				mapObj.addControl(new GSmallMapControl());
-			}
-		},
-		
-		clearForm: function() {
-			if(this.options.form) {
-				this.getFormElements();
-			}
-			
-			this.form.each( function(each) {
-				each[1].value = '';
-			});
-		},
-		
-		getFormElements: function() {
-			this.form = $H();
-			
-			var prefix = this.options.form;
-			
-			this.form.latitude = document.getElementsByName(prefix + '[0][latitude]')[0];
-			this.form.longitude = document.getElementsByName(prefix + '[0][longitude]')[0];
-			this.form.zoom_level = document.getElementsByName(prefix + '[0][zoom_level]')[0];
-			this.form.address = document.getElementsByName(prefix + '[0][address]')[0];
-		},
-		
-		setFormToPoint: function(point) {
-			//If we are processing a form
-			if(this.options.form) {
-				
-				this.getFormElements();
-								
-				this.form.latitude.value = point.lat();
-				
-				this.form.longitude.value = point.lng();
-				
-				this.form.zoom_level.value = this.mapObj.getZoom();
-			}					
-		},
-		
-		setCenter: function() {						
-			var longitude = parseFloat(this.options.default.longitude);
-			var latitude = parseFloat(this.options.default.latitude);
-			var zoomLevel = parseInt(this.options.default.zoomLevel);
-			
-			var point = new GLatLng(latitude, longitude);
-
-			this.mapObj.setCenter(point, zoomLevel);
-			this.mapObj.setZoom(zoomLevel);
-		},
-		
-		populateMap: function(mapObj) {
-
-			if(this.options.uri) {
-				
-				var uri = this.options.uri;
-				
-				var that = this;
-			
-				var url = uri.href;
-			
-				var query = $H(uri.params).toQueryString();
-			
 				if(url.indexOf('?') != -1) {
 					url += "&" + query;
 				}else {
 					url += "?" + query;
 				}				
 
+				var that = this;
+
 				GDownloadUrl(url, function(data, responseCode) {
 					var xml = GXml.parse(data);
-					
-					switch(uri.type) {
-						case 'browse':
-							that.populateBrowse(xml);
-							break;
-						case 'show': 
-							that.populateShow(xml);
-							break;
-					}	
-				});							
-			}
+					strategy.processXml.call(that, xml);
+				});								
+			};
+			
 		},
 		
-		//All we need to do for populating a single-item view is add an overlay where the item is, then set the center
-		populateShow: function(xml) {
-			var item = xml.documentElement;
+		setMarkerForItem: function(item, callback) {
 			
+			var coord = this.getCoordFromItem(item);
+			
+			if(!coord) return false;
+			
+			var point = new GLatLng(coord[0], coord[1]);
+			var marker = new GMarker(point);
+			
+			this.map.addOverlay(marker);
+	
+			callback.call(this, marker, coord[2], item);
+		},
+				
+		//Show involves one marker
+		Show: {
+			marker: null,
+			//Take the XML and put markers out
+			processXml: function(xml) {				
+				var item = xml.documentElement;	
+				this.setMarkerForItem(item, this.Show.processMarker);
+			},
+			processMarker: function(marker, zoom, item) {
+				this.Show.marker = marker;
+				this.map.setCenter(marker.getPoint());
+				this.map.setZoom(zoom);
+			},
+			//Custom map setup for showing an item
+			setup: function(map, options) {}
+		},
+		
+		Browse: {
+			markers: $A(),
+			
+			//Loop through all the items and add a clickable balloon to each one
+			processXml: function(xml) {
+				var items = xml.documentElement.getElementsByTagName('item');
+	
+				for (var i=0; i < items.length; i++) {
+					var item = items[i];
+					this.setMarkerForItem(item, this.Browse.processMarker);
+				};							
+			},
+			
+			//Build a balloon for the marker that will open when clicked
+			//Build a link at the bottom of the browse page
+			//Push the browse marker on to the stack
+			processMarker: function(marker, zoom, item) {
+				var balloon = browseBalloon(item);
+				
+				GEvent.addListener(marker, "click", function() {
+					marker.openInfoWindowHtml(balloon);
+				});
+				
+				this.Browse.pageLink(item, marker);
+				
+				this.Browse.markers.push(marker);
+			},
+			
+			setup: function(map, options) {},
+
+			//Create a link to the item that will show the corresponding info window when clicked
+			pageLink: function(item, marker) {
+			
+				var linkDiv = $('map-links');
+			
+				var itemId = parseInt(item.getAttribute('id'));		
+				var linkId = 'item_link_' + itemId;
+				
+				var title = Xml.getValue(item, 'title') || '[Untitled]';
+				var shortDescription = Xml.getValue(item, 'short_description') || '';			
+			
+				var html = '<p class="item_link"><a href="javascript:void(0)" id="' + linkId +
+				'">Find this item --&gt;</a>(' + title + ') ' + shortDescription + '</p>';
+
+				new Insertion.Bottom(linkDiv, html);
+			
+				var link = $(linkId);
+			
+				var that = this;
+				
+				link.onclick = function() {
+					GEvent.trigger(marker, 'click');
+					that.map.panTo(marker.getPoint());
+				}
+			}			
+		},
+		
+		Form: {
+			marker: null,
+			processXml: function(xml) {},
+			//Scriptaculous display hack,
+			//Map clicks should add/move/remove the single marker
+			//Geocoding
+			setup: function(map, options) {
+				var that = this;
+				
+				this.Form.geocoder = new GClientGeocoder();
+				
+				this.Form.getFormElements(options.form);
+				
+				//Here's a hack that should fix the map on mouseover if Scriptaculous has messed it up
+				var resizeHandler = null;
+								
+				resizeHandler = GEvent.addListener(map, 'mouseover', function() {
+					//Resize the map on mouseover and then unregister this event so we don't do that anymore
+					map.checkResize();
+					that.Form.setPointFromOptions(map, options);
+					GEvent.removeListener(resizeHandler);
+				});	
+				
+				//Listen to all clicks on the map
+				GEvent.addListener(map, 'click', function(marker, point) {
+					
+					//If we are clicking a new spot on the map
+					if(marker == null) {
+						that.Form.setFormToPoint(point, map);
+		
+						//Add a marker to the form (or move the existing marker)
+						that.Form.moveMarkerToPoint(map, point);
+					}
+					//If we clicked on the first marker
+					else {
+						//Remove marker and clear the form
+						map.removeOverlay(marker);
+						that.Form.marker = null;
+						that.Form.clearForm();
+					}
+					
+				});					
+			
+			
+				//Geocoding
+				
+				//Process the find_by_address feature
+				$('find_location_by_address').onclick = function() {
+					var address = $F('geolocation_address');
+
+					that.Form.locateAddress(map, address, that.options.address_zoom);
+					
+					//Don't submit the form
+					return false;
+				}
+				
+				
+				//When we submit the form, we want to make sure the map form has the coordinates of the marker
+				Event.observe('item-form', 'submit', function() {
+					var marker = that.Form.marker;
+					if(marker) {
+						that.Form.setFormToPoint(marker.getPoint(), map);
+					}else {
+						that.Form.clearForm();
+					}
+				});
+				
+			},	
+			
+			setPointFromOptions: function(map, options) {
+				if(typeof options.point != 'undefined') {
+					var point = new GLatLng(options.point.lat, options.point.lng);
+					var marker = new GMarker(point);
+				
+					map.addOverlay(marker);
+					map.setZoom(options.point.zoom);
+					map.setCenter(marker.getPoint());
+					this.marker = marker;							
+				}				
+			},
+			
+			locateAddress: function(map, address, zoom) {	
+				//Variable scope hack
+				var that = this;		
+			
+				if(!address.length) return false;
+			
+				this.geocoder.getLatLng(address, function(point) {
+								
+					//If the point was found, then put the marker on that spot
+					if(point != null) {
+						var marker = that.moveMarkerToPoint(map, point);
+					
+						//Open a little window that verifies the address
+					
+						var html = addressBalloon(address);
+										
+						marker.openInfoWindowHtml(html);
+					
+						//Clicking 'Yes' should set the form and close the window
+						$('confirm_address').onclick = function() {
+							that.setFormToPoint(point, map);
+							marker.closeInfoWindow();
+						}
+					
+						//Clicking 'No' should erase the form, clear the map and the marker
+						$('wrong_address').onclick = function() {
+							marker.closeInfoWindow();
+							map.clearOverlays();
+							that.marker = null;
+							that.clearForm();
+						}
+					
+						//reset the zoom on the map
+						map.setZoom(parseInt(zoom));
+					
+					}else {
+					
+						//Address was not found
+					
+						alert(address + ' was not found!');
+					}
+				});
+			},
+		
+			moveMarkerToPoint: function(map, point) {
+				//If there are no markers, add one
+				if(!this.marker) {
+			
+					var newMarker = new GMarker(point);
+					map.addOverlay(newMarker);
+					this.marker = newMarker;
+				
+					return newMarker;
+				}
+				//If there is one marker, then move it around the screen
+				else{
+			
+					var oldMarker = this.marker;
+					oldMarker.setPoint(point);
+				
+					return oldMarker;
+				}							
+			},
+		
+			clearForm: function() {			
+				this.elements.each( function(each) {
+					each[1].value = '';
+				});
+			},
+		
+			getFormElements: function(prefix) {
+				var elements = $H();
+										
+				elements.latitude = document.getElementsByName(prefix + '[0][latitude]')[0];
+				elements.longitude = document.getElementsByName(prefix + '[0][longitude]')[0];
+				elements.zoom_level = document.getElementsByName(prefix + '[0][zoom_level]')[0];
+				elements.address = document.getElementsByName(prefix + '[0][address]')[0];
+				
+				this.elements = elements;
+			},
+		
+			setFormToPoint: function(point, map) {
+				var els = this.elements;
+							
+				els.latitude.value = point.lat();
+			
+				els.longitude.value = point.lng();
+			
+				els.zoom_level.value = map.getZoom();
+			}					
+		},
+
+		//Create the map object then delegate to whatever strategy for displaying the map
+		setup: function(div, options, strategy) {
+			if (GBrowserIsCompatible()) {
+				
+				div.setStyle({width: (options.width+'px'), height: (options.height+'px')});
+			
+				var map = new GMap2(div);
+			
+				//Determine what kinds of controls to give the map based on its dimensions
+				var width = parseInt(options.width);
+				var height = parseInt(options.height);
+			
+				if(width > 300) {
+					//Add controls to the map
+				    map.addControl(new GLargeMapControl());
+					map.addControl(new GMapTypeControl());
+				}else {
+					map.addControl(new GSmallMapControl());
+				}
+			
+				//Have to set the center of the map
+				var center = {};
+				center.lng = parseFloat(this.options.default.longitude);
+				center.lat = parseFloat(this.options.default.latitude);
+				center.zoom = parseInt(this.options.default.zoomLevel);
+		
+				center.point = new GLatLng(center.lat, center.lng);
+
+				map.setCenter(center.point);
+				map.setZoom(center.zoom);
+			
+				//Have to set the maptype manually (for some strange reason)
+				var mapType = map.getMapTypes()[0];
+				map.setMapType(mapType);
+			
+				this.map = map;
+				
+				strategy.map = map;
+				strategy.setup.call(this, map, options);
+				
+				this.populate(strategy);
+			}
+		},
+
+		getLocationFromItem: function(item) {
 			var location = item.getElementsByTagName('location')[0];
 			
-			if(location) {
-				//Make a marker from this XML location and center it
-				var xyz = this.getCoordFromLocation(location);
-				
-				var point = new GLatLng(xyz[0], xyz[1]);
-				var marker = new GMarker(point);
-				this.markers.push(marker);
-				
-				this.mapObj.addOverlay(marker);
-				this.mapObj.setCenter(point);
-				this.mapObj.setZoom(xyz[2]);			
-			}
+			return location;
 		},
 
-		getCoordFromLocation: function(loc) {
-			var lat = Xml.getFloat(loc, 'latitude');
-			var lng = Xml.getFloat(loc, 'longitude');
-			var zoom = Xml.getInt(loc, 'zoom_level');
+		getCoordFromItem: function(item) {
+			var loc = this.getLocationFromItem(item);
 			
-			return [lat, lng, zoom];			
-		},
-		
-		//Loop through all the items and add a clickable balloon to each one
-		populateBrowse: function(xml) {
-			var items = xml.documentElement.getElementsByTagName('item');
-			this.items = items;
-	
-			for (var i=0; i < items.length; i++) {
-				var item = items[i];
-				var location = item.getElementsByTagName('location')[0];
-	
-				var latitude = Xml.getFloat(location, 'latitude');
-				var longitude = Xml.getFloat(location, 'longitude');
-				var zoomlevel = Xml.getInt(location, 'zoom_level');
-	
-				var point = new GLatLng(latitude, longitude);				
-	
-				var balloon = buildBalloon(item);
-	
-				var marker = createMarker(point, balloon);
-				
-				this.buildLink(item, marker);
-				
-				this.mapObj.addOverlay(marker);
-				
-				this.markers.push(marker);
-			};							
-		},
-		
-		//Create a link to the item that will show the corresponding info window when clicked
-		buildLink: function(item, marker) {
+			if(loc) {
+				var lat = Xml.getFloat(loc, 'latitude');
+				var lng = Xml.getFloat(loc, 'longitude');
+				var zoom = Xml.getInt(loc, 'zoom_level');
 			
-			var linkDiv = $('map-links');
-			
-			var itemId = parseInt(item.getAttribute('id'));		
-			var linkId = 'item_link_' + itemId;
-			var shortDescription = Xml.getValue(item, 'short_description');
-			
-			
-			var html = '<p class="item_link"><a href="javascript:void(0)" id="' + linkId +
-			'">Find this item --&gt;</a>' + shortDescription + '</p>';
-
-			new Insertion.Bottom(linkDiv, html);
-			
-			var link = $(linkId);
-			
-			var that = this;
-				
-			link.onclick = function() {
-				GEvent.trigger(marker, 'click');
-				that.mapObj.setCenter(marker.getPoint());
+				return [lat, lng, zoom];					
 			}
-		}
+			
+			return null;
+		
+		},
 	}
 
 function addressBalloon(address) {
-	var html = '<p>Is this address correct?</p><p>';
+	var html = '<p>Is this address correct?</p>';
 	
 	html += "<p><em>" + address + '</em></p>';
 	
@@ -335,8 +396,8 @@ function addressBalloon(address) {
 	return html;
 }
 
-function buildBalloon(item) {
-	var description = Xml.getValue(item, 'short_description');
+function browseBalloon(item) {
+	var description = Xml.getValue(item, 'short_description') || '';
 
 	var img = Xml.getValue(item, 'thumbnail');
 
@@ -350,19 +411,6 @@ function buildBalloon(item) {
 	html += '</div>';
 	return html;
 }		
-
-function createMarker(point, html) {
-	var marker = new GMarker(point);
-	//marker.html = html;
-
-	//markerArray.push( marker );
-
-	GEvent.addListener(marker, "click", function() {
-		marker.openInfoWindowHtml(html);
-	});
-
-	return marker;
-}	
 
 var Xml = {};
 

@@ -1,4 +1,5 @@
 <?php
+require_once 'LocationTable.php';
 /**
  * Location
  * @package: Omeka

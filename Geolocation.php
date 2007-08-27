@@ -66,35 +66,44 @@ class Geolocation extends Kea_Plugin
 		}
 	}
 	
+	//Generic Omeka hook that is called whenever a form is submitted
 	public function onCommitForm($record, $post)
 	{
 		switch (get_class($record)) {
 			case 'Item':
-				
-				$geo_post = $post['geolocation'][0];
-				
-				//If we have filled out info for the geolocation, then submit to the db
-				if(!empty($geo_post) and !empty($geo_post['latitude']) and !empty($geo_post['longitude'])) {
-					
-					//Find the ActiveRecord location object
-					$location = Doctrine_Manager::getInstance()->getTable('Location')->findLocationByItem($record);
-					
-					if(!$location) {
-						$location = new Location;
-						$location->item_id = $record->id;
-					}
-					
-					if( $location->commitForm($geo_post) ) {
-						return true;
-					}
-				}
-				
+				return $this->commitMapForm($record, $post);				
 				break;
 			
 			default:
 				break;
 		}
 		
+	}
+	
+	protected function commitMapForm($item, $post) {
+		$geo_post = $post['geolocation'][0];
+		
+		//Find the ActiveRecord location object
+		$location = Doctrine_Manager::getInstance()->getTable('Location')->findLocationByItem($item);
+				
+		//If we have filled out info for the geolocation, then submit to the db
+		if(!empty($geo_post) and !empty($geo_post['latitude']) and !empty($geo_post['longitude'])) {
+				
+			if(!$location) {
+				$location = new Location;
+				$location->item_id = $item->id;						
+			}
+			
+			if( $location->commitForm($geo_post) ) {
+				return true;
+			}
+		}		
+		//If the form is empty, then we want to delete whatever location is currently stored
+		else {
+			if($location) {
+				$location->delete();
+			}
+		}
 	}
 	
 	/**
@@ -174,7 +183,6 @@ function get_location_for_item($item_id)
 
 	/**
 	 *  Possible options include:
-	 *		clickable = true  (makes the map clickable)
 	 *		form = 'geolocation'  (provides the prefix for form elements that should catch the map coordinates)
 	 *		 
 	 * 
@@ -193,24 +201,7 @@ function get_location_for_item($item_id)
 		
 		$options['width'] = $width;
 		$options['height'] = $height;
-		
-		//Right now there are only 2 URLs that can pull in map data so it makes no sense to allow other arbitrary settings
-		switch ($options['uri']) {
-			case 'browse':
-				$options['uri'] = array();
-				$options['uri']['href'] = uri('map/browse');
-				$options['uri']['type'] = 'browse';
-				break;
-			case 'show':
-				$options['uri'] = array();
-				$options['uri']['href'] = uri('map/show');
-				$options['uri']['type'] = 'show';
-				break;
-			default:
-				throw new Exception( 'URI option is required!' );
-				break;
-		}
-		
+				
 		//The request parameters get put into the map options
 		$params = array();
 		if(!isset($options['params'])) {
@@ -221,7 +212,7 @@ function get_location_for_item($item_id)
 		
 		//Append the 'rest' parameter to signify that we want to return XML		
 		$params['output'] = 'rest';
-		$options['uri']['params'] = $params;	
+		$options['params'] = $params;	
 
 		require_once 'Zend/Json.php';
 		$options = Zend_Json::encode($options);
@@ -229,37 +220,54 @@ function get_location_for_item($item_id)
 	}
 	
 	function map_for_item($item, $width=200, $height=200) {		
-		google_map($width, $height, 'item_map', array('uri'=>'show','params'=>array('id'=>$item->id)));
+		google_map($width, $height, 'item_map', 
+			array(
+				'uri'=>uri('map/show'),
+				'params'=>array('id'=>$item->id), 
+				'type'=>'show'));
 	}
 	
 	function map_form($item, $width=400, $height=400) { ?>
 		<?php 
 			$loc = array_pop(get_location_for_item($item));
 			
-			$longitude = $loc['longitude'] or $longitude = @$_POST['geolocation'][0]['longitude'];
+			$usePost = !empty($_POST);
 			
-			$latitude = $loc['latitude'] or $latitude = @$_POST['geolocation'][0]['latitude'];
-			
-			$zoom_level = $loc['zoom_level'] or $zoom_level = @$_POST['geolocation'][0]['zoom_level'];
-			
-			$address = $loc['address'] or $address = @$_POST['geolocation'][0]['address'];
+			if($usePost) {
+				$lng = (int) @$_POST['geolocation'][0]['longitude'];
+				$lat =  (int) @$_POST['geolocation'][0]['latitude'];
+				$zoom = (int) @$_POST['geolocation'][0]['zoom_level'];
+				$addr = @$_POST['geolocation'][0]['address'];
+			}else {
+				$lng = (int) $loc['longitude'];
+				$lat = (int) $loc['latitude'];
+				$zoom = (int) $loc['zoom_level'];
+				$addr = $loc['address'];
+			}
 		?>
 		
 		<fieldset id="location_form">
-			<input type="hidden" name="geolocation[0][latitude]" value="<?php echo $latitude; ?>" />
-			<input type="hidden" name="geolocation[0][longitude]" value="<?php echo $longitude; ?>" />
-			<input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom_level; ?>" />
+			<input type="hidden" name="geolocation[0][latitude]" value="<?php echo $lat; ?>" />
+			<input type="hidden" name="geolocation[0][longitude]" value="<?php echo $lng; ?>" />
+			<input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom; ?>" />
+			<input type="hidden" name="geolocation[0][map_type]" value="Google Maps V2" />
 			
 			<label>Find Your location via address:</label>
-			<input type="text" name="geolocation[0][address]" id="geolocation_address" value="<?php echo $address; ?>" />
+			<input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
 			<input type="submit" name="find_location_by_address" id="find_location_by_address" value="Find By Address" />
 		</fieldset>
 		
 		<?php 
-		google_map($width, $height, 'item_form', array(
-			'clickable'=>true, 
-			'form'=>'geolocation', 
-			'uri'=>'show',
-			'params'=>array('id'=>$item->id)));
+		$options = array(
+			'form'=>'geolocation');
+		
+		if($lng and $lat) {
+			//B/c of changes in map via POST, we should always pass the form the map parameters manually
+			$options['point'] = array('lng'=>$lng, 'lat'=>$lat, 'zoom'=>$zoom);			
+		}
+		
+		$options['type'] = 'form';
+		
+		google_map($width, $height, 'item_form', $options);
 	 } 
 ?>
