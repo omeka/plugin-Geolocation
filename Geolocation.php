@@ -187,7 +187,7 @@ function get_location_for_item($item_id)
 	 *		 
 	 * 
 	 **/
-	function google_map($width, $height, $divName = 'map', $options = array()) {
+	function google_map($divName = 'map', $options = array()) {
 		echo "<div id=\"$divName\"></div>";
 		//Load this junk in from the plugin config
 
@@ -198,10 +198,7 @@ function get_location_for_item($item_id)
 		
 		//Load the Key into the plugin config
 		//$options['api_key'] = $plugin->getConfig('Google Maps API Key');
-		
-		$options['width'] = $width;
-		$options['height'] = $height;
-				
+
 		//The request parameters get put into the map options
 		$params = array();
 		if(!isset($options['params'])) {
@@ -220,11 +217,13 @@ function get_location_for_item($item_id)
 	}
 	
 	function map_for_item($item, $width=200, $height=200) {		
-		google_map($width, $height, 'item_map', 
+		google_map('item_map' . $item->id, 
 			array(
 				'uri'=>uri('map/show'),
 				'params'=>array('id'=>$item->id), 
-				'type'=>'show'));
+				'type'=>'show', 
+				'width'=>$width,
+				'height'=>$height));
 	}
 	
 	function map_form($item, $width=400, $height=400) { ?>

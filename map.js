@@ -77,6 +77,13 @@ Event.observe(window, 'unload', GUnload);
 			//Take the XML and put markers out
 			processXml: function(xml) {				
 				var item = xml.documentElement;	
+				
+				try{
+					var location = Xml.getValue(item, 'location');
+				}catch(e) {
+					noLocationBalloon(this.map);
+				}
+				
 				this.setMarkerForItem(item, this.Show.processMarker);
 			},
 			processMarker: function(marker, zoom, item) {
@@ -322,7 +329,9 @@ Event.observe(window, 'unload', GUnload);
 		setup: function(div, options, strategy) {
 			if (GBrowserIsCompatible()) {
 				
-				div.setStyle({width: (options.width+'px'), height: (options.height+'px')});
+				if(typeof options.width != 'undefined') {
+					div.setStyle({width: (options.width+'px'), height: (options.height+'px')});
+				}
 			
 				var map = new GMap2(div);
 			
@@ -403,7 +412,7 @@ function browseBalloon(item) {
 
 	var link = Xml.getValue(item, 'link_to_item');
 
-	var html = '<div style="width:250px;min-height:80px;" class="balloon">';
+	var html = '<div style="width:250px;height:150px;overflow:auto;" class="balloon">';
 
 	html += '<div class="title">' + link + '</div>';
 	html += "<p>" + description + "</p>";
@@ -411,6 +420,22 @@ function browseBalloon(item) {
 	html += '</div>';
 	return html;
 }		
+
+function noLocationBalloon(map) {
+
+	var div = $(document.createElement('div'));
+		
+		div.setStyle({'width':'100px'});
+		
+		div.innerHTML = '<em>There is no location for this item</em>';
+	
+	//Open a window
+	map.openInfoWindow(
+		//At the bottom left corner of the map
+		map.getBounds().getSouthWest(), 
+		//That says, no available location for this item
+		div);
+}
 
 var Xml = {};
 
