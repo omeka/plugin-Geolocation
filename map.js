@@ -92,7 +92,9 @@ Event.observe(window, 'unload', GUnload);
 				this.map.setZoom(zoom);
 			},
 			//Custom map setup for showing an item
-			setup: function(map, options) {}
+			setup: function(map, options) {
+				map.addControl(new GSmallMapControl());
+			}
 		},
 		
 		Browse: {
@@ -123,7 +125,10 @@ Event.observe(window, 'unload', GUnload);
 				this.Browse.markers.push(marker);
 			},
 			
-			setup: function(map, options) {},
+			setup: function(map, options) {
+				map.addControl(new GLargeMapControl());
+				map.addControl(new GMapTypeControl());
+			},
 
 			//Create a link to the item that will show the corresponding info window when clicked
 			pageLink: function(item, marker) {
@@ -160,6 +165,9 @@ Event.observe(window, 'unload', GUnload);
 			//Geocoding
 			setup: function(map, options) {
 				var that = this;
+				
+				map.addControl(new GLargeMapControl());
+				map.addControl(new GMapTypeControl());
 				
 				this.Form.geocoder = new GClientGeocoder();
 				
@@ -334,18 +342,6 @@ Event.observe(window, 'unload', GUnload);
 				}
 			
 				var map = new GMap2(div);
-			
-				//Determine what kinds of controls to give the map based on its dimensions
-				var width = parseInt(options.width);
-				var height = parseInt(options.height);
-			
-				if(width > 300) {
-					//Add controls to the map
-				    map.addControl(new GLargeMapControl());
-					map.addControl(new GMapTypeControl());
-				}else {
-					map.addControl(new GSmallMapControl());
-				}
 			
 				//Have to set the center of the map
 				var center = {};

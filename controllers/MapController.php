@@ -2,13 +2,8 @@
 
 require_once 'Kea/Controller/Action.php';
 
-class GeoController extends Kea_Controller_Action
+class MapController extends Kea_Controller_Action
 {
-    public function indexAction()
-    {
-		echo 'Geo!';
-    }
-
     public function noRouteAction()
     {
         $this->_redirect('/');
@@ -18,7 +13,7 @@ class GeoController extends Kea_Controller_Action
 	{
 		
 		//Tell the plugin that it should filter the SQL in the items browse
-		Zend::Registry( 'Geolocation' )->setMapDisplay(true);
+		Zend::Registry( 'geolocation' )->setMapDisplay(true);
 				
 		$c = $this->getController('items');
 		
