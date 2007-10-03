@@ -4,7 +4,7 @@ require_once 'LocationTable.php';
  * Location
  * @package: Omeka
  */
-class Location extends Kea_Record
+class Location extends Omeka_Record
 {
     public function setTableDefinition()
     {

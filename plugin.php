@@ -17,11 +17,10 @@ add_plugin_hook('save_item', 'geo_save_location');
 
 add_plugin_hook('theme_header', 'geo_map_header');
 
-
-
+add_plugin_hook('add_routes', 'geo_add_routes');
 
 //Register $geo so that we can call it from the controller
-Zend::register('geolocation', $geo);
+Zend_Registry::set('geolocation', $geo);
 
 /**
  * Output the script tags that include the GMaps JS from afar
@@ -42,26 +41,31 @@ function geo_map_header()
 <?php
 }
 
+function geo_add_routes($router)
+{
+	$router->addRoute('map_browse', new Zend_Controller_Router_Route('items/map/:page', array('controller'=>'map','action'=>'browse', 'page'=>1, 'module'=>'geolocation'), array('page'=>'\d+')));
+}
+
 function geo_initialize()
 {
 	//Maybe we need to upgrade the plugin.  check on it.
 	$version = get_option('geolocation_plugin_version');
 	
 /*
-		mapBrowse.route = "map/browse/:page"
+		mapBrowse.route = "items/map/:page"
 mapBrowse.defaults.controller = map
 mapBrowse.defaults.action = browse
 mapBrowse.defaults.page = 1
 mapBrowse.reqs.page = "\d+"
-*/	
-	
-	add_route('map_browse', new Zend_Controller_Router_Route('map/browse/:page', array('controller'=>'map','action'=>'browse'), array('page'=>'\d+')));
-	
-	
+*/		
 	//We need to make sure that our MapController has available the theme pages it needs
 	add_theme_pages('theme');
 	add_output_pages('xml', 'rest');
 	add_controllers('controllers');
+	
+	
+	add_navigation('Map', 'items/map', 'archive');
+//	add_navigation('Disney', 'http://www.disney.com', 'archive');
 }
 
 function geo_form()
@@ -199,7 +203,7 @@ class GeolocationPlugin
  **/
 function get_location_for_item($item_id)
 {
-	$select = new Kea_Select;
+	$select = new Omeka_Select;
 	$select->from(array('Location', 'l'), 'l.*');
 	
 	$item_id = ($item_id instanceof Item) ? $item_id->id : $item_id;
@@ -280,7 +284,7 @@ function google_map($divName = 'map', $options = array()) {
 function map_for_item($item, $width=200, $height=200) {		
 	google_map('item_map' . $item->id, 
 		array(
-			'uri'=>uri('map/show'),
+			'uri'=>uri('geolocation/map/show'),
 			'params'=>array('id'=>$item->id), 
 			'type'=>'show', 
 			'width'=>$width,

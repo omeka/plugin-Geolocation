@@ -1,6 +1,8 @@
 <?php head(); ?>
 <?php js('search'); ?>
 
+<?php common('archive-nav'); ?>
+
 <style type="text/css" media="screen">
 	#map_browse{
 		width: 500px;
@@ -30,7 +32,7 @@
 
 <div id="pagination">
 <?php echo pagination_links(
-	5, null,null,null,null, uri('map/browse/') ); ?>
+	5, null,null,null,null, uri('items/map/') ); ?>
 </div>
 
 <div id="search_block">

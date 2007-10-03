@@ -1,8 +1,8 @@
 <?php
 
-require_once 'Kea/Controller/Action.php';
+require_once 'Omeka/Controller/Action.php';
 
-class MapController extends Kea_Controller_Action
+class Geolocation_MapController extends Omeka_Controller_Action
 {
     public function noRouteAction()
     {
@@ -11,9 +11,8 @@ class MapController extends Kea_Controller_Action
 
 	public function browseAction()
 	{
-		
 		//Tell the plugin that it should filter the SQL in the items browse
-		Zend::Registry( 'geolocation' )->setMapDisplay(true);
+		Zend_Registry::get( 'geolocation' )->setMapDisplay(true);
 				
 		$c = $this->getController('items');
 		
@@ -21,7 +20,7 @@ class MapController extends Kea_Controller_Action
 		$items = $c->browseAction();
 								
 		$locations = get_location_for_item($items);
-			
+		
 		$this->render('map/browse.php', compact('items', 'locations'));
 	}
 	
