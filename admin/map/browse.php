@@ -31,8 +31,7 @@
 
 
 <div id="pagination">
-<?php echo pagination_links(
-	5, null,null,null,null, uri('items/map/') ); ?>
+<?php echo map_pagination(); ?>
 </div>
 
 <div id="search_block">

@@ -51,15 +51,9 @@ function geo_initialize()
 	//Maybe we need to upgrade the plugin.  check on it.
 	$version = get_option('geolocation_plugin_version');
 	
-/*
-		mapBrowse.route = "items/map/:page"
-mapBrowse.defaults.controller = map
-mapBrowse.defaults.action = browse
-mapBrowse.defaults.page = 1
-mapBrowse.reqs.page = "\d+"
-*/		
 	//We need to make sure that our MapController has available the theme pages it needs
-	add_theme_pages('theme');
+	add_theme_pages('admin', 'admin');
+	add_theme_pages('public', 'public');
 	add_output_pages('xml', 'rest');
 	add_controllers('controllers');
 	
@@ -291,8 +285,12 @@ function map_for_item($item, $width=200, $height=200) {
 			'height'=>$height));
 }
 
-function map_form($item, $width=400, $height=400) { ?>
-	<?php 
+function map_pagination() {
+	return pagination_links(
+	5, null,null,null,null, uri('items/map/') );
+}
+
+function map_form($item, $width=400, $height=400) { 
 		$loc = array_pop(get_location_for_item($item));
 		
 		$usePost = !empty($_POST);

@@ -142,7 +142,9 @@ Event.observe(window, 'unload', GUnload);
 				var shortDescription = Xml.getValue(item, 'short_description') || '';			
 			
 				var html = '<p class="item_link"><a href="javascript:void(0)" id="' + linkId +
-				'">Find this item --&gt;</a>(' + title + ') ' + shortDescription + '</p>';
+				'">Find this item --&gt;</a>' + title /*
+					+ shortDescription
+				*/	 + '</p>';
 
 				new Insertion.Bottom(linkDiv, html);
 			
