@@ -73,8 +73,9 @@ function geo_form()
  * @return void
  **/
 function geo_install()
-{
-	db_query("CREATE TABLE `locations` (
+{	
+	$conn = Doctrine_Manager::getInstance()->connection()->getDbh();
+	$conn->exec("CREATE TABLE `locations` (
 		`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 		`item_id` BIGINT UNSIGNED NOT NULL ,
 		`latitude` DOUBLE NOT NULL ,
@@ -84,7 +85,7 @@ function geo_install()
 		`map_type` VARCHAR( 255 ) NOT NULL ,
 		`address` TEXT NOT NULL ,
 		INDEX ( `item_id` )
-		) ENGINE = MYISAM ;");
+		) ENGINE = MYISAM");
 		
 	set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);
 	
