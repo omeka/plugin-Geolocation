@@ -80,7 +80,6 @@ function geo_install()
 		`item_id` BIGINT UNSIGNED NOT NULL ,
 		`latitude` DOUBLE NOT NULL ,
 		`longitude` DOUBLE NOT NULL ,
-		`zipcode` INT NOT NULL ,
 		`zoom_level` INT NOT NULL ,
 		`map_type` VARCHAR( 255 ) NOT NULL ,
 		`address` TEXT NOT NULL ,
@@ -135,7 +134,8 @@ function geo_save_location($item)
 	$location = Doctrine_Manager::getInstance()->getTable('Location')->findLocationByItem($item);
 				
 	//If we have filled out info for the geolocation, then submit to the db
-	if(!empty($geo_post) and !empty($geo_post['latitude']) and !empty($geo_post['longitude'])) {
+	if(!empty($geo_post) and 
+		(!empty($geo_post['latitude']) and !empty($geo_post['longitude']))) {
 		
 		if(!$location) {
 			$location = new Location;
@@ -277,6 +277,21 @@ function google_map($divName = 'map', $options = array()) {
 }
 
 function map_for_item($item, $width=200, $height=200) {		
+?>
+	<style type="text/css" media="screen">
+		/* The map for the items page needs a bit of styling on it */
+		
+		#address_balloon dt {
+			font-weight: bold;
+		}
+		
+		#address_balloon {
+			width: 100px;
+		}
+		
+	</style>
+
+<?php	
 	google_map('item_map' . $item->id, 
 		array(
 			'uri'=>uri('geolocation/map/show'),
@@ -297,17 +312,26 @@ function map_form($item, $width=400, $height=400) {
 		$usePost = !empty($_POST);
 		
 		if($usePost) {
-			$lng = (int) @$_POST['geolocation'][0]['longitude'];
-			$lat =  (int) @$_POST['geolocation'][0]['latitude'];
+			$lng = (double) @$_POST['geolocation'][0]['longitude'];
+			$lat =  (double) @$_POST['geolocation'][0]['latitude'];
 			$zoom = (int) @$_POST['geolocation'][0]['zoom_level'];
 			$addr = @$_POST['geolocation'][0]['address'];
 		}else {
-			$lng = (int) $loc['longitude'];
-			$lat = (int) $loc['latitude'];
+			$lng = (double) $loc['longitude'];
+			$lat = (double) $loc['latitude'];
 			$zoom = (int) $loc['zoom_level'];
 			$addr = $loc['address'];
 		}
 	?>
+	
+	<style type="text/css" media="screen">
+		/* Need a bit of styling for the geocoder balloon */
+		#geocoder_balloon a{
+			display:block;
+			width:50%;
+			float:left;
+		}
+	</style>
 	
 	<fieldset id="location_form">
 		<input type="hidden" name="geolocation[0][latitude]" value="<?php echo $lat; ?>" />
@@ -321,8 +345,7 @@ function map_form($item, $width=400, $height=400) {
 	</fieldset>
 	
 	<?php 
-	$options = array(
-		'form'=>'geolocation');
+	$options = array();
 	
 	if($lng and $lat) {
 		//B/c of changes in map via POST, we should always pass the form the map parameters manually

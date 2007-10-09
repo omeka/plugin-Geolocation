@@ -74,6 +74,7 @@ Event.observe(window, 'unload', GUnload);
 		//Show involves one marker
 		Show: {
 			marker: null,
+			
 			//Take the XML and put markers out
 			processXml: function(xml) {				
 				var item = xml.documentElement;	
@@ -86,11 +87,27 @@ Event.observe(window, 'unload', GUnload);
 				
 				this.setMarkerForItem(item, this.Show.processMarker);
 			},
+			
+			//Show the marker on the center of the map.  When the info window is opened, 
+			//move the map so we can see the contents of the balloon (the address)
 			processMarker: function(marker, zoom, item) {
 				this.Show.marker = marker;
 				this.map.setCenter(marker.getPoint());
-				this.map.setZoom(zoom);
+				this.map.setZoom(zoom);		
+				
+				var address = Xml.getValue(item, 'address');
+				
+				if(address && address.length) {
+					var balloon = showAddressBalloon(address);		
+				
+					var map = this.map;
+				
+					GEvent.addListener(marker, 'click', function() {
+						marker.openInfoWindowHtml(balloon);
+					});					
+				}
 			},
+			
 			//Custom map setup for showing an item
 			setup: function(map, options) {
 				map.addControl(new GSmallMapControl());
@@ -172,9 +189,7 @@ Event.observe(window, 'unload', GUnload);
 				map.addControl(new GMapTypeControl());
 				
 				this.Form.geocoder = new GClientGeocoder();
-				
-				this.Form.getFormElements(options.form);
-				
+								
 				//Here's a hack that should fix the map on mouseover if Scriptaculous has messed it up
 				var resizeHandler = null;
 								
@@ -257,7 +272,7 @@ Event.observe(window, 'unload', GUnload);
 					
 						//Open a little window that verifies the address
 					
-						var html = addressBalloon(address);
+						var html = confirmAddressBalloon(address);
 										
 						marker.openInfoWindowHtml(html);
 					
@@ -272,7 +287,13 @@ Event.observe(window, 'unload', GUnload);
 							marker.closeInfoWindow();
 							map.clearOverlays();
 							that.marker = null;
-							that.clearForm();
+							
+							//If its not the right address, wipe the lat/lng fields to make sure we don't submit incorrect data 
+							var formElements = getMapFormElements();
+							
+							formElements.latitude.value = '';
+							formElements.longitude.value = '';
+							formElements.zoom_level.value = '';
 						}
 					
 						//reset the zoom on the map
@@ -308,24 +329,15 @@ Event.observe(window, 'unload', GUnload);
 			},
 		
 			clearForm: function() {			
-				this.elements.each( function(each) {
+				var inputs = getMapFormElements();
+
+				inputs.each( function(each) {
 					each[1].value = '';
 				});
 			},
-		
-			getFormElements: function(prefix) {
-				var elements = $H();
-										
-				elements.latitude = document.getElementsByName(prefix + '[0][latitude]')[0];
-				elements.longitude = document.getElementsByName(prefix + '[0][longitude]')[0];
-				elements.zoom_level = document.getElementsByName(prefix + '[0][zoom_level]')[0];
-				elements.address = document.getElementsByName(prefix + '[0][address]')[0];
 				
-				this.elements = elements;
-			},
-		
 			setFormToPoint: function(point, map) {
-				var els = this.elements;
+				var els = getMapFormElements();
 							
 				els.latitude.value = point.lat();
 			
@@ -391,14 +403,14 @@ Event.observe(window, 'unload', GUnload);
 		},
 	}
 
-function addressBalloon(address) {
-	var html = '<p>Is this address correct?</p>';
+function confirmAddressBalloon(address) {
+	var html = '<div id="geocoder_balloon"><p>Is this address correct?</p>';
 	
 	html += "<p><em>" + address + '</em></p>';
 	
 	html += '<a id="confirm_address">Yes</a>';
 	
-	html += '<a id="wrong_address">No</a>';
+	html += '<a id="wrong_address">No</a></div>';
 	
 	return html;
 }
@@ -434,6 +446,27 @@ function noLocationBalloon(map) {
 		//That says, no available location for this item
 		div);
 }
+
+function showAddressBalloon(address)
+{
+	var html = '<div id="address_balloon"><dt>Address:</dt><dd>' + address + '</dd></div>';
+	
+	return html;
+}
+
+function getMapFormElements() {				
+	var prefix = 'geolocation';
+	
+	var elements = $H();
+							
+	elements.latitude = document.getElementsByName(prefix + '[0][latitude]')[0];
+	elements.longitude = document.getElementsByName(prefix + '[0][longitude]')[0];
+	elements.zoom_level = document.getElementsByName(prefix + '[0][zoom_level]')[0];
+	elements.address = document.getElementsByName(prefix + '[0][address]')[0];
+	
+	return elements;
+}
+
 
 var Xml = {};
 

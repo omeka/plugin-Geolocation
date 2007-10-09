@@ -11,9 +11,8 @@ class Location extends Omeka_Record
 		$this->setTableName('locations');
 		
 		$this->hasColumn('item_id', 'integer', null, array('range'=>array('1')));
-		$this->hasColumn('latitude', 'float', null, array('notblank'=>true));
-		$this->hasColumn('longitude', 'float', null, array('notblank'=>true));
-		$this->hasColumn('zipcode', 'integer');
+		$this->hasColumn('latitude', 'float');
+		$this->hasColumn('longitude', 'float');
 		$this->hasColumn('zoom_level', 'integer');
 		$this->hasColumn('map_type', 'string', 255);
 		$this->hasColumn('address', 'string');
