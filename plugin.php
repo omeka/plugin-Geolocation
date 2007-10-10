@@ -132,7 +132,7 @@ function geo_save_location($item)
 		
 	//Find the ActiveRecord location object
 	$location = Doctrine_Manager::getInstance()->getTable('Location')->findLocationByItem($item);
-				
+					
 	//If we have filled out info for the geolocation, then submit to the db
 	if(!empty($geo_post) and 
 		(!empty($geo_post['latitude']) and !empty($geo_post['longitude']))) {
@@ -310,7 +310,7 @@ function map_form($item, $width=400, $height=400) {
 		$loc = array_pop(get_location_for_item($item));
 		
 		$usePost = !empty($_POST);
-		
+	
 		if($usePost) {
 			$lng = (double) @$_POST['geolocation'][0]['longitude'];
 			$lat =  (double) @$_POST['geolocation'][0]['latitude'];

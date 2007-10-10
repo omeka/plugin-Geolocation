@@ -232,18 +232,6 @@ Event.observe(window, 'unload', GUnload);
 					//Don't submit the form
 					return false;
 				}
-				
-				
-				//When we submit the form, we want to make sure the map form has the coordinates of the marker
-				Event.observe('item-form', 'submit', function() {
-					var marker = that.Form.marker;
-					if(marker) {
-						that.Form.setFormToPoint(marker.getPoint(), map);
-					}else {
-						that.Form.clearForm();
-					}
-				});
-				
 			},	
 			
 			setPointFromOptions: function(map, options) {
