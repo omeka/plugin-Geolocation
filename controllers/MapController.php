@@ -21,7 +21,11 @@ class Geolocation_MapController extends Omeka_Controller_Action
 								
 		$locations = get_location_for_item($items);
 		
-		$this->render('map/browse.php', compact('items', 'locations'));
+		$pass_to_render = compact('items', 'locations');
+		$pass_to_render['recordset'] = $items;
+		$pass_to_render['record_type'] = 'Item';
+		
+		return $this->render('map/browse.php', $pass_to_render);
 	}
 	
 	protected function getController($return) 

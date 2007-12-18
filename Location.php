@@ -1,4 +1,6 @@
 <?php
+get_db()->addTable('Location', 'locations');
+
 require_once 'LocationTable.php';
 /**
  * Location

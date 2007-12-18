@@ -1,4 +1,7 @@
-<?php head(); ?>
+<?php 
+// the short <?= php syntax interferes with the xml header!!
+echo '<?xml version="1.0" encoding="UTF-8"?>'; 
+?>
 
 <items>
 	<?php foreach ($items as $key => $item): ?>
@@ -10,7 +13,7 @@
 		<?php 
 				$location = $locations[$item->id];
 		?>
-		<?php common('_location', compact('location'), 'map'); ?>
+		<?php include '_location.php'; ?>
 		
 		<thumbnail><![CDATA[
 			<?php thumbnail($item); ?>

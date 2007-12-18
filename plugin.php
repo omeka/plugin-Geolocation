@@ -6,7 +6,8 @@ require_once 'Location.php';
 
 add_plugin_hook('initialize', 'geo_initialize');
 add_plugin_hook('install', 'geo_install');
-add_plugin_hook('install_form', 'geo_form');
+add_plugin_hook('config_form', 'geo_form');
+add_plugin_hook('config', 'geo_config');
 
 //We are going to add some object-instance hooks to demonstrate the power of the callback
 $geo = new GeolocationPlugin;
@@ -18,6 +19,13 @@ add_plugin_hook('save_item', 'geo_save_location');
 add_plugin_hook('theme_header', 'geo_map_header');
 
 add_plugin_hook('add_routes', 'geo_add_routes');
+
+//Create a feed that provides the custom XML for the map
+add_data_feed('map-xml', 
+	array(
+		'access_uri'=>'items/map',
+		'script_path'=> PLUGIN_DIR . '/Geolocation/xml/map/browse.php', 
+		'mime_type'=>'application/xml'));
 
 //Register $geo so that we can call it from the controller
 Zend_Registry::set('geolocation', $geo);
@@ -54,10 +62,7 @@ function geo_initialize()
 	//We need to make sure that our MapController has available the theme pages it needs
 	add_theme_pages('admin', 'admin');
 	add_theme_pages('public', 'public');
-	add_output_pages('xml', 'rest');
-	add_controllers('controllers');
-	
-	
+	add_controllers('controllers');	
 	add_navigation('Map', 'items/map', 'archive');
 //	add_navigation('Disney', 'http://www.disney.com', 'archive');
 }
@@ -67,6 +72,15 @@ function geo_form()
 	include 'form.php';
 }
 
+function geo_config()
+{
+	//Use the form to set a bunch of default options in the db
+	set_option('geo_gmaps_key', $_POST['map_key']);
+	set_option('geo_default_latitude', $_POST['default_latitude']);
+	set_option('geo_default_longitude', $_POST['default_longitude']);
+	set_option('geo_default_zoom_level', $_POST['default_zoomlevel']);	
+}
+
 /**
  * Installer creates a 'locations' table, sets some default lat/lng/zoom and API key attributes in DB
  *
@@ -74,8 +88,9 @@ function geo_form()
  **/
 function geo_install()
 {	
-	$conn = Doctrine_Manager::getInstance()->connection()->getDbh();
-	$conn->exec("CREATE TABLE `locations` (
+	$conn = get_db();
+
+	$conn->exec("CREATE TABLE IF NOT EXISTS $conn->Location (
 		`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 		`item_id` BIGINT UNSIGNED NOT NULL ,
 		`latitude` DOUBLE NOT NULL ,
@@ -86,13 +101,7 @@ function geo_install()
 		INDEX ( `item_id` )
 		) ENGINE = MYISAM");
 		
-	set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);
-	
-	//Use the form to set a bunch of default options in the db
-	set_option('geo_gmaps_key', $_POST['map_key']);
-	set_option('geo_default_latitude', $_POST['default_latitude']);
-	set_option('geo_default_longitude', $_POST['default_longitude']);
-	set_option('geo_default_zoom_level', $_POST['default_zoomlevel']);
+	set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);	
 }
 
 /**
@@ -181,9 +190,9 @@ class GeolocationPlugin
 	public function locationSql($select)
 	{
 		if($this->displayMap) {
-			
+			$db = get_db();
 			//INNER JOIN the locations table
-			$select->innerJoin(array('Location', 'l'), 'l.item_id = i.id');
+			$select->innerJoin("$db->Location l", 'l.item_id = i.id');
 		}
 	}
 	
@@ -198,43 +207,7 @@ class GeolocationPlugin
  **/
 function get_location_for_item($item_id)
 {
-	$select = new Omeka_Select;
-	$select->from(array('Location', 'l'), 'l.*');
-	
-	$item_id = ($item_id instanceof Item) ? $item_id->id : $item_id;
-	
-	//Create a WHERE condition that will pull down all the location info
-	if(count($item_id) > 1 or ($item_id instanceof Doctrine_Collection)) {
-		
-		//Loop through a collection of ActiveRecord items
-		if($item_id instanceof Doctrine_Collection) {
-			foreach ($item_id as $item) {
-				$select->orWhere('l.item_id = ?', $item->id);
-			}
-		}
-		//Loop through an array of item IDs
-		else {
-			foreach ($item_id as $id) {
-				$select->orWhere('l.item_id = ?', $id);
-			}			
-		}
-		
-
-	}else {
-		$select->where('l.item_id = ?', $item_id);
-	}
-		
-	//Fetch the data
-	$array = $select->fetchAll();
-	
-	
-	//Now process into an array where the key is the item_id		
-	$locations = array();	
-	foreach ($array as $k => $row) {
-		$locations[$row['item_id']] = $row;
-	}	
-			
-	return $locations;
+	return get_db()->getTable('Location')->findLocationByItem($item_id);
 }
 
 /**
@@ -267,7 +240,7 @@ function google_map($divName = 'map', $options = array()) {
 	}
 	
 	//Append the 'rest' parameter to signify that we want to return XML		
-	$params['output'] = 'rest';
+	$params['output'] = 'map-xml';
 	$options['params'] = $params;	
 
 	require_once 'Zend/Json.php';
