@@ -2,7 +2,7 @@
 
 require_once 'Omeka/Controller/Action.php';
 
-class Geolocation_MapController extends Omeka_Controller_Action
+class MapController extends Omeka_Controller_Action
 {
     public function noRouteAction()
     {
@@ -50,16 +50,16 @@ class Geolocation_MapController extends Omeka_Controller_Action
 		}
 		//This needs to piggyback off of the permissions checks for items		
 		
-		$itemController = $this->getController('item');
-		
-		$item = $itemController->showAction();
+        $item = get_db()->getTable('Item')->find($this->_getParam('id'));
 		
 		$locations = get_location_for_item($item->id);
 				
 		$location = $locations[$item->id];	
 		
 		$has_location = !$location ? false : true;
-			
+		
+		$this->_setParam('output', 'map-xml');
+		
 		$this->render('map/show.php', compact('item','location', 'has_location'));
 	}
 

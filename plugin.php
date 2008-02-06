@@ -1,5 +1,5 @@
 <?php
-define('GEOLOCATION_PLUGIN_VERSION', 1);
+define('GEOLOCATION_PLUGIN_VERSION', '1.0rc4');
 
 //Include the ActiveRecord model
 require_once 'Location.php';
@@ -13,20 +13,12 @@ add_plugin_hook('config', 'geo_config');
 $geo = new GeolocationPlugin;
 add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
 
-add_plugin_hook('append_to_page', 'geo_append_page');
-add_plugin_hook('save_item', 'geo_save_location');
+add_plugin_hook('after_save_item', 'geo_save_location');
 
 add_plugin_hook('theme_header', 'geo_map_header');
 
 add_plugin_hook('add_routes', 'geo_add_routes');
-
-//Create a feed that provides the custom XML for the map
-add_data_feed('map-xml', 
-	array(
-		'access_uri'=>'items/map',
-		'script_path'=> PLUGIN_DIR . '/Geolocation/xml/map/browse.php', 
-		'mime_type'=>'application/xml'));
-
+	
 //Register $geo so that we can call it from the controller
 Zend_Registry::set('geolocation', $geo);
 
@@ -51,7 +43,22 @@ function geo_map_header()
 
 function geo_add_routes($router)
 {
-	$router->addRoute('map_browse', new Zend_Controller_Router_Route('items/map/:page', array('controller'=>'map','action'=>'browse', 'page'=>1, 'module'=>'geolocation'), array('page'=>'\d+')));
+    $mapRoute = new Zend_Controller_Router_Route('items/map/:page', array('controller'=>'map','action'=>'browse', 'page'=>1, 'module'=>'geolocation'), array('page'=>'\d+'));
+    
+	$router->addRoute('map_browse', $mapRoute);	
+	
+	add_data_feed('map-xml', 
+	array(
+		'access_uri'=>$mapRoute,
+		'script_path'=> PLUGIN_DIR . '/Geolocation/xml/map/browse.php', 
+		'mime_type'=>'application/xml'));
+		
+	//Create a feed that provides the custom XML for the map
+    add_data_feed('map-xml',
+    array(
+        'access_uri'=>'map/show',
+        'script_path'=> PLUGIN_DIR . '/Geolocation/xml/map/show.php',
+        'mime_type'=>'application/xml'));		
 }
 
 function geo_initialize()
@@ -64,7 +71,6 @@ function geo_initialize()
 	add_theme_pages('public', 'public');
 	add_controllers('controllers');	
 	add_navigation('Map', 'items/map', 'archive');
-//	add_navigation('Disney', 'http://www.disney.com', 'archive');
 }
 
 function geo_form()
@@ -88,9 +94,9 @@ function geo_config()
  **/
 function geo_install()
 {	
-	$conn = get_db();
+	$db = get_db();
 
-	$conn->exec("CREATE TABLE IF NOT EXISTS $conn->Location (
+	$db->exec("CREATE TABLE IF NOT EXISTS $db->Location (
 		`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
 		`item_id` BIGINT UNSIGNED NOT NULL ,
 		`latitude` DOUBLE NOT NULL ,
@@ -104,30 +110,8 @@ function geo_install()
 	set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);	
 }
 
-/**
- * Append map data to relevant theme pages
- *
- * @return void
- **/
-function geo_append_page($page, $options) 
-{
-	//This should pull in the $items var
-	extract($options);
-	
-	switch ($page) {
-		case 'items/form':
-			map_form($item);
-			break;
-		
-		case 'items/show':
-			map_for_item($item);
-			break;
-			
-		default:
-			# code...
-			break;
-	}
-}
+add_plugin_hook('append_to_item_form', 'map_form');
+add_plugin_hook('append_to_item_show', 'map_for_item');
 
 /**
  * Each time we save an item, check the POST to see if we are also saving a location
@@ -136,11 +120,11 @@ function geo_append_page($page, $options)
  **/
 function geo_save_location($item)
 {	
-	$post = $_POST;
+	$post = $_POST;	
 	$geo_post = $post['geolocation'][0];
 		
 	//Find the ActiveRecord location object
-	$location = Doctrine_Manager::getInstance()->getTable('Location')->findLocationByItem($item);
+	$location = get_db()->getTable('Location')->findLocationByItem($item);
 					
 	//If we have filled out info for the geolocation, then submit to the db
 	if(!empty($geo_post) and 
@@ -150,8 +134,8 @@ function geo_save_location($item)
 			$location = new Location;
 			$location->item_id = $item->id;						
 		}
-				
-		if( $location->commitForm($geo_post) ) {
+		
+  		if( $location->saveForm($geo_post) ) {
 			return true;
 		}
 	}		
@@ -267,7 +251,7 @@ function map_for_item($item, $width=200, $height=200) {
 <?php	
 	google_map('item_map' . $item->id, 
 		array(
-			'uri'=>uri('geolocation/map/show'),
+			'uri'=>uri('map/show'),
 			'params'=>array('id'=>$item->id), 
 			'type'=>'show', 
 			'width'=>$width,
