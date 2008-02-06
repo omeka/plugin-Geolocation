@@ -19,7 +19,7 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 			<?php thumbnail($item); ?>
 		]]></thumbnail>	
 		
-		<short_description><?php echo snippet($item->description, 0, 250); ?></short_description>
+		<short_description><?php echo snippet(h($item->description), 0, 250); ?></short_description>
 		
 		<link_to_item><![CDATA[
 			<?php link_to_item($item); ?>

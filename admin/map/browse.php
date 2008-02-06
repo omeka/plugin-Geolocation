@@ -1,19 +1,15 @@
 <?php head(); ?>
 <?php js('search'); ?>
-
 <?php common('archive-nav'); ?>
 
+<div id="primary">
+    
 <style type="text/css" media="screen">
 	#map_browse{
-		width: 500px;
+		width: 650px;
 		height: 500px;
 	}
 
-	#search_block {
-		float:left;
-		width:20%;
-	}
-	
 	#map_block {
 		float:left;
 		margin-left: 2%;
@@ -29,8 +25,9 @@
 		
 </style>
 
+<h1>Browse Items on the Map (<?php echo total_results(true);?> items total)</h1>
 
-<div id="pagination">
+<div class="pagination">
 <?php echo map_pagination(); ?>
 </div>
 
@@ -52,6 +49,6 @@
 
 </div>
 
-
+</div>
 
 <?php foot(); ?>

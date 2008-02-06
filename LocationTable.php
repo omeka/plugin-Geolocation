@@ -12,7 +12,7 @@ class LocationTable extends Omeka_Table
 	 * @param array|int $item_id
 	 * @return array
 	 **/
-	public function findLocationByItem($item)
+	public function findLocationByItem($item, $findOnlyOne=false)
 	{		
 		$db = $this->getConn();
 		
@@ -41,7 +41,11 @@ class LocationTable extends Omeka_Table
 		}
 		
 		$locations = $this->fetchObjects($select);
-	
+	    
+	    if($findOnlyOne) {
+	        return current($locations);
+	    }
+	    
 		$indexed = array();
 		
 		//Now process into an array where the key is the item_id		

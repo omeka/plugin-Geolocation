@@ -1,4 +1,13 @@
-Default Latitude:<input type="text" name="default_latitude" value="" id="default_latitude" />
-Default Longitude:<input type="text" name="default_longitude" value="" id="default_longitude" />
-Default Zoom Level:<input type="text" name="default_zoomlevel" value="" id="default_zoomlevel" />
-Google Maps API Key:<input type="text" name="map_key" value="" id="map_key" />
+
+<label for="default_latitude">Default Latitude:</label>
+<input type="text" name="default_latitude" size="8" value="<?php echo get_option('geo_default_latitude'); ?>" id="default_latitude" />
+
+<label for="default_longitude">Default Longitude:</label>
+<input type="text" name="default_longitude" size="8" value="<?php echo get_option('geo_default_longitude'); ?>" id="default_longitude" />
+
+<label for="default_zoomlevel">Default Zoom Level:</label>
+<input type="text" name="default_zoomlevel" size="3" value="<?php echo get_option('geo_default_zoom_level'); ?>" id="default_zoomlevel" />
+
+<label for="map_key">Google Maps API Key:</label>
+<input type="text" name="map_key" size="90" value="<?php echo get_option('geo_gmaps_key'); ?>" id="map_key" />
+

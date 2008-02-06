@@ -4,7 +4,6 @@ define('GEOLOCATION_PLUGIN_VERSION', '1.0rc4');
 //Include the ActiveRecord model
 require_once 'Location.php';
 
-add_plugin_hook('initialize', 'geo_initialize');
 add_plugin_hook('install', 'geo_install');
 add_plugin_hook('config_form', 'geo_form');
 add_plugin_hook('config', 'geo_config');
@@ -12,15 +11,20 @@ add_plugin_hook('config', 'geo_config');
 //We are going to add some object-instance hooks to demonstrate the power of the callback
 $geo = new GeolocationPlugin;
 add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
-
 add_plugin_hook('after_save_item', 'geo_save_location');
-
 add_plugin_hook('theme_header', 'geo_map_header');
-
 add_plugin_hook('add_routes', 'geo_add_routes');
+add_plugin_hook('append_to_item_form', 'map_form');
+add_plugin_hook('append_to_item_show', 'map_for_item');
 	
 //Register $geo so that we can call it from the controller
 Zend_Registry::set('geolocation', $geo);
+
+//We need to make sure that our MapController has available the theme pages it needs
+add_theme_pages('admin', 'admin');
+add_theme_pages('public', 'public');
+add_controllers('controllers');	
+add_navigation('Map', 'items/map', 'archive');
 
 /**
  * Output the script tags that include the GMaps JS from afar
@@ -41,6 +45,19 @@ function geo_map_header()
 <?php
 }
 
+/**
+ * Plugin hook that can manipulate Omeka's routes to allow for new URIs to access data
+ *
+ * Currently does the following things:
+ *      matches up the URI items/map/:page with MapController::browseAction()
+ *
+ * Adds a couple of data feeds to render XML for the map (these pages are in the xml/ directory)
+ *
+ * @see Zend_Controller_Router_Rewrite
+ * @param $router
+ *
+ * @return void
+ **/
 function geo_add_routes($router)
 {
     $mapRoute = new Zend_Controller_Router_Route('items/map/:page', array('controller'=>'map','action'=>'browse', 'page'=>1, 'module'=>'geolocation'), array('page'=>'\d+'));
@@ -59,18 +76,6 @@ function geo_add_routes($router)
         'access_uri'=>'map/show',
         'script_path'=> PLUGIN_DIR . '/Geolocation/xml/map/show.php',
         'mime_type'=>'application/xml'));		
-}
-
-function geo_initialize()
-{
-	//Maybe we need to upgrade the plugin.  check on it.
-	$version = get_option('geolocation_plugin_version');
-	
-	//We need to make sure that our MapController has available the theme pages it needs
-	add_theme_pages('admin', 'admin');
-	add_theme_pages('public', 'public');
-	add_controllers('controllers');	
-	add_navigation('Map', 'items/map', 'archive');
 }
 
 function geo_form()
@@ -110,8 +115,7 @@ function geo_install()
 	set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);	
 }
 
-add_plugin_hook('append_to_item_form', 'map_form');
-add_plugin_hook('append_to_item_show', 'map_for_item');
+
 
 /**
  * Each time we save an item, check the POST to see if we are also saving a location
@@ -124,7 +128,7 @@ function geo_save_location($item)
 	$geo_post = $post['geolocation'][0];
 		
 	//Find the ActiveRecord location object
-	$location = get_db()->getTable('Location')->findLocationByItem($item);
+	$location = get_db()->getTable('Location')->findLocationByItem($item, true);
 					
 	//If we have filled out info for the geolocation, then submit to the db
 	if(!empty($geo_post) and 
