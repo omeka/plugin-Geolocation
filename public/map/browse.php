@@ -7,7 +7,10 @@
 	}
 </style>
 
-<?php echo map_pagination(); ?>
+<div id="primary">
+
+<h1>Browse Items on the Map</h1>
+<div class="pagination"><?php echo map_pagination(); ?></div>
 
 <?php 
 	 google_map('map_browse', array('uri'=>$_SERVER['REQUEST_URI']));
@@ -17,5 +20,6 @@
 
 <div id="map-links"></div>
 
+</div>
 
 <?php foot(); ?>

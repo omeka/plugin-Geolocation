@@ -19,6 +19,9 @@ class LocationTable extends Omeka_Table
 		if(($item instanceof Item) and !$item->exists()) {
 			return array();
 		}
+        elseif(is_array($item) and !count($item)) {
+            return array();
+        }
 		
 		$select = new Omeka_Select;
 

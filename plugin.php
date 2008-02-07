@@ -1,5 +1,5 @@
 <?php
-define('GEOLOCATION_PLUGIN_VERSION', '1.0rc4');
+define('GEOLOCATION_PLUGIN_VERSION', '1.0.0');
 
 //Include the ActiveRecord model
 require_once 'Location.php';
