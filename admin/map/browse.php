@@ -1,5 +1,4 @@
 <?php head(); ?>
-<?php js('search'); ?>
 <?php common('archive-nav'); ?>
 
 <div id="primary">

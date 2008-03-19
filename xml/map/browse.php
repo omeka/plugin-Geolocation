@@ -16,13 +16,13 @@ echo '<?xml version="1.0" encoding="UTF-8"?>';
 		<?php include '_location.php'; ?>
 		
 		<thumbnail><![CDATA[
-			<?php thumbnail($item); ?>
+			<?php echo thumbnail($item); ?>
 		]]></thumbnail>	
 		
 		<short_description><?php echo snippet(h($item->description), 0, 250); ?></short_description>
 		
 		<link_to_item><![CDATA[
-			<?php link_to_item($item); ?>
+			<?php echo link_to_item($item); ?>
 		]]></link_to_item>
 		
 		</item>
