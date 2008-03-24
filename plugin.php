@@ -125,6 +125,10 @@ function geo_install()
 function geo_save_location($item)
 {	
 	$post = $_POST;	
+	
+	//If we don't have the geolocation form on the page, don't do anything!
+	if(!$post['geolocation']) return;
+	
 	$geo_post = $post['geolocation'][0];
 		
 	//Find the ActiveRecord location object
