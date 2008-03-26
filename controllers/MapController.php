@@ -8,18 +8,30 @@ class MapController extends Omeka_Controller_Action
     {
         $this->_redirect('/');
     }
-
+    
 	public function browseAction()
 	{
-		//Tell the plugin that it should filter the SQL in the items browse
+	    //Tell the plugin that it should filter the SQL in the items browse
 		Zend_Registry::get( 'geolocation' )->setMapDisplay(true);
-				
-		$c = $this->getController('items');
+
+	    //If we are looking for a specific item, bypass the other shit
+		if($this->_getParam('id')) {
+		    
+		    $item = get_db()->getTable('Item')->find($this->_getParam('id'));
+		    $items = array($item);
+		                
+		}else {
+    		$c = $this->getController('items');
 		
-		//Retrieve the items from that shit
-		$items = $c->browseAction();
-								
+    		//Retrieve the items from that shit
+    		$items = $c->browseAction();		    
+ //   		exit;
+		}
+        
 		$locations = get_location_for_item($items);
+		//Make this accessible from the plugin template helpers
+		$params = array('page'=>$this->_getParam('page', 1));
+		Zend_Registry::set('map_params', $params);
 		
 		$pass_to_render = compact('items', 'locations');
 		$pass_to_render['recordset'] = $items;
@@ -42,25 +54,4 @@ class MapController extends Omeka_Controller_Action
 		
 		return $itemController;		
 	}
-	
-	public function showAction()
-	{
-		if(!$this->_getParam('id')) {
-			echo "<item></item>";return;
-		}
-		//This needs to piggyback off of the permissions checks for items		
-		
-        $item = get_db()->getTable('Item')->find($this->_getParam('id'));
-		
-		$locations = get_location_for_item($item->id);
-				
-		$location = $locations[$item->id];	
-		
-		$has_location = !$location ? false : true;
-		
-		$this->_setParam('output', 'map-xml');
-		
-		$this->render('map/show.php', compact('item','location', 'has_location'));
-	}
-
 }?>

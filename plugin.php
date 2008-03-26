@@ -12,7 +12,6 @@ add_plugin_hook('config', 'geo_config');
 $geo = new GeolocationPlugin;
 add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
 add_plugin_hook('after_save_item', 'geo_save_location');
-add_plugin_hook('theme_header', 'geo_map_header');
 add_plugin_hook('add_routes', 'geo_add_routes');
 add_plugin_hook('append_to_item_form', 'map_form');
 add_plugin_hook('append_to_item_show', 'map_for_item');
@@ -31,7 +30,7 @@ add_navigation('Map', 'items/map', 'archive');
  *
  * @return void
  **/
-function geo_map_header()
+function geolocation_scripts()
 {
 	$key = get_option('geo_gmaps_key');
 	
@@ -62,20 +61,17 @@ function geo_add_routes($router)
 {
     $mapRoute = new Zend_Controller_Router_Route('items/map/:page', array('controller'=>'map','action'=>'browse', 'page'=>1, 'module'=>'geolocation'), array('page'=>'\d+'));
     
-	$router->addRoute('map_browse', $mapRoute);	
+	$router->addRoute('items_map', $mapRoute);	
 	
-	add_data_feed('map-xml', 
-	array(
-		'access_uri'=>$mapRoute,
-		'script_path'=> PLUGIN_DIR . '/Geolocation/xml/map/browse.php', 
-		'mime_type'=>'application/xml'));
-		
-	//Create a feed that provides the custom XML for the map
-    add_data_feed('map-xml',
+    //@hack Have to have a basic route for this b/c it is being overridden by the 'page' route in routes.ini
+	$mapRoute2 = new Zend_Controller_Router_Route('map/browse', array('controller'=>'map','action'=>'browse'));
+	$router->addRoute('map_browse', $mapRoute2);
+	
+    add_data_feed('kml', 
     array(
-        'access_uri'=>'map/show',
-        'script_path'=> PLUGIN_DIR . '/Geolocation/xml/map/show.php',
-        'mime_type'=>'application/xml'));		
+        'access_uri'=>'map/browse',
+        'script_path'=> PLUGIN_DIR . '/Geolocation/kml/browse.php',
+        'mime_type'=>'application/vnd.google-earth.kml+xml'));        		
 }
 
 function geo_form()
@@ -125,7 +121,7 @@ function geo_install()
 function geo_save_location($item)
 {	
 	$post = $_POST;	
-	
+
 	//If we don't have the geolocation form on the page, don't do anything!
 	if(!$post['geolocation']) return;
 	
@@ -212,36 +208,45 @@ function google_map($divName = 'map', $options = array()) {
 	echo "<div id=\"$divName\"></div>";
 	//Load this junk in from the plugin config
 
-	$lat = (double) get_option('geo_default_latitude');
-	$lng = (double) get_option('geo_default_longitude');
-	$zoom = (double) get_option('geo_default_zoom_level');
+    if(!isset($options['center'])) {
+      	$lat = (double) get_option('geo_default_latitude');
+    	$lng = (double) get_option('geo_default_longitude');
+    	$zoom = (double) get_option('geo_default_zoom_level');
 	
-	$options['default']['latitude'] = $lat;
-	$options['default']['longitude'] = $lng;
-	$options['default']['zoomLevel'] = $zoom;
-	
+    	$options['center']['latitude'] = $lat;
+    	$options['center']['longitude'] = $lng;
+    	$options['center']['zoomLevel'] = $zoom;  
+    }
+
 	//Load the Key into the plugin config
 	//$options['api_key'] = $plugin->getConfig('Google Maps API Key');
 
 	//The request parameters get put into the map options
 	$params = array();
 	if(!isset($options['params'])) {
-		$params = $_GET;
-	}else {
-		$params = array_merge($options['params'], $_GET);
-	}
+		$params = array();
+    }
+	$params = array_merge($params, $_GET);
 	
-	//Append the 'rest' parameter to signify that we want to return XML		
-	$params['output'] = 'map-xml';
+	//Merge in extra parameters from the controller
+	if(Zend_Registry::isRegistered('map_params')) {
+	    $params = array_merge($params, Zend_Registry::get('map_params'));
+	}
+	$output['params'] = $params;
+	
+	//We are using KML as the output format
+	$params['output'] = 'kml';
 	$options['params'] = $params;	
-
+    
 	require_once 'Zend/Json.php';
 	$options = Zend_Json::encode($options);
 	
-	echo "<script>var ${divName}Omeka = new OmekaMap('$divName', $options);</script>";
+	echo "<script type=\"text/javascript\">var ${divName}Omeka = new OmekaMap('$divName', $options);</script>";
 }
 
 function map_for_item($item, $width=200, $height=200) {		
+    $divId = 'item_map' . $item->id;
+
 ?>
 	<style type="text/css" media="screen">
 		/* The map for the items page needs a bit of styling on it */
@@ -254,21 +259,50 @@ function map_for_item($item, $width=200, $height=200) {
 			width: 100px;
 		}
 		
+		#<?php echo $divId;?> {
+		    width: <?php echo $width; ?>px;
+		    height: <?php echo $height; ?>px;
+		}
+		
+		div.map-notification {
+		    width: <?php echo $width; ?>px;
+		    height: <?php echo $height; ?>px;
+		    display:block;
+		    border: 1px dotted #ccc;
+		    text-align:center;
+		    font-size: 2em;
+		}
+		
 	</style>
-
+    <h2>Geolocation</h2>
 <?php	
-	google_map('item_map' . $item->id, 
-		array(
-			'uri'=>uri('map/show'),
-			'params'=>array('id'=>$item->id), 
-			'type'=>'show', 
-			'width'=>$width,
-			'height'=>$height));
+    //Options for google_maps helper
+    $options = array(
+			/*  //We don't really need to load the KML for a single item since it's just hardcoded in the JSON
+			'uri'=>uri('map/browse'),
+			'params'=>array('id'=>$item->id) */   
+			'size'=>'small');
+
+    $location = current(get_location_for_item($item));
+    
+    //Only set the center of the map if this item actually has a location associated with it
+    if($location) {
+        $center['latitude'] = $location->latitude;
+        $center['longitude'] = $location->longitude;
+        $center['zoomLevel'] = $location->zoom_level;
+        $options['center'] = $center;
+        $options['showCenter'] = true;
+        
+        google_map($divId, $options);
+    }
+    else {
+        echo '<div class="map-notification"><br/><br/>This item has no location info associated with it.</div>';
+    }
 }
 
 function map_pagination() {
 	return pagination_links(
-	5, null,null,null,null, uri('items/map/') );
+	5, null,null,null,null, uri('items/map/'));
 }
 
 function map_form($item, $width=400, $height=400) { 
@@ -281,7 +315,7 @@ function map_form($item, $width=400, $height=400) {
 			$lat =  (double) @$_POST['geolocation'][0]['latitude'];
 			$zoom = (int) @$_POST['geolocation'][0]['zoom_level'];
 			$addr = @$_POST['geolocation'][0]['address'];
-		}else {
+		}elseif($loc) {
 			$lng = (double) $loc['longitude'];
 			$lat = (double) $loc['latitude'];
 			$zoom = (int) $loc['zoom_level'];
@@ -296,6 +330,11 @@ function map_form($item, $width=400, $height=400) {
 			width:50%;
 			float:left;
 		}
+		
+		#item_form{
+		    width: <?php echo $width; ?>px;
+		    height: <?php echo $height; ?>px;
+		}
 	</style>
 	
 	<fieldset id="location_form">
@@ -306,21 +345,32 @@ function map_form($item, $width=400, $height=400) {
 		
 		<label>Find Your location via address:</label>
 		<input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
-		<input type="submit" name="find_location_by_address" id="find_location_by_address" value="Find By Address" />
+		<button type="button" name="find_location_by_address" id="find_location_by_address">Find By Address</button>
 	</fieldset>
 	
 	<?php 
 	$options = array();
 	
-	if($lng and $lat) {
-		//B/c of changes in map via POST, we should always pass the form the map parameters manually
-		$options['point'] = array('lng'=>$lng, 'lat'=>$lat, 'zoom'=>$zoom);			
+	//If we are using the POST data, we don't need to re-retrieve the KML for the item's location
+	if(!$usePost and $item->exists()) {
+    	$options['uri'] = uri('map/browse');
+    	$options['params'] = array('id'=>$item->id);	    
 	}
 	
-	$options['type'] = 'form';
-	$options['width'] = $width;
-	$options['height'] = $height;
+	$options['form'] = array('id'=>'location_form', 'posted'=>$usePost);
 	
+/*
+	if($usePost) {
+	    $options['form']['post'] = array('latitude'=>$lat, 'longitude'=>$lng, 'zoomLevel'=>$zoom);
+	}
+*/  
+	if($lng) {
+    	$options['center']['latitude'] = $lat;
+    	$options['center']['longitude'] = $lng;
+    	$options['center']['zoomLevel'] = $zoom;	    
+	}
+
+			
 	google_map('item_form', $options);
  } 
 ?>

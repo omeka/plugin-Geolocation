@@ -1,4 +1,5 @@
 <?php head(); ?>
+<?php geolocation_scripts(); ?>
 <?php common('archive-nav'); ?>
 
 <div id="primary">
@@ -21,6 +22,11 @@
 		margin-left: 2%;
 		margin-top: 3%;
 	}
+	
+	#map-links a {
+	    padding-left: 15px;
+	    display:block;
+	}
 		
 </style>
 
@@ -30,22 +36,22 @@
 <?php echo map_pagination(); ?>
 </div>
 
-<div id="search_block">
-<?php items_search_form(array('id'=>'search'), $_SERVER['REQUEST_URI']); ?>
-</div>
-
-<div id="map_block">
-<?php 
-	 google_map('map_browse', array('uri'=>$_SERVER['REQUEST_URI']));
-?>
-</div>
-
 <div id="link_block">
 
 <h2>Find An Item on the Map</h2>
 
 <div id="map-links"></div>
 
+</div>
+
+<div id="map_block">
+<?php 
+	 google_map('map_browse', array('uri'=>uri('map/browse'), 'list'=>'map-links'));
+?>
+</div>
+
+<div id="search_block">
+<?php items_search_form(array('id'=>'search'), $_SERVER['REQUEST_URI']); ?>
 </div>
 
 </div>
