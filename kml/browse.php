@@ -18,12 +18,12 @@
         <?php $location = $locations[$item->id]; ?>
        <Placemark>
             <name><![CDATA[<?php if($item->title) echo h($item->title); else echo '[Untitled]';?>]]></name>
-            <Snippet maxLines="2"><?php   
+            <Snippet maxLines="2"><![CDATA[<?php   
                     if($item->description):
                         echo snippet(htmlentities($item->description), 0, 150); 
                     else:
                         echo 'No description was given.';
-                    endif; ?></Snippet>    
+                    endif; ?>]]></Snippet>    
             <description><![CDATA[<?php 
             /* @since 3/26/08: movies do not display properly on the map in IE6, so can't use display_files()  
             Description field contains the HTML for displaying the first file (if possible)
