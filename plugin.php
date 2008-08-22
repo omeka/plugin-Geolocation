@@ -8,7 +8,8 @@ add_plugin_hook('install', 'geo_install');
 add_plugin_hook('config_form', 'geo_form');
 add_plugin_hook('config', 'geo_config');
 
-//We are going to add some object-instance hooks to demonstrate the power of the callback
+// We are going to add some object-instance hooks to demonstrate the power of 
+// the callback
 $geo = new GeolocationPlugin;
 add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
 add_plugin_hook('after_save_item', 'geo_save_location');
@@ -16,14 +17,22 @@ add_plugin_hook('add_routes', 'geo_add_routes');
 add_plugin_hook('append_to_item_form', 'map_form');
 add_plugin_hook('append_to_item_show', 'map_for_item');
 	
-//Register $geo so that we can call it from the controller
+// Register $geo so that we can call it from the controller
 Zend_Registry::set('geolocation', $geo);
 
-//We need to make sure that our MapController has available the theme pages it needs
-add_theme_pages('admin', 'admin');
-add_theme_pages('public', 'public');
-add_controllers('controllers');	
-add_navigation('Map', 'items/map', 'archive');
+// We need to make sure that our MapController has available the theme pages it 
+// needs
+//add_theme_pages('admin', 'admin');
+//add_theme_pages('public', 'public');
+//add_controllers('controllers');	
+
+add_filter('admin_navigation_main', 'geo_admin_nav');
+function geo_admin_nav($navArray)
+{
+    $geoNav = array('Map'=> url_for('map'));
+    $navArray += $geoNav;
+    return $navArray;
+}
 
 /**
  * Output the script tags that include the GMaps JS from afar
@@ -96,18 +105,17 @@ function geo_config()
 function geo_install()
 {	
 	$db = get_db();
-
-	$db->exec("CREATE TABLE IF NOT EXISTS $db->Location (
-		`id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-		`item_id` BIGINT UNSIGNED NOT NULL ,
-		`latitude` DOUBLE NOT NULL ,
-		`longitude` DOUBLE NOT NULL ,
-		`zoom_level` INT NOT NULL ,
-		`map_type` VARCHAR( 255 ) NOT NULL ,
-		`address` TEXT NOT NULL ,
-		INDEX ( `item_id` )
-		) ENGINE = MYISAM");
-		
+    $sql = "
+    CREATE TABLE IF NOT EXISTS $db->Location (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+	`item_id` BIGINT UNSIGNED NOT NULL ,
+	`latitude` DOUBLE NOT NULL ,
+	`longitude` DOUBLE NOT NULL ,
+	`zoom_level` INT NOT NULL ,
+	`map_type` VARCHAR( 255 ) NOT NULL ,
+	`address` TEXT NOT NULL ,
+	INDEX (`item_id`)) ENGINE = MYISAM";
+	$db->exec($sql);
 	set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);	
 }
 

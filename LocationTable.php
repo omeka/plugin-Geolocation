@@ -3,7 +3,7 @@
  * LocationTable
  * @package: Omeka
  */
-class LocationTable extends Omeka_Table
+class LocationTable extends Omeka_Db_Table
 {
 	
 	/**
