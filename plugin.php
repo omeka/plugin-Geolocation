@@ -23,7 +23,7 @@ Zend_Registry::set('geolocation', $geo);
 add_filter('admin_navigation_main', 'geo_admin_nav');
 function geo_admin_nav($navArray)
 {
-    $geoNav = array('Map'=> url_for('map'));
+    $geoNav = array('Map' => url_for('items/map'));
     $navArray += $geoNav;
     return $navArray;
 }
@@ -251,6 +251,7 @@ function google_map($divName = 'map', $options = array()) {
 }
 
 function map_for_item($item, $width = 200, $height = 200) {        
+    geolocation_scripts(); 
     $divId = 'item_map' . $item->id;
 ?>
 <style type="text/css" media="screen">
@@ -301,7 +302,8 @@ function map_for_item($item, $width = 200, $height = 200) {
 }
 
 function map_form($item, $width = 400, $height = 400) { 
-        $loc = array_pop(get_location_for_item($item));
+    geolocation_scripts();    
+    $loc = array_pop(get_location_for_item($item));
         $usePost = !empty($_POST);
         if ($usePost) {
             $lng  = (double) @$_POST['geolocation'][0]['longitude'];

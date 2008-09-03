@@ -20,10 +20,12 @@
         margin-left: 2%;
         margin-top: 3%;
     }
-    
     #map-links a {
         padding-left: 15px;
         display:block;
+    }
+    #search_block {
+        clear: both;
     }
 </style>
 
