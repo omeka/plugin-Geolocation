@@ -13,6 +13,8 @@ class MapController extends Omeka_Controller_Action
     {
         $items = $this->_getItems();
         
+        $totalItems = $this->_getTotalItems();
+        
         //var_dump($items);exit();
         
         $locations = get_location_for_item($items);
@@ -21,7 +23,7 @@ class MapController extends Omeka_Controller_Action
         $params = array('page'=>$this->_getParam('page', 1));
         Zend_Registry::set('map_params', $params);
         
-        $this->view->assign(compact('items', 'locations'));
+        $this->view->assign(compact('items', 'totalItems', 'locations'));
     }
     
     private function _getItems()
@@ -30,5 +32,12 @@ class MapController extends Omeka_Controller_Action
         $itemSelect = $itemTable->getSelectForFindBy();
         $itemSelect->joinInner(array('l' => $this->getDb()->Location), 'l.item_id = i.id', array());
         return $itemTable->fetchObjects($itemSelect);
+    }
+    private function _getTotalItems()
+    {
+        $itemTable = $this->getTable('Item');
+        $itemSelect = $itemTable->getSelectForCount();
+        $itemSelect->joinInner(array('l' => $this->getDb()->Location), 'l.item_id = i.id', array());
+        return $itemTable->fetchOne($itemSelect);
     }
 }

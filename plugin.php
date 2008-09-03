@@ -40,11 +40,10 @@ function geolocation_scripts()
         return;
     }
     
-    $path = WEB_PLUGIN . DIRECTORY_SEPARATOR . 'Geolocation' . DIRECTORY_SEPARATOR . 'map.js';
 ?>
 <script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=<?php echo $key;?>" type="text/javascript"></script>
-<script src="<?php echo $path;?>" type="text/javascript" charset="utf-8"></script>
 <?php
+echo js('map');
 }
 
 /**
@@ -210,7 +209,7 @@ function google_map($divName = 'map', $options = array()) {
         $zoom = (double) get_option('geo_default_zoom_level');
         $options['center']['latitude']  = $lat;
         $options['center']['longitude'] = $lng;
-        $options['center']['zoomLevel'] = $zoom;  
+        $options['center']['zoomLevel'] = $zoom;
     }
     
     //Load the Key into the plugin config
@@ -287,10 +286,6 @@ function map_for_item($item, $width = 200, $height = 200) {
     } else {
         echo '<div class="map-notification"><br/><br/>This item has no location info associated with it.</div>';
     }
-}
-
-function map_pagination() {
-    return pagination_links(5, null, null, null, null, uri('items/map/'));
 }
 
 function map_form($item, $width = 400, $height = 400) { 
