@@ -1,6 +1,5 @@
 <?php head(); ?>
 <?php geolocation_scripts(); ?>
-<?php common('archive-nav'); ?>
 
 <div id="primary">
     
