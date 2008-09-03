@@ -178,10 +178,9 @@ class GeolocationPlugin
         if ($this->displayMap) {
             $db = get_db();
             //INNER JOIN the locations table
-            $select->innerJoin("$db->Location l", 'l.item_id = i.id');
+            $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id');
         }
     }
-    
 }
 
 
