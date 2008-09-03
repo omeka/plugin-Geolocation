@@ -43,7 +43,7 @@
 </div><!-- end map_block -->
 
 <div id="search_block">
-    <?php items_search_form(array('id'=>'search'), $_SERVER['REQUEST_URI']); ?>
+    <?php echo items_search_form(array('id'=>'search'), $_SERVER['REQUEST_URI']); ?>
 </div><!-- end search_block -->
 
 </div><!-- end primary -->

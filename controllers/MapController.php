@@ -2,7 +2,7 @@
 
 require_once 'Omeka/Controller/Action.php';
 
-class MapController extends Omeka_Controller_Action
+class Geolocation_MapController extends Omeka_Controller_Action
 {
     public function noRouteAction()
     {
