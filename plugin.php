@@ -16,6 +16,24 @@ add_plugin_hook('after_save_item', 'geo_save_location');
 add_plugin_hook('add_routes', 'geo_add_routes');
 add_plugin_hook('append_to_item_form', 'map_form');
 add_plugin_hook('append_to_item_show', 'map_for_item');
+
+add_filter('define_response_contexts', 'kml_response_context');
+add_filter('define_action_contexts', 'kml_action_context');
+
+function kml_response_context($context)
+{
+    $context['kml'] = array('suffix'  => 'kml', 
+                            'headers' => array('Content-Type' => 'application/vnd.google-earth.kml+xml'));
+    return $context;
+}
+
+function kml_action_context($context, $controller)
+{
+    if ($controller instanceof Geolocation_MapController) {
+        $context['browse'] = array('kml');
+    }
+    return $context;
+}
     
 // Register $geo so that we can call it from the controller
 Zend_Registry::set('geolocation', $geo);
@@ -73,10 +91,6 @@ function geo_add_routes($router)
                                                   array('controller' => 'map', 
                                                         'action'     => 'browse'));
     $router->addRoute('map_browse', $mapRoute2);
-    
-    add_data_feed('kml', array('access_uri'  => 'map/browse', 
-                               'script_path' => PLUGIN_DIR . '/Geolocation/kml/browse.php', 
-                               'mime_type'   => 'application/vnd.google-earth.kml+xml'));                
 }
 
 function geo_form()
@@ -344,7 +358,7 @@ function map_form($item, $width = 400, $height = 400) {
     // If we are using the POST data, we don't need to re-retrieve the KML for 
     // the item's location
     if (!$usePost && $item->exists()) {
-        $options['uri']    = uri('map/browse');
+        $options['uri']    = uri('geolocation/map/browse');
         $options['params'] = array('id' => $item->id);        
     }
     
