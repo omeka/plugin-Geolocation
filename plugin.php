@@ -96,6 +96,9 @@ function geo_add_routes($router)
 function geo_form()
 {
 ?>
+<label for="per_page">Number of Locations Per Page:</label>
+<input type="text" name="per_page" size="4" value="<?php echo get_option('geo_per_page'); ?>" id="per_page" />
+
 <label for="default_latitude">Default Latitude:</label>
 <input type="text" name="default_latitude" size="8" value="<?php echo get_option('geo_default_latitude'); ?>" id="default_latitude" />
 
@@ -116,7 +119,8 @@ function geo_config()
     set_option('geo_gmaps_key', $_POST['map_key']);
     set_option('geo_default_latitude', $_POST['default_latitude']);
     set_option('geo_default_longitude', $_POST['default_longitude']);
-    set_option('geo_default_zoom_level', $_POST['default_zoomlevel']);    
+    set_option('geo_default_zoom_level', $_POST['default_zoomlevel']); 
+    set_option('geo_per_page', $_POST['per_page']);
 }
 
 /**
