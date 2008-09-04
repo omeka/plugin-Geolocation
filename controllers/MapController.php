@@ -21,7 +21,7 @@ class Geolocation_MapController extends Omeka_Controller_Action
         
         //Make this accessible from the plugin template helpers
         $params = array('page'     => $this->_getParam('page', 1), 
-                        'per_page' => 1, 
+                        'per_page' => 10, 
                         'total_results' => $totalItems);
         Zend_Registry::set('map_params', $params);
         Zend_Registry::set('pagination', $params);
@@ -32,7 +32,8 @@ class Geolocation_MapController extends Omeka_Controller_Action
     private function _getItems()
     {
         $itemTable = $this->getTable('Item');
-        $itemSelect = $itemTable->getSelectForFindBy(array('per_page' => 1));
+        $itemSelect = $itemTable->getSelectForFindBy(array('per_page' => 10, 
+                                                           'page' => $this->_getParam('page', 1)));
         $itemSelect->joinInner(array('l' => $this->getDb()->Location), 'l.item_id = i.id', array());
         return $itemTable->fetchObjects($itemSelect);
     }
