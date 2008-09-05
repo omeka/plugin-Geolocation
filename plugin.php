@@ -1,6 +1,8 @@
 <?php
 define('GEOLOCATION_PLUGIN_VERSION', '1.0.0');
 
+define('GOOGLE_MAPS_API_VERSION', '2.x');
+
 // Add the controllers/, models/, and views/ directories.
 add_plugin_directories();
 
@@ -59,7 +61,7 @@ function geolocation_scripts()
     }
     
 ?>
-<script src="http://maps.google.com/maps?file=api&amp;v=2.x&amp;key=<?php echo $key;?>" type="text/javascript"></script>
+<script src="http://maps.google.com/maps?file=api&amp;v=<?php echo GOOGLE_MAPS_API_VERSION; ?>&amp;key=<?php echo $key;?>" type="text/javascript"></script>
 <?php
 echo js('map');
 }
@@ -351,20 +353,13 @@ function map_form($item, $width = 400, $height = 400) {
     <input type="hidden" name="geolocation[0][latitude]" value="<?php echo $lat; ?>" />
     <input type="hidden" name="geolocation[0][longitude]" value="<?php echo $lng; ?>" />
     <input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom; ?>" />
-    <input type="hidden" name="geolocation[0][map_type]" value="Google Maps V2" />
+    <input type="hidden" name="geolocation[0][map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
     <label>Find Your location via address:</label>
     <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
     <button type="button" name="find_location_by_address" id="find_location_by_address">Find By Address</button>
 </fieldset>
 <?php 
     $options = array();
-    
-    // If we are using the POST data, we don't need to re-retrieve the KML for 
-    // the item's location
-    if (!$usePost && $item->exists()) {
-        $options['uri']    = uri('geolocation/map/browse');
-        $options['params'] = array('id' => $item->id);        
-    }
     
     $options['form'] = array('id' => 'location_form', 
                              'posted' => $usePost);
@@ -377,7 +372,8 @@ function map_form($item, $width = 400, $height = 400) {
     if ($lng) {
         $options['center']['latitude']  = $lat;
         $options['center']['longitude'] = $lng;
-        $options['center']['zoomLevel'] = $zoom;        
+        $options['center']['zoomLevel'] = $zoom;  
+        $options['showCenter'] = true;      
     }
     google_map('item_form', $options);
  } 
