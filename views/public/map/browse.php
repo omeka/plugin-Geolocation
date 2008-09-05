@@ -13,7 +13,7 @@
 <h1>Browse Items on the Map (<?php echo $totalItems; ?> items total)</h1>
 
 <div class="pagination">
-    <?php echo pagination(); ?>
+    <?php echo pagination_links(); ?>
 </div><!-- end pagination -->
 
 <div id="map_block">

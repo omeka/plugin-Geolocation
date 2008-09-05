@@ -21,7 +21,7 @@ class Geolocation_MapController extends Omeka_Controller_Action
                         'total_results' => $totalItems);
         Zend_Registry::set('map_params', $params);
         
-        // Make the pagination values accessible from pagination().
+        // Make the pagination values accessible from pagination_links().
         Zend_Registry::set('pagination', $params);
         
         $this->view->assign(compact('items', 'totalItems', 'locations'));
