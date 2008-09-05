@@ -38,7 +38,6 @@ OmekaMap.prototype = {
            //Load KML if a URI has been passed
            if(this.options.uri) {
                var kmlUrl = this.makeQuery(this.options.uri, this.options.params);
-               
                //XML loads asynchronously, so need to call for further config only after it has executed
                this.loadKmlIntoMap(kmlUrl);
            }else {
@@ -244,9 +243,13 @@ OmekaMap.prototype = {
     },
     
     /* Note to self: have to parse KML manually b/c GMaps API cannot access the KML behind the admin interface */
-    loadKmlIntoMap: function(kmlUrl) {
-         var that = this;
-     
+    loadKmlIntoMap: function(kmlUrl) {    
+        // Try to load the KML file.
+        // This doesn't work b/c Omeka builds relative URLs instead of absolute URLs (thanks, Zend!).
+        // var geoXml = new GGeoXml(kmlUrl);
+        // return this.map.addOverlay(geoXml);
+                
+        var that = this; 
             geoXml = new GDownloadUrl(kmlUrl, function(data, responseCode) {
             
                 //Store the raw XML (debugging purposes)

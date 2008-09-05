@@ -93,6 +93,16 @@ function geo_add_routes($router)
                                                   array('controller' => 'map', 
                                                         'action'     => 'browse'));
     $router->addRoute('map_browse', $mapRoute2);
+    
+    // Trying to make the route look like a KML file so google will eat it.
+    // @todo Include page parameter if this works.
+    $kmlRoute = new Zend_Controller_Router_Route_Regex('geolocation/map\.kml', 
+                                                array('controller' => 'map',
+                                                    'action' => 'browse',
+                                                    'module' => 'geolocation',
+                                                    'page' => 1,
+                                                    'output' => 'kml'));
+    $router->addRoute('map_kml', $kmlRoute);
 }
 
 function geo_form()
@@ -254,16 +264,19 @@ function google_map($divName = 'map', $options = array()) {
     }
     $params = array_merge($params, $_GET);
     
+    if ($options['loadKml']) {
+        unset($options['loadKml']);
+        $options['uri'] = public_url_for('geolocation/map.kml');
+    }
+    
     //Merge in extra parameters from the controller
     if (Zend_Registry::isRegistered('map_params')) {
         $params = array_merge($params, Zend_Registry::get('map_params'));
     }
-    $output['params'] = $params;
-    
+        
     //We are using KML as the output format
-    $params['output'] = 'kml';
     $options['params'] = $params;    
-    
+        
     require_once 'Zend/Json.php';
     $options = Zend_Json::encode($options);
     

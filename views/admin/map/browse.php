@@ -41,7 +41,7 @@
 </div><!-- end link_block -->
 
 <div id="map_block">
-    <?php google_map('map_browse', array('uri'=>uri('geolocation/map/browse'), 'list'=>'map-links'));?>
+    <?php google_map('map_browse', array('loadKml'=>true, 'list'=>'map-links'));?>
 </div><!-- end map_block -->
 
 <div id="search_block">
