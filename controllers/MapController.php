@@ -6,11 +6,6 @@ class Geolocation_MapController extends Omeka_Controller_Action
 {
     private $_perPage;
     
-    public function noRouteAction()
-    {
-        $this->_redirect('/');
-    }
-    
     public function browseAction()
     {
         $this->_setPerPage();

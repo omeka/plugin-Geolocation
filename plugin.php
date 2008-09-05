@@ -266,7 +266,9 @@ function google_map($divName = 'map', $options = array()) {
     
     if ($options['loadKml']) {
         unset($options['loadKml']);
-        $options['uri'] = public_url_for('geolocation/map.kml');
+        // This should not be a link to the public side b/c then all the URLs that
+        // are generated inside the KML will also link to the public side.
+        $options['uri'] = url_for('geolocation/map.kml');
     }
     
     //Merge in extra parameters from the controller
