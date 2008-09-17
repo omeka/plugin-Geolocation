@@ -43,7 +43,7 @@ Zend_Registry::set('geolocation', $geo);
 add_filter('admin_navigation_main', 'geo_admin_nav');
 function geo_admin_nav($navArray)
 {
-    $geoNav = array('Map' => url_for('items/map'));
+    $geoNav = array('Map' => uri('items/map'));
     $navArray += $geoNav;
     return $navArray;
 }
@@ -268,7 +268,7 @@ function google_map($divName = 'map', $options = array()) {
         unset($options['loadKml']);
         // This should not be a link to the public side b/c then all the URLs that
         // are generated inside the KML will also link to the public side.
-        $options['uri'] = url_for('geolocation/map.kml');
+        $options['uri'] = uri('geolocation/map.kml');
     }
     
     //Merge in extra parameters from the controller
