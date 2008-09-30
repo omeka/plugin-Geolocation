@@ -43,7 +43,8 @@ Zend_Registry::set('geolocation', $geo);
 add_filter('admin_navigation_main', 'geo_admin_nav');
 function geo_admin_nav($navArray)
 {
-    $geoNav = array('Map' => uri('items/map'));
+    $geoNav = array('Map' => uri('geolocation/map/browse'));
+
     $navArray += $geoNav;
     return $navArray;
 }

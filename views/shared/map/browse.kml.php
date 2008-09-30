@@ -21,10 +21,10 @@
         ?>
         <Placemark>
             <name><![CDATA[<?php
-            echo item('Title', array('element_set' => 'Dublin Core', 'index'=>0));
+            echo item('Title');
             ?>]]></name>
             <Snippet maxLines="2"><![CDATA[<?php
-            echo item('Description', array('element_set' => 'Dublin Core', 'index' => 0, 'snippet' => 150));
+            echo item('Description', array('snippet' => 150));
             ?>]]></Snippet>    
             <description><![CDATA[<?php 
             // @since 3/26/08: movies do not display properly on the map in IE6, 
@@ -32,7 +32,7 @@
             // for displaying the first file (if possible)
             //echo display_files($item->Files[0]);
             echo thumbnail($item->Files[0]);
-            echo link_to_item('show', 'View Item');
+            echo link_to_item('View Item');
             ?>]]></description>
             <Point>
                 <coordinates><?php echo $location['longitude']; ?>,<?php echo $location['latitude']; ?></coordinates>
