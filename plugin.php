@@ -4,8 +4,6 @@ define('GEOLOCATION_PLUGIN_VERSION', '1.0.0');
 define('GOOGLE_MAPS_API_VERSION', '2.x');
 
 // Add the controllers/, models/, and views/ directories.
-add_plugin_directories();
-
 require_once 'Location.php';
 
 add_plugin_hook('install', 'geo_install');
@@ -14,10 +12,11 @@ add_plugin_hook('config', 'geo_config');
 
 $geo = new GeolocationPlugin;
 add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
+
 add_plugin_hook('after_save_item', 'geo_save_location');
 add_plugin_hook('add_routes', 'geo_add_routes');
 add_plugin_hook('append_to_item_form', 'map_form');
-add_plugin_hook('append_to_item_show', 'map_for_item');
+add_plugin_hook('admin_append_to_items_show_secondary', 'admin_map_for_item');
 
 add_filter('define_response_contexts', 'kml_response_context');
 add_filter('define_action_contexts', 'kml_action_context');
@@ -243,7 +242,7 @@ function get_location_for_item($item_id)
  **/
 function google_map($divName = 'map', $options = array()) {
     
-    echo "<div id=\"$divName\"></div>";
+    echo "<div id=\"$divName\" class=\"map\"></div>";
     
     //Load this junk in from the plugin config
     if (!isset($options['center'])) {
@@ -334,7 +333,19 @@ function map_for_item($item, $width = 200, $height = 200) {
         google_map($divId, $options);
     } else {
         echo '<div class="map-notification"><br/><br/>This item has no location info associated with it.</div>';
-    }
+    } 
+}
+
+function admin_map_for_item($item)
+{
+?>
+<style type="text/css" media="screen">
+	.info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
+</style>
+  <?php
+	echo '<div class="info-panel">';
+	map_for_item($item,'224','270');
+	echo '</div>';
 }
 
 function map_form($item, $width = 400, $height = 400) { 

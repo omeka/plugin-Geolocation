@@ -221,7 +221,6 @@ OmekaMap.prototype = {
             var listElement = $(document.createElement('li'));
             
             //Each <li> starts with the title of the item            
-            listElement.update(marker.title);
             
             //Make an <a> tag, give it a class for styling
             var link = $(document.createElement('a'));
@@ -229,7 +228,7 @@ OmekaMap.prototype = {
         
             //Links open up the markers on the map, clicking them doesn't actually go anywhere
             link.setAttribute('href', 'javascript:void(0)');
-            link.innerHTML = 'Find this item --&gt;';
+            link.innerHTML = marker.title;
                     
             //Clicking the link should take us to the map
             Event.observe(link, 'click', function() {
