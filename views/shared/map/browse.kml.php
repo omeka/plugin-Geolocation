@@ -20,11 +20,10 @@
         $location = $locations[$item->id];
         ?>
         <Placemark>
-            <name><![CDATA[<?php
-            echo item('Title');
+            <name><![CDATA[<?php echo item('Dublin Core', 'Title');
             ?>]]></name>
-            <Snippet maxLines="2"><![CDATA[<?php
-            echo item('Description', array('snippet' => 150));
+            <Snippet maxLines="2"><![CDATA[foo<?php
+            echo htmlentities(item('Dublin Core', 'Description', array('snippet' => 150)));
             ?>]]></Snippet>    
             <description><![CDATA[<?php 
             // @since 3/26/08: movies do not display properly on the map in IE6, 
