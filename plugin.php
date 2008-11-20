@@ -1,21 +1,24 @@
 <?php
-define('GEOLOCATION_PLUGIN_VERSION', '1.0.0');
+define('GEOLOCATION_PLUGIN_VERSION', '1.0.2');
 
 define('GOOGLE_MAPS_API_VERSION', '2.x');
 
 // Add the controllers/, models/, and views/ directories.
 require_once 'Location.php';
 
-add_plugin_hook('install', 'geo_install');
-add_plugin_hook('config_form', 'geo_form');
-add_plugin_hook('config', 'geo_config');
+add_plugin_hook('install', 'geolocation_install');
+add_plugin_hook('uninstall', 'geolocation_uninstall');
+add_plugin_hook('config_form', 'geolocation_form');
+add_plugin_hook('config', 'geolocation_config');
 
 $geo = new GeolocationPlugin;
-add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
+// Register $geo so that we can call it from the controller
+Zend_Registry::set('geolocation', $geo);
 
-add_plugin_hook('after_save_item', 'geo_save_location');
-add_plugin_hook('add_routes', 'geo_add_routes');
-add_plugin_hook('append_to_item_form', 'map_form');
+add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
+add_plugin_hook('after_save_item', 'geolocation_save_location');
+add_plugin_hook('add_routes', 'geolocation_add_routes');
+add_plugin_hook('append_to_item_form', 'geolocation_map_form');
 add_plugin_hook('admin_append_to_items_show_secondary', 'admin_map_for_item');
 
 add_filter('define_response_contexts', 'kml_response_context');
@@ -36,11 +39,8 @@ function kml_action_context($context, $controller)
     return $context;
 }
     
-// Register $geo so that we can call it from the controller
-Zend_Registry::set('geolocation', $geo);
-
-add_filter('admin_navigation_main', 'geo_admin_nav');
-function geo_admin_nav($navArray)
+add_filter('admin_navigation_main', 'geolocation_admin_nav');
+function geolocation_admin_nav($navArray)
 {
     $geoNav = array('Map' => uri('geolocation/map/browse'));
 
@@ -54,7 +54,7 @@ function geo_admin_nav($navArray)
  **/
 function geolocation_scripts()
 {
-    $key = get_option('geo_gmaps_key');
+    $key = get_option('geolocation_gmaps_key');
     
     if (!$key) {
         return;
@@ -77,12 +77,11 @@ echo js('map');
  * @param $router
  * @return void
  **/
-function geo_add_routes($router)
+function geolocation_add_routes($router)
 {
     $mapRoute = new Zend_Controller_Router_Route('items/map/:page', 
                                                  array('controller' => 'map', 
                                                        'action'     => 'browse', 
-                                                       'page'       => 1, 
                                                        'module'     => 'geolocation'), 
                                                  array('page' => '\d+'));
     $router->addRoute('items_map', $mapRoute);    
@@ -100,39 +99,23 @@ function geo_add_routes($router)
                                                 array('controller' => 'map',
                                                     'action' => 'browse',
                                                     'module' => 'geolocation',
-                                                    'page' => 1,
                                                     'output' => 'kml'));
     $router->addRoute('map_kml', $kmlRoute);
 }
 
-function geo_form()
+function geolocation_form()
 {
-?>
-<label for="per_page">Number of Locations Per Page:</label>
-<input type="text" name="per_page" size="4" value="<?php echo get_option('geo_per_page'); ?>" id="per_page" />
-
-<label for="default_latitude">Default Latitude:</label>
-<input type="text" name="default_latitude" size="8" value="<?php echo get_option('geo_default_latitude'); ?>" id="default_latitude" />
-
-<label for="default_longitude">Default Longitude:</label>
-<input type="text" name="default_longitude" size="8" value="<?php echo get_option('geo_default_longitude'); ?>" id="default_longitude" />
-
-<label for="default_zoomlevel">Default Zoom Level:</label>
-<input type="text" name="default_zoomlevel" size="3" value="<?php echo get_option('geo_default_zoom_level'); ?>" id="default_zoomlevel" />
-
-<label for="map_key">Google Maps API Key:</label>
-<input type="text" name="map_key" size="90" value="<?php echo get_option('geo_gmaps_key'); ?>" id="map_key" />
-<?php
+	include 'config_form.php';
 }
 
-function geo_config()
+function geolocation_config()
 {
     //Use the form to set a bunch of default options in the db
-    set_option('geo_gmaps_key', $_POST['map_key']);
-    set_option('geo_default_latitude', $_POST['default_latitude']);
-    set_option('geo_default_longitude', $_POST['default_longitude']);
-    set_option('geo_default_zoom_level', $_POST['default_zoomlevel']); 
-    set_option('geo_per_page', $_POST['per_page']);
+    set_option('geolocation_gmaps_key', $_POST['map_key']);
+    set_option('geolocation_default_latitude', $_POST['default_latitude']);
+    set_option('geolocation_default_longitude', $_POST['default_longitude']);
+    set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
+    set_option('geolocation_per_page', $_POST['per_page']);
 }
 
 /**
@@ -140,7 +123,7 @@ function geo_config()
  * key attributes in DB
  * @return void
  **/
-function geo_install()
+function geolocation_install()
 {    
     $db = get_db();
     $sql = "
@@ -153,8 +136,15 @@ function geo_install()
     `map_type` VARCHAR( 255 ) NOT NULL ,
     `address` TEXT NOT NULL ,
     INDEX (`item_id`)) ENGINE = MYISAM";
-    $db->exec($sql);
-    set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);    
+    $db->query($sql);
+    set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);    
+}
+
+function geolocation_uninstall()
+{
+	delete_option('geolocation_plugin_version');
+	$db = get_db();
+	$db->query("DROP TABLE $db->Location");
 }
 
 /**
@@ -162,7 +152,7 @@ function geo_install()
  * location
  * @return void
  **/
-function geo_save_location($item)
+function geolocation_save_location($item)
 {
     $post = $_POST;    
     
@@ -171,20 +161,20 @@ function geo_save_location($item)
         return;
     }
     
-    $geo_post = $post['geolocation'][0];
+    $geolocation_post = $post['geolocation'][0];
         
     // Find the ActiveRecord location object
     $location = get_db()->getTable('Location')->findLocationByItem($item, true);
                     
     // If we have filled out info for the geolocation, then submit to the db
-    if (!empty($geo_post) 
-        && (!empty($geo_post['latitude']) 
-            && !empty($geo_post['longitude']))) {
+    if (!empty($geolocation_post) 
+        && (!empty($geolocation_post['latitude']) 
+            && !empty($geolocation_post['longitude']))) {
         if (!$location) {
             $location = new Location;
             $location->item_id = $item->id;                        
         }
-        if ($location->saveForm($geo_post) ) {
+        if ($location->saveForm($geolocation_post) ) {
             return true;
         }
     // If the form is empty, then we want to delete whatever location is 
@@ -246,9 +236,9 @@ function google_map($divName = 'map', $options = array()) {
     
     //Load this junk in from the plugin config
     if (!isset($options['center'])) {
-        $lat  = (double) get_option('geo_default_latitude');
-        $lng  = (double) get_option('geo_default_longitude');
-        $zoom = (double) get_option('geo_default_zoom_level');
+        $lat  = (double) get_option('geolocation_default_latitude');
+        $lng  = (double) get_option('geolocation_default_longitude');
+        $zoom = (double) get_option('geolocation_default_zoom_level');
         $options['center']['latitude']  = $lat;
         $options['center']['longitude'] = $lng;
         $options['center']['zoomLevel'] = $zoom;
@@ -348,7 +338,7 @@ function admin_map_for_item($item)
 	echo '</div>';
 }
 
-function map_form($item, $width = 400, $height = 400) { 
+function geolocation_map_form($item, $width = 400, $height = 400) { 
     geolocation_scripts();    
     $loc = array_pop(get_location_for_item($item));
         $usePost = !empty($_POST);

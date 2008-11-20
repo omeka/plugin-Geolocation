@@ -342,7 +342,7 @@ OmekaMap.prototype = {
 			url += "?" + query;
 		}			
 		
-		return url;	
+		return url;
     },
     
     //Calculate the zoom level given the 'range' value

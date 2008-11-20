@@ -8,6 +8,7 @@ class Geolocation_MapController extends Omeka_Controller_Action
     
     public function browseAction()
     {
+	
         $this->_setPerPage();
         
         $items      = $this->_getItems();
@@ -45,8 +46,8 @@ class Geolocation_MapController extends Omeka_Controller_Action
     
     private function _setPerPage()
     {
-        if (is_numeric(get_option('geo_per_page'))) {
-            $this->_perPage = get_option('geo_per_page');
+        if (is_numeric(get_option('geolocation_per_page'))) {
+            $this->_perPage = get_option('geolocation_per_page');
         } else {
             $this->_perPage = 10;
         }
