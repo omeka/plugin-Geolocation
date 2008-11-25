@@ -42,7 +42,7 @@
 	</div><!-- end link_block -->
 
 	<div id="map_block">
-	    <?php google_map('map_browse', array('loadKml'=>true, 'list'=>'map-links'));?>
+	    <?php geolocation_google_map('map_browse', array('loadKml'=>true, 'list'=>'map-links'));?>
 	</div><!-- end map_block -->
 
 	<div id="search_block">

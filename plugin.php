@@ -1,69 +1,69 @@
 <?php
 define('GEOLOCATION_PLUGIN_VERSION', '1.0.2');
-
 define('GOOGLE_MAPS_API_VERSION', '2.x');
 
-// Add the controllers/, models/, and views/ directories.
 require_once 'Location.php';
 
+// Plugin Hooks
 add_plugin_hook('install', 'geolocation_install');
 add_plugin_hook('uninstall', 'geolocation_uninstall');
-add_plugin_hook('config_form', 'geolocation_form');
+add_plugin_hook('config_form', 'geolocation_config_form');
 add_plugin_hook('config', 'geolocation_config');
-
-$geo = new GeolocationPlugin;
-// Register $geo so that we can call it from the controller
-Zend_Registry::set('geolocation', $geo);
-
-add_plugin_hook('item_browse_sql', array($geo, 'locationSql'));
-add_plugin_hook('after_save_item', 'geolocation_save_location');
 add_plugin_hook('add_routes', 'geolocation_add_routes');
+add_plugin_hook('item_browse_sql', 'geolocation_location_sql');
+add_plugin_hook('after_save_item', 'geolocation_save_location');
 add_plugin_hook('append_to_item_form', 'geolocation_map_form');
-add_plugin_hook('admin_append_to_items_show_secondary', 'admin_map_for_item');
+add_plugin_hook('admin_append_to_items_show_secondary', 'geolocation_admin_map_for_item');
 
+// Plugin Filters
+add_filter('admin_navigation_main', 'geolocation_admin_nav');
 add_filter('define_response_contexts', 'kml_response_context');
 add_filter('define_action_contexts', 'kml_action_context');
 
-function kml_response_context($context)
-{
-    $context['kml'] = array('suffix'  => 'kml', 
-                            'headers' => array('Content-Type' => 'application/vnd.google-earth.kml+xml'));
-    return $context;
+// Hook Functions
+function geolocation_install()
+{    
+    $db = get_db();
+    $sql = "
+    CREATE TABLE IF NOT EXISTS $db->Location (
+    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+    `item_id` BIGINT UNSIGNED NOT NULL ,
+    `latitude` DOUBLE NOT NULL ,
+    `longitude` DOUBLE NOT NULL ,
+    `zoom_level` INT NOT NULL ,
+    `map_type` VARCHAR( 255 ) NOT NULL ,
+    `address` TEXT NOT NULL ,
+    INDEX (`item_id`)) ENGINE = MYISAM";
+    $db->query($sql);
+    set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);    
 }
 
-function kml_action_context($context, $controller)
+function geolocation_uninstall()
 {
-    if ($controller instanceof Geolocation_MapController) {
-        $context['browse'] = array('kml');
-    }
-    return $context;
-}
-    
-add_filter('admin_navigation_main', 'geolocation_admin_nav');
-function geolocation_admin_nav($navArray)
-{
-    $geoNav = array('Map' => uri('geolocation/map/browse'));
+	delete_option('geolocation_plugin_version');
+	delete_option('geolocation_gmaps_key');
+	delete_option('geolocation_default_latitude');
+	delete_option('geolocation_default_longitude');
+	delete_option('geolocation_default_zoom_level');
+	delete_option('geolocation_per_page');
 
-    $navArray += $geoNav;
-    return $navArray;
+	$db = get_db();
+	$db->query("DROP TABLE $db->Location");
 }
 
-/**
- * Output the script tags that include the GMaps JS from afar
- * @return void
- **/
-function geolocation_scripts()
+function geolocation_config_form()
 {
-    $key = get_option('geolocation_gmaps_key');
-    
-    if (!$key) {
-        return;
-    }
-    
-?>
-<script src="http://maps.google.com/maps?file=api&amp;v=<?php echo GOOGLE_MAPS_API_VERSION; ?>&amp;key=<?php echo $key;?>" type="text/javascript"></script>
-<?php
-echo js('map');
+	include 'config_form.php';
+}
+
+function geolocation_config()
+{
+    //Use the form to set a bunch of default options in the db
+    set_option('geolocation_gmaps_key', $_POST['map_key']);
+    set_option('geolocation_default_latitude', $_POST['default_latitude']);
+    set_option('geolocation_default_longitude', $_POST['default_longitude']);
+    set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
+    set_option('geolocation_per_page', $_POST['per_page']);
 }
 
 /**
@@ -103,48 +103,16 @@ function geolocation_add_routes($router)
     $router->addRoute('map_kml', $kmlRoute);
 }
 
-function geolocation_form()
-{
-	include 'config_form.php';
-}
 
-function geolocation_config()
+function geolocation_location_sql()
 {
-    //Use the form to set a bunch of default options in the db
-    set_option('geolocation_gmaps_key', $_POST['map_key']);
-    set_option('geolocation_default_latitude', $_POST['default_latitude']);
-    set_option('geolocation_default_longitude', $_POST['default_longitude']);
-    set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
-    set_option('geolocation_per_page', $_POST['per_page']);
-}
-
-/**
- * Installer creates a 'locations' table, sets some default lat/lng/zoom and API 
- * key attributes in DB
- * @return void
- **/
-function geolocation_install()
-{    
-    $db = get_db();
-    $sql = "
-    CREATE TABLE IF NOT EXISTS $db->Location (
-    `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-    `item_id` BIGINT UNSIGNED NOT NULL ,
-    `latitude` DOUBLE NOT NULL ,
-    `longitude` DOUBLE NOT NULL ,
-    `zoom_level` INT NOT NULL ,
-    `map_type` VARCHAR( 255 ) NOT NULL ,
-    `address` TEXT NOT NULL ,
-    INDEX (`item_id`)) ENGINE = MYISAM";
-    $db->query($sql);
-    set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);    
-}
-
-function geolocation_uninstall()
-{
-	delete_option('geolocation_plugin_version');
-	$db = get_db();
-	$db->query("DROP TABLE $db->Location");
+	$geo = new GeolocationPlugin;
+	// Register $geo so that we can call it from the controller
+	Zend_Registry::set('geolocation', $geo);
+	
+	$array = array($geo, 'locationSql');
+	
+	return $array;
 }
 
 /**
@@ -155,14 +123,13 @@ function geolocation_uninstall()
 function geolocation_save_location($item)
 {
     $post = $_POST;    
-    
     // If we don't have the geolocation form on the page, don't do anything!
     if (!$post['geolocation']) {
         return;
     }
     
     $geolocation_post = $post['geolocation'][0];
-        
+  
     // Find the ActiveRecord location object
     $location = get_db()->getTable('Location')->findLocationByItem($item, true);
                     
@@ -172,7 +139,8 @@ function geolocation_save_location($item)
             && !empty($geolocation_post['longitude']))) {
         if (!$location) {
             $location = new Location;
-            $location->item_id = $item->id;                        
+            $location->item_id = $item->id;  
+             
         }
         if ($location->saveForm($geolocation_post) ) {
             return true;
@@ -184,6 +152,51 @@ function geolocation_save_location($item)
             $location->delete();
         }
     }
+}
+
+// Filter Functions
+function geolocation_admin_nav($navArray)
+{
+    $geoNav = array('Map' => uri('geolocation/map/browse'));
+
+    $navArray += $geoNav;
+    return $navArray;
+}
+
+function kml_response_context($context)
+{
+    $context['kml'] = array('suffix'  => 'kml', 
+                            'headers' => array('Content-Type' => 'application/vnd.google-earth.kml+xml'));
+    return $context;
+}
+
+function kml_action_context($context, $controller)
+{
+    if ($controller instanceof Geolocation_MapController) {
+        $context['browse'] = array('kml');
+    }
+    return $context;
+}
+    
+
+// Helpers
+
+/**
+ * Output the script tags that include the GMaps JS from afar
+ * @return void
+ **/
+function geolocation_scripts()
+{
+    $key = get_option('geolocation_gmaps_key');
+    
+    if (!$key) {
+        return;
+    }
+    
+?>
+<script src="http://maps.google.com/maps?file=api&amp;v=<?php echo GOOGLE_MAPS_API_VERSION; ?>&amp;key=<?php echo $key;?>" type="text/javascript"></script>
+<?php
+echo js('map');
 }
 
 class GeolocationPlugin
@@ -230,7 +243,7 @@ function get_location_for_item($item_id)
  *     form = 'geolocation'  (provides the prefix for form elements that should 
  *     catch the map coordinates)
  **/
-function google_map($divName = 'map', $options = array()) {
+function geolocation_google_map($divName = 'map', $options = array()) {
     
     echo "<div id=\"$divName\" class=\"map\"></div>";
     
@@ -275,7 +288,7 @@ function google_map($divName = 'map', $options = array()) {
     echo "<script type=\"text/javascript\">var ${divName}Omeka = new OmekaMap('$divName', $options);</script>";
 }
 
-function map_for_item($item, $width = 200, $height = 200) {        
+function geolocation_map_for_item($item, $width = 200, $height = 200) {        
     geolocation_scripts(); 
     $divId = 'item_map' . $item->id;
 ?>
@@ -320,29 +333,18 @@ function map_for_item($item, $width = 200, $height = 200) {
         $center['zoomLevel']   = $location->zoom_level;
         $options['center']     = $center;
         $options['showCenter'] = true;
-        google_map($divId, $options);
+        geolocation_google_map($divId, $options);
     } else {
-        echo '<div class="map-notification"><br/><br/>This item has no location info associated with it.</div>';
+        echo '<p class="map-notification">This item has no location info associated with it.</p>';
     } 
 }
 
-function admin_map_for_item($item)
-{
-?>
-<style type="text/css" media="screen">
-	.info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
-</style>
-  <?php
-	echo '<div class="info-panel">';
-	map_for_item($item,'224','270');
-	echo '</div>';
-}
-
 function geolocation_map_form($item, $width = 400, $height = 400) { 
-    geolocation_scripts();    
-    $loc = array_pop(get_location_for_item($item));
-        $usePost = !empty($_POST);
+    	geolocation_scripts();    
+    	$loc = array_pop(get_location_for_item($item));
+        $usePost = $_POST;
         if ($usePost) {
+			echo $usePost;
             $lng  = (double) @$_POST['geolocation'][0]['longitude'];
             $lat  = (double) @$_POST['geolocation'][0]['latitude'];
             $zoom = (int) @$_POST['geolocation'][0]['zoom_level'];
@@ -381,17 +383,29 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
     $options['form'] = array('id' => 'location_form', 
                              'posted' => $usePost);
     
-    /*
+    
     if($usePost) {
         $options['form']['post'] = array('latitude'=>$lat, 'longitude'=>$lng, 'zoomLevel'=>$zoom);
     }
-    */  
+    
     if ($lng) {
         $options['center']['latitude']  = $lat;
         $options['center']['longitude'] = $lng;
         $options['center']['zoomLevel'] = $zoom;  
         $options['showCenter'] = true;      
     }
-    google_map('item_form', $options);
- } 
+    geolocation_google_map('item_form', $options);
+}
+
+function geolocation_admin_map_for_item($item)
+{
+?>
+<style type="text/css" media="screen">
+	.info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
+</style>
+  <?php
+	echo '<div class="info-panel">';
+	geolocation_map_for_item($item,'224','270');
+	echo '</div>';
+} 
 ?>
