@@ -10,10 +10,10 @@ add_plugin_hook('uninstall', 'geolocation_uninstall');
 add_plugin_hook('config_form', 'geolocation_config_form');
 add_plugin_hook('config', 'geolocation_config');
 add_plugin_hook('add_routes', 'geolocation_add_routes');
-add_plugin_hook('item_browse_sql', 'geolocation_location_sql');
 add_plugin_hook('after_save_item', 'geolocation_save_location');
 add_plugin_hook('append_to_item_form', 'geolocation_map_form');
 add_plugin_hook('admin_append_to_items_show_secondary', 'geolocation_admin_map_for_item');
+add_plugin_hook('item_browse_sql', 'geolocation_show_only_map_items');
 
 // Plugin Filters
 add_filter('admin_navigation_main', 'geolocation_admin_nav');
@@ -86,13 +86,6 @@ function geolocation_add_routes($router)
                                                  array('page' => '\d+'));
     $router->addRoute('items_map', $mapRoute);    
     
-    // @hack Have to have a basic route for this b/c it is being overridden by 
-    // the 'page' route in routes.ini
-    $mapRoute2 = new Zend_Controller_Router_Route('map/browse', 
-                                                  array('controller' => 'map', 
-                                                        'action'     => 'browse'));
-    $router->addRoute('map_browse', $mapRoute2);
-    
     // Trying to make the route look like a KML file so google will eat it.
     // @todo Include page parameter if this works.
     $kmlRoute = new Zend_Controller_Router_Route_Regex('geolocation/map\.kml', 
@@ -101,18 +94,6 @@ function geolocation_add_routes($router)
                                                     'module' => 'geolocation',
                                                     'output' => 'kml'));
     $router->addRoute('map_kml', $kmlRoute);
-}
-
-
-function geolocation_location_sql()
-{
-	$geo = new GeolocationPlugin;
-	// Register $geo so that we can call it from the controller
-	Zend_Registry::set('geolocation', $geo);
-	
-	$array = array($geo, 'locationSql');
-	
-	return $array;
 }
 
 /**
@@ -178,6 +159,37 @@ function kml_action_context($context, $controller)
     return $context;
 }
     
+function geolocation_show_only_map_items($select, $params)
+{
+    // It would be nice if the item_browse_sql hook also passed in the request object.
+    $request = Omeka_Context::getInstance()->getRequest();
+
+    if ($request->get('only_map_items')) {
+        $db = get_db();
+        //INNER JOIN the locations table
+        $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id', 
+            array('latitude', 'longitude', 'address'));
+    }
+    
+    // This would be better as a filter that actually manipulated the 'per_page'
+    // value via this plugin. Until then, we need to hack the LIMIT clause for
+    // the SQL query that determines how many items to return.
+    if ($request->get('use_map_per_page')) {
+        // If the limit of the SQL query is 1, we're probably doing a COUNT(*)
+        $limitCount = $select->getPart('limitcount');
+        if ($limitCount != 1) {
+            $select->reset('limit');
+            $pageNum = $request->get('page') or $pageNum = 1;
+            $select->limitPage($pageNum, geolocation_get_map_items_per_page());
+        }
+    }
+}
+
+function geolocation_get_map_items_per_page()
+{
+    $itemsPerMap = (int)get_option('geo_per_page') or $itemsPerMap = 10;
+    return $itemsPerMap;
+}
 
 // Helpers
 
@@ -203,35 +215,6 @@ function geolocation_scripts()
 <?php
 echo js('map');
 }
-
-class GeolocationPlugin
-{    
-    /**
-     * Let the plugin know that it should throw some hooks into the items 
-     * browsing to filter out items based whether or not they have locations 
-     * associated with them
-     * @return void
-     **/
-    public function setMapDisplay($bool = true)
-    {
-        $this->displayMap = true;
-    }
-    
-    /**
-     * Plugin must be able to add SQL to the master query that pulls down a list 
-     * of items
-     * @return void
-     **/
-    public function locationSql($select)
-    {
-        if ($this->displayMap) {
-            $db = get_db();
-            //INNER JOIN the locations table
-            $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id');
-        }
-    }
-}
-
 
 /**
  * Return a multidimensional array of location info
