@@ -20,5 +20,3 @@ class Location extends Omeka_Record
         }
     }
 }
-
-?>

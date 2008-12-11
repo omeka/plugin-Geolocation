@@ -395,5 +395,4 @@ function geolocation_admin_map_for_item($item)
 	echo '<div class="info-panel">';
 	geolocation_map_for_item($item,'224','270');
 	echo '</div>';
-} 
-?>
+}
