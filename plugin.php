@@ -190,6 +190,11 @@ function geolocation_scripts()
     $key = get_option('geo_gmaps_key');
 
     if (!$key) {
+        ?>
+        <script type="text/javascript" charset="utf-8">
+            alert('Warning: The Geolocation plugin will not work properly until your Google Maps API key has been properly configured.');
+        </script>
+        <?
         return;
     }
     
