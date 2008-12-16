@@ -320,14 +320,14 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
         $options = Zend_Json::encode($options);
         
         
-        echo '<div id="' . $divId . '"></div>';
+        echo '<div id="' . $divId . '" class="map"></div>';
         echo "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Single('$divId', $center, $options);</script>";
     } else {
         echo '<p class="map-notification">This item has no location info associated with it.</p>';
     } 
 }
 
-function geolocation_map_form($item, $width = 400, $height = 400) { 
+function geolocation_map_form($item, $width = 612, $height = 400) { 
     	geolocation_scripts();    
     	$loc = array_pop(get_location_for_item($item));
         $usePost = !empty($_POST);
@@ -346,17 +346,16 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
 ?>
 <style type="text/css" media="screen">
     /* Need a bit of styling for the geocoder balloon */
-    #geocoder_balloon a{
-        display:block;
-        width:50%;
-        float:left;
-    }
     #omeka-map-form{
         width: <?php echo $width; ?>px;
         height: <?php echo $height; ?>px;
     }
+    #find_location_by_address {margin-bottom:18px;}
+    #confirm_address,
+    #wrong_address {background:#eae9db; padding:8px 12px; color: #333; cursor:pointer;}
+    #confirm_address:hover, #wrong_address:hover {background:#c60; color:#fff;}
 </style>
-<fieldset id="location_form">
+<div id="location_form">
     <input type="hidden" name="geolocation[0][latitude]" value="<?php echo $lat; ?>" />
     <input type="hidden" name="geolocation[0][longitude]" value="<?php echo $lng; ?>" />
     <input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom; ?>" />
@@ -366,7 +365,7 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
     <button type="button" name="find_location_by_address" id="find_location_by_address">Find By Address</button>
     
     <div id="geolocation-geocoder-confirmation"></div>
-</fieldset>
+</div>
 <?php 
     $options = array();
     

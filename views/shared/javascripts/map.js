@@ -271,10 +271,10 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
         }
                 
         var balloonHtml = function(address) {
-            var html = '<div id="geocoder_balloon"><p>Is this address correct?</p>';	
-        	    html += "<p><em>" + address + '</em></p>';
-        	    html += '<a id="confirm_address">Yes</a>';
-        	    html += '<a id="wrong_address">No</a></div>';
+            var html = '<div id="geocoder_confirm">';	
+        	    html += "<p>Your searched for <strong>" + address + '</strong> Is this location correct?</p>';
+        	    html += '<p><a id="confirm_address">Yes</a> <a id="wrong_address">No</a></p>';
+        	    html += '</div>';
         	return html;
         }
                 
@@ -301,6 +301,7 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
 			    Event.observe('wrong_address', 'click', function(){
 			        this.clearForm();
 			        confirmation.update();
+					$('geolocation_address').focus();
 			    }.bind(this));
 			}
 			//If no point was found, give us an alert
