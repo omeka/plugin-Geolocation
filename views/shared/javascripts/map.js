@@ -71,18 +71,18 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
         var kmlUrl = this.makeQuery(this.options.uri, this.options.params);
        //XML loads asynchronously, so need to call for further config only after it has executed
        this.loadKmlIntoMap(kmlUrl);
-       
-        //Load the links in the sidebar
-       if(this.options.list) {
-          var listDiv = $(this.options.list);
-          
-          if(!listDiv) {
-              alert('Error: You have no map links div!');
-          }else {
-              //Create HTML links for each of the markers
-              this.buildListLinks(listDiv); 
-          }              
-       }
+    },
+    
+    afterLoadItems: function()
+    {
+        var listDiv = $(this.options.list);
+
+        if(!listDiv) {
+          alert('Error: You have no map links div!');
+        }else {
+          //Create HTML links for each of the markers
+          this.buildListLinks(listDiv); 
+        }
     },
     
     /* Note to self: have to parse KML manually b/c GMaps API cannot access the KML behind the admin interface */
@@ -126,7 +126,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
                     placeMarks.each(buildMarker);
                 
                     //We have successfully loaded some map points, so continue setting up the map object
-                    return that.setUp();
+                    return that.afterLoadItems.bind(that)();
                 }else {
                 
                     //@todo Elaborate with an error message

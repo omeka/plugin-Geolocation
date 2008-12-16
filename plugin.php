@@ -244,9 +244,7 @@ function geolocation_google_map($divName = 'map', $options = array()) {
     echo "<div id=\"$divName\" class=\"map\"></div>";
     
     //Load this junk in from the plugin config
-    if (!isset($options['center'])) {
-        $options['center'] = geolocation_get_center();
-    }
+    $center = geolocation_get_center();
     
     //Load the Key into the plugin config
     //$options['api_key'] = $plugin->getConfig('Google Maps API Key');
@@ -275,8 +273,9 @@ function geolocation_google_map($divName = 'map', $options = array()) {
         
     require_once 'Zend/Json.php';
     $options = Zend_Json::encode($options);
+    $center = Zend_Json::encode($center);
     
-    echo "<script type=\"text/javascript\">var ${divName}Omeka = new OmekaMap('$divName', $options);</script>";
+    echo "<script type=\"text/javascript\">var ${divName}Omeka = new OmekaMap.Browse('$divName', $center, $options);</script>";
 }
 
 function geolocation_map_for_item($item, $width = 200, $height = 200) {        
