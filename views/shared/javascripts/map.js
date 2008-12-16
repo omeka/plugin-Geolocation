@@ -1,8 +1,70 @@
 Event.observe(window, 'unload', GUnload);
 
-var OmekaMap = Class.create();
+OmekaMap = {};
 
-OmekaMap.prototype = {
+OmekaMap.Base = Class.create();
+
+OmekaMap.Base.prototype = {
+    
+    mapDiv: null,
+    mapSize: 'small',
+    center: {},
+    markers: [],
+    options: {},
+    
+    initialize: function(div, center, options)
+    {
+        // do stuff
+        this.mapDiv = $(div);
+        this.center = center;
+        this.options = options;
+        
+        if (!GBrowserIsCompatible()) {
+            alert("Your browser is not compatible with the Google Maps API.");
+            return;
+        };
+        
+        // Build the map.
+        this.map = new GMap2(this.mapDiv); 
+        switch(this.mapSize) {
+            case 'small':
+                this.map.addControl(new GSmallMapControl());
+            break;
+            case 'large':
+            default:
+                this.map.addControl(new GLargeMapControl());
+            break;
+        }
+        
+        if(!this.center) {
+            alert('Error: The center of the map has not been set!');
+            return;
+        }
+        
+        // Set the center of the map.
+        this.map.setCenter(new GLatLng( this.center.latitude, this.center.longitude ), this.center.zoomLevel);
+        
+        // Show the center marker if we have that enabled.
+        if (this.center.show) {
+            this.addMarker(this.center.latitude, this.center.longitude, {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"});
+        };        
+    },
+    
+    addMarker: function(lat, lng, options) 
+    {
+        //Make the center point into an overlay
+        var gPoint = new GLatLng(lat, lng);
+
+        //Give it a random title
+        var gMarker = new GMarker(gPoint, options);
+        
+        this.map.addOverlay(gMarker);
+        this.markers.push(gMarker);
+    }
+}
+
+OmekaMap.Old = Class.create(OmekaMap.Base);
+OmekaMap.Old.prototype = {
     initialize: function(mapDiv, options) {
     	this.options = options;
 
@@ -97,91 +159,6 @@ OmekaMap.prototype = {
            } 
     },
     
-    findAddress: function(address) {
-        if(!this.geocoder) {
-            this.geocoder = new GClientGeocoder();
-        }
-        
-        var balloonHtml = function(address) {
-            var html = '<div id="geocoder_balloon"><p>Is this address correct?</p>';	
-        	    html += "<p><em>" + address + '</em></p>';
-        	    html += '<a id="confirm_address">Yes</a>';
-        	    html += '<a id="wrong_address">No</a></div>';
-        	return html;
-        }
-                
-        //This is what happens when the geocoder finds/does not find the address
-        var openBalloonForPoint = function(point) {
-            //If the point was found, then put the marker on that spot
-			if(point != null) {
-			    var marker = this.setOrMoveMarker(point);
-			    
-			    marker.openInfoWindowHtml(balloonHtml(address));
-			    
-			    //Update the form and close the window
-			    Event.observe('confirm_address', 'click', function(){
-			        this.setOrMoveMarker(point);
-			        marker.closeInfoWindow();
-			    }.bind(this));
-			    
-			    //Clear the form and the map
-			    Event.observe('wrong_address', 'click', function(){
-			        this.markers = $A();
-			        this.map.clearOverlays();
-			        this.updateForm();
-			        marker.closeInfoWindow();
-			    }.bind(this));
-			}
-			//If no point was found, give us an alert
-			else {
-			    alert('Error: "' + address + '" was not found!');
-			}
-        }.bind(this);        
-        
-        this.geocoder.getLatLng(address, openBalloonForPoint);
-    },
-       
-    setOrMoveMarker: function(point) {
-        
-        //If we have a marker, move it
-        if(this.markers.size() > 0) {
-            
-            var marker = this.markers.pop();            
-            marker.setLatLng(point);
-            this.markers.push(marker);
-        }
-        //Otherwise make a new marker
-        else {
-            var marker = new GMarker(point);
-            this.addMarker(marker);
-        }
-        
-        this.updateForm(point);
-        
-        return marker;
-    },
-    
-    //This is coupled to the structure of the form
-    //It would be nice if it wasn't
-    updateForm: function(point) {
-                
-        var latElement = document.getElementsByName('geolocation[0][latitude]')[0];
-        var lngElement = document.getElementsByName('geolocation[0][longitude]')[0];
-        var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
-        
-        //If we passed a point, then set the form to that.  If there is no point, clear the form
-        if(point) {
-            latElement.value = point.lat();
-            lngElement.value = point.lng();
-            zoomElement.value = this.map.getZoom();          
-        }
-        else {
-            latElement.value = '';
-            lngElement.value = '';
-            zoomElement.value = '';
-        }        
-    },
-        
     //This just adds a single marker at the center spot on the form
     addCenterMarker: function() {
         
@@ -353,6 +330,153 @@ OmekaMap.prototype = {
         return zoom;
     } 
 }
+
+OmekaMap.Browse = Class.create(OmekaMap.Base);
+
+OmekaMap.Browse.prototype = {
+    initialize: function(div, options)
+    {
+        this.mapDiv = div;
+        this.options = options;
+        
+        if (!GBrowserIsCompatible()) {
+            alert('Browse not compatible with Google Maps API!');
+            return;
+        };
+        
+        this.map = new GMap2(this.mapDiv);
+        this.map.addControl(new GLargeMapControl());
+        this.map.setCenter(new GLatLng( this.options.center.latitude, this.options.center.longitude ), this.options.center.zoomLevel);
+        
+    }
+}
+
+OmekaMap.Form = Class.create(OmekaMap.Base, {
+    
+    mapSize: 'large',
+    
+    initialize: function($super, div, center, options)
+    {        
+        $super(div, center, options);
+        
+        this.formDiv = $(this.options.form.id);
+           
+       //If data was passed back to the form via POST, then use that instead of the KML
+       //*Note: Required for persistence across invalid form submission
+       if(this.options.form.posted) {
+           debugger;
+           this.addCenterMarker();
+       } 
+         
+       var that = this;
+       //Make the map clickable to add location point (or points, in future)
+		GEvent.addListener(this.map, 'click', function(marker, point) {
+			
+			//If we are clicking a new spot on the map
+			if(marker == null) {
+				that.setOrMoveMarker(point);
+			}else {
+			    that.removeFormMarker(marker);
+			}
+		});	
+		
+		//Geocoder address lookup
+		Event.observe('find_location_by_address', 'click', function(){
+			var address = $F('geolocation_address');
+
+			that.findAddress(address);
+			
+			//Don't submit the form
+			return false;
+		});
+    },
+    
+    findAddress: function(address) {
+        if(!this.geocoder) {
+            this.geocoder = new GClientGeocoder();
+        }
+        
+        var balloonHtml = function(address) {
+            var html = '<div id="geocoder_balloon"><p>Is this address correct?</p>';	
+        	    html += "<p><em>" + address + '</em></p>';
+        	    html += '<a id="confirm_address">Yes</a>';
+        	    html += '<a id="wrong_address">No</a></div>';
+        	return html;
+        }
+                
+        //This is what happens when the geocoder finds/does not find the address
+        var openBalloonForPoint = function(point) {
+            //If the point was found, then put the marker on that spot
+			if(point != null) {
+			    var marker = this.setOrMoveMarker(point);
+			    
+			    marker.openInfoWindowHtml(balloonHtml(address));
+			    
+			    //Update the form and close the window
+			    Event.observe('confirm_address', 'click', function(){
+			        this.setOrMoveMarker(point);
+			        marker.closeInfoWindow();
+			    }.bind(this));
+			    
+			    //Clear the form and the map
+			    Event.observe('wrong_address', 'click', function(){
+			        this.markers = $A();
+			        this.map.clearOverlays();
+			        this.updateForm();
+			        marker.closeInfoWindow();
+			    }.bind(this));
+			}
+			//If no point was found, give us an alert
+			else {
+			    alert('Error: "' + address + '" was not found!');
+			}
+        }.bind(this);        
+        
+        this.geocoder.getLatLng(address, openBalloonForPoint);
+    },
+       
+    setOrMoveMarker: function(point) {
+        
+        //If we have a marker, move it
+        if(this.markers.size() > 0) {
+            
+            var marker = this.markers.pop();            
+            marker.setLatLng(point);
+            this.markers.push(marker);
+        }
+        //Otherwise make a new marker
+        else {
+            var marker = new GMarker(point);
+            this.addMarker(marker);
+        }
+        
+        this.updateForm(point);
+        
+        return marker;
+    },
+    
+    //This is coupled to the structure of the form
+    //It would be nice if it wasn't
+    updateForm: function(point) {
+                
+        var latElement = document.getElementsByName('geolocation[0][latitude]')[0];
+        var lngElement = document.getElementsByName('geolocation[0][longitude]')[0];
+        var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
+        
+        //If we passed a point, then set the form to that.  If there is no point, clear the form
+        if(point) {
+            latElement.value = point.lat();
+            lngElement.value = point.lng();
+            zoomElement.value = this.map.getZoom();          
+        }
+        else {
+            latElement.value = '';
+            lngElement.value = '';
+            zoomElement.value = '';
+        }        
+    }
+});
+
 
 var Xml = {};
 

@@ -376,13 +376,19 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
         $options['form']['post'] = array('latitude'=>$lat, 'longitude'=>$lng, 'zoomLevel'=>$zoom);
     }
     
-    if ($lng) {
-        $options['center']['latitude']  = $lat;
-        $options['center']['longitude'] = $lng;
-        $options['center']['zoomLevel'] = $zoom;  
-        $options['showCenter'] = true;      
-    }
-    geolocation_google_map('item_form', $options);
+    $center['latitude']  = $lat;
+    $center['longitude'] = $lng;
+    $center['zoomLevel'] = $zoom;  
+    
+    // @todo Get this to show only sometimes.
+    $center['show'] = true;      
+    
+    require_once 'Zend/Json.php';
+    $center = Zend_Json::encode($center);
+    $options = Zend_Json::encode($options);
+    
+    echo '<div id="omeka-map-form"></div>';
+    echo "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Form('omeka-map-form', $center, $options);</script>";
 }
 
 function geolocation_admin_map_for_item($item)
