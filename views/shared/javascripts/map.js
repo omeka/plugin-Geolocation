@@ -40,7 +40,7 @@ OmekaMap.Base.prototype = {
             alert('Error: The center of the map has not been set!');
             return;
         }
-        
+
         // Set the center of the map.
         this.map.setCenter(new GLatLng( this.center.latitude, this.center.longitude ), this.center.zoomLevel);
         
@@ -112,17 +112,7 @@ OmekaMap.Old.prototype = {
     //or it runs immediately after initializing
     setUp: function() {
                     
-            //Load the links in the sidebar
-           if(this.options.list) {
-              var listDiv = $(this.options.list);
-              
-              if(!listDiv) {
-                  alert('Error: You have no map links div!');
-              }else {
-                  //Create HTML links for each of the markers
-                  this.buildListLinks(listDiv); 
-              }              
-           }      
+
            
            //Handle the form-specific nonsense
            if(this.options.form) {
@@ -179,43 +169,29 @@ OmekaMap.Old.prototype = {
     addMarker: function(marker) {
         this.map.addOverlay(marker);
         this.markers.push(marker);
-    },
-    
-    removeFormMarker: function(marker) {
-        this.map.removeOverlay(marker);
-        this.updateForm();
-        this.markers = $A();
-    },
-     
-    buildListLinks: function(container) {
+    }
+}
+
+OmekaMap.Browse = Class.create(OmekaMap.Base, {
+    initialize: function($super, div, center, options)
+    {
+        $super(div, center, options);
         
-        var list = document.createElement('ul');
-        container.appendChild(list);
-                
-        //Loop through all the markers
-        this.markers.each(function(marker) {
-                        
-            var listElement = $(document.createElement('li'));
-            
-            //Each <li> starts with the title of the item            
-            
-            //Make an <a> tag, give it a class for styling
-            var link = $(document.createElement('a'));
-            link.addClassName('item-link');
-        
-            //Links open up the markers on the map, clicking them doesn't actually go anywhere
-            link.setAttribute('href', 'javascript:void(0)');
-            link.innerHTML = marker.title;
-                    
-            //Clicking the link should take us to the map
-            Event.observe(link, 'click', function() {
-               GEvent.trigger(marker, 'click');
-    		   this.map.panTo(marker.getPoint()); 
-            }.bind(this));     
-            
-            listElement.appendChild(link);
-            list.appendChild(listElement);       
-        }.bind(this));
+        var kmlUrl = this.makeQuery(this.options.uri, this.options.params);
+       //XML loads asynchronously, so need to call for further config only after it has executed
+       this.loadKmlIntoMap(kmlUrl);
+       
+        //Load the links in the sidebar
+       if(this.options.list) {
+          var listDiv = $(this.options.list);
+          
+          if(!listDiv) {
+              alert('Error: You have no map links div!');
+          }else {
+              //Create HTML links for each of the markers
+              this.buildListLinks(listDiv); 
+          }              
+       }
     },
     
     /* Note to self: have to parse KML manually b/c GMaps API cannot access the KML behind the admin interface */
@@ -328,28 +304,43 @@ OmekaMap.Old.prototype = {
     calculateZoom: function(range, width, height) {
         var zoom = 18-Math.log(3.3*range/Math.sqrt(width*width+height*height))/Math.log(2);
         return zoom;
-    } 
-}
+    },
+    
+    buildListLinks: function(container) {
 
-OmekaMap.Browse = Class.create(OmekaMap.Base);
+     var list = document.createElement('ul');
+     container.appendChild(list);
 
-OmekaMap.Browse.prototype = {
-    initialize: function(div, options)
-    {
-        this.mapDiv = div;
-        this.options = options;
-        
-        if (!GBrowserIsCompatible()) {
-            alert('Browse not compatible with Google Maps API!');
-            return;
-        };
-        
-        this.map = new GMap2(this.mapDiv);
-        this.map.addControl(new GLargeMapControl());
-        this.map.setCenter(new GLatLng( this.options.center.latitude, this.options.center.longitude ), this.options.center.zoomLevel);
-        
+     //Loop through all the markers
+     this.markers.each(function(marker) {
+
+         var listElement = $(document.createElement('li'));
+
+         //Each <li> starts with the title of the item            
+
+         //Make an <a> tag, give it a class for styling
+         var link = $(document.createElement('a'));
+         link.addClassName('item-link');
+
+         //Links open up the markers on the map, clicking them doesn't actually go anywhere
+         link.setAttribute('href', 'javascript:void(0)');
+         link.innerHTML = marker.title;
+
+         //Clicking the link should take us to the map
+         Event.observe(link, 'click', function() {
+            GEvent.trigger(marker, 'click');
+    		   this.map.panTo(marker.getPoint()); 
+         }.bind(this));     
+
+         listElement.appendChild(link);
+         list.appendChild(listElement);       
+     }.bind(this));
     }
-}
+});
+
+OmekaMap.Single = Class.create(OmekaMap.Base, {
+    mapSize: 'small'
+});
 
 OmekaMap.Form = Class.create(OmekaMap.Base, {
     
@@ -364,7 +355,6 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
        //If data was passed back to the form via POST, then use that instead of the KML
        //*Note: Required for persistence across invalid form submission
        if(this.options.form.posted) {
-           debugger;
            this.addCenterMarker();
        } 
          
@@ -474,6 +464,12 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
             lngElement.value = '';
             zoomElement.value = '';
         }        
+    },
+    
+    removeFormMarker: function(marker) {
+        this.map.removeOverlay(marker);
+        this.updateForm();
+        this.markers = $A();
     }
 });
 

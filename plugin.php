@@ -226,6 +226,14 @@ function get_location_for_item($item_id)
     return get_db()->getTable('Location')->findLocationByItem($item_id);
 }
 
+function geolocation_get_center()
+{
+    return array(
+        'latitude'=>  (double) get_option('geo_default_latitude'), 
+        'longitude'=> (double) get_option('geo_default_longitude'), 
+        'zoomLevel'=> (double) get_option('geo_default_zoom_level'));
+}
+
 /**
  * Possible options include:
  *     form = 'geolocation'  (provides the prefix for form elements that should 
@@ -237,12 +245,7 @@ function geolocation_google_map($divName = 'map', $options = array()) {
     
     //Load this junk in from the plugin config
     if (!isset($options['center'])) {
-        $lat  = (double) get_option('geo_default_latitude');
-        $lng  = (double) get_option('geo_default_longitude');
-        $zoom = (double) get_option('geo_default_zoom_level');
-        $options['center']['latitude']  = $lat;
-        $options['center']['longitude'] = $lng;
-        $options['center']['zoomLevel'] = $zoom;
+        $options['center'] = geolocation_get_center();
     }
     
     //Load the Key into the plugin config
@@ -278,7 +281,7 @@ function geolocation_google_map($divName = 'map', $options = array()) {
 
 function geolocation_map_for_item($item, $width = 200, $height = 200) {        
     geolocation_scripts(); 
-    $divId = 'item_map' . $item->id;
+    $divId = "item-map-{$item->id}";
 ?>
 <style type="text/css" media="screen">
     /* The map for the items page needs a bit of styling on it */
@@ -302,26 +305,23 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
     }
 </style>
 <h2>Geolocation</h2>
-<?php    
-    //Options for google_maps helper
-    $options = array(
-            // We don't really need to load the KML for a single item since it's 
-            // just hardcoded in the JSON
-            //'uri' => uri('map/browse'),
-            //'params' => array('id'=>$item->id)
-            'size' => 'small');
-    
+<?php        
     $location = current(get_location_for_item($item));
     
     // Only set the center of the map if this item actually has a location 
     // associated with it
     if ($location) {
-        $center['latitude']    = $location->latitude;
-        $center['longitude']   = $location->longitude;
-        $center['zoomLevel']   = $location->zoom_level;
-        $options['center']     = $center;
-        $options['showCenter'] = true;
-        geolocation_google_map($divId, $options);
+        $center['latitude']     = $location->latitude;
+        $center['longitude']    = $location->longitude;
+        $center['zoomLevel']    = $location->zoom_level;
+        $center['show']         = true;
+        
+        $center = Zend_Json::encode($center);
+        $options = Zend_Json::encode($options);
+        
+        
+        echo '<div id="' . $divId . '"></div>';
+        echo "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Single('$divId', $center, $options);</script>";
     } else {
         echo '<p class="map-notification">This item has no location info associated with it.</p>';
     } 
@@ -330,7 +330,7 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
 function geolocation_map_form($item, $width = 400, $height = 400) { 
     	geolocation_scripts();    
     	$loc = array_pop(get_location_for_item($item));
-        $usePost = $_POST;
+        $usePost = !empty($_POST);
         if ($usePost) {
 			echo $usePost;
             $lng  = (double) @$_POST['geolocation'][0]['longitude'];
@@ -351,7 +351,7 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
         width:50%;
         float:left;
     }
-    #item_form{
+    #omeka-map-form{
         width: <?php echo $width; ?>px;
         height: <?php echo $height; ?>px;
     }
@@ -376,12 +376,10 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
         $options['form']['post'] = array('latitude'=>$lat, 'longitude'=>$lng, 'zoomLevel'=>$zoom);
     }
     
-    $center['latitude']  = $lat;
-    $center['longitude'] = $lng;
-    $center['zoomLevel'] = $zoom;  
+    $center = geolocation_get_center();
     
     // @todo Get this to show only sometimes.
-    $center['show'] = true;      
+    $center['show'] = false;
     
     require_once 'Zend/Json.php';
     $center = Zend_Json::encode($center);
