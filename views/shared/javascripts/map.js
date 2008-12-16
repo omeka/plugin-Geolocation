@@ -50,7 +50,7 @@ OmekaMap.Base.prototype = {
         };        
     },
     
-    addMarker: function(lat, lng, options) 
+    addMarker: function(lat, lng, options, bindHtml) 
     {
         //Make the center point into an overlay
         var gPoint = new GLatLng(lat, lng);
@@ -58,8 +58,14 @@ OmekaMap.Base.prototype = {
         //Give it a random title
         var gMarker = new GMarker(gPoint, options);
         
+        if (bindHtml) {
+            gMarker.bindInfoWindowHtml(bindHtml);
+        };
+        
         this.map.addOverlay(gMarker);
         this.markers.push(gMarker);
+        
+        return gMarker;
     }
 }
 
@@ -155,25 +161,12 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
         var latitude = coordinates[1];
         
         //Build a marker, add HTML for it
-        var gPoint = new GLatLng(latitude, longitude);
-        var gMarker = new GMarker(gPoint, {title: title});
             
-        //Use the KML formatting (do some string sub magic on that bitch)
+        //Use the KML formatting (do some string sub magic)
         var gBalloon = this.browseBalloon;
         gBalloon = gBalloon.replace('$[name]', title).replace('$[description]', body).replace('$[Snippet]', snippet);
         
-        //Make the marker clickable to show the info on the map
-        //Note that we only do this if we aren't already on the form
-        if(!this.options.form) {
-            gMarker.bindInfoWindowHtml(gBalloon);
-        }
-        
-        gMarker.title = title;
-        gMarker.body = body;
-        gMarker.latitude = latitude;
-        gMarker.longitude = longitude;
-                
-        this.addMarker(gMarker);       
+        var gMarker = this.addMarker(latitude, longitude, {title: title}, gBalloon);
     },
     
     makeQuery: function(uri, params) {
@@ -215,7 +208,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
 
          //Links open up the markers on the map, clicking them doesn't actually go anywhere
          link.setAttribute('href', 'javascript:void(0)');
-         link.innerHTML = marker.title;
+         link.innerHTML = marker.getTitle();
 
          //Clicking the link should take us to the map
          Event.observe(link, 'click', function() {

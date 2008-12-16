@@ -18,9 +18,6 @@
 	.balloon .title, .balloon .description {float:left; width: 220px;margin-bottom:1.5em;}
 	.balloon img {float:right;display:block;}
 	.balloon .view-item {display:block; float:left; clear:left; font-weight:bold; text-decoration:none;}
-    #link_block {
-       
-    }
 	#map-links ul {float:left; padding:18px 18px 18px 27px; border:1px solid #ccc; border-width: 1px 0 1px 1px;width: 191px; height: 400px; overflow-y:auto; list-style:square;}
     #map-links a {
         display:block;
