@@ -371,8 +371,8 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
                              'posted' => $usePost);
     
     
-    if($usePost) {
-        $options['form']['post'] = array('latitude'=>$lat, 'longitude'=>$lng, 'zoomLevel'=>$zoom);
+    if ($loc or $usePost) {
+        $options['point'] = array('latitude'=>$lat, 'longitude'=>$lng, 'zoomLevel'=>$zoom);
     }
     
     $center = geolocation_get_center();

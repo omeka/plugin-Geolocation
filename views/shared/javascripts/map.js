@@ -235,12 +235,6 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
         $super(div, center, options);
         
         this.formDiv = $(this.options.form.id);
-           
-       //If data was passed back to the form via POST, then use that instead of the KML
-       //*Note: Required for persistence across invalid form submission
-       if(this.options.form.posted) {
-           this.addCenterMarker();
-       } 
          
        var that = this;
        //Make the map clickable to add location point (or points, in future)
@@ -263,6 +257,12 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
 			//Don't submit the form
 			return false;
 		});
+		
+		// Add the existing map point.
+		if (this.options.point) {
+		    var formMarker = this.addMarker(this.options.point.latitude, this.options.point.longitude);
+		    this.map.setCenter(formMarker.getLatLng(), this.options.point.zoomLevel);
+		};
     },
     
     findAddress: function(address) {
