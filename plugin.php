@@ -104,6 +104,7 @@ function geolocation_add_routes($router)
 function geolocation_save_location($item)
 {
     $post = $_POST;    
+
     // If we don't have the geolocation form on the page, don't do anything!
     if (!$post['geolocation']) {
         return;
@@ -363,6 +364,8 @@ function geolocation_map_form($item, $width = 400, $height = 400) {
     <label>Find Your location via address:</label>
     <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
     <button type="button" name="find_location_by_address" id="find_location_by_address">Find By Address</button>
+    
+    <div id="geolocation-geocoder-confirmation"></div>
 </fieldset>
 <?php 
     $options = array();

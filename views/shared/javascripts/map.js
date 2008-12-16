@@ -244,7 +244,7 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
 			if(marker == null) {
 				that.setOrMoveMarker(point);
 			}else {
-			    that.removeFormMarker(marker);
+			    that.clearForm();
 			}
 		});	
 		
@@ -269,7 +269,7 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
         if(!this.geocoder) {
             this.geocoder = new GClientGeocoder();
         }
-        
+                
         var balloonHtml = function(address) {
             var html = '<div id="geocoder_balloon"><p>Is this address correct?</p>';	
         	    html += "<p><em>" + address + '</em></p>';
@@ -280,24 +280,27 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
                 
         //This is what happens when the geocoder finds/does not find the address
         var openBalloonForPoint = function(point) {
+
             //If the point was found, then put the marker on that spot
 			if(point != null) {
-			    var marker = this.setOrMoveMarker(point);
+			    var confirmation = $('geolocation-geocoder-confirmation');
 			    
-			    marker.openInfoWindowHtml(balloonHtml(address));
+			    this.clearForm();
+			    var marker = this.addMarker(point.lat(), point.lng());
+			    
+			    this.map.panTo(point);
+			    confirmation.update(balloonHtml(address));
 			    
 			    //Update the form and close the window
 			    Event.observe('confirm_address', 'click', function(){
-			        this.setOrMoveMarker(point);
-			        marker.closeInfoWindow();
+			        var marker = this.setOrMoveMarker(point);
+			        confirmation.update();
 			    }.bind(this));
 			    
 			    //Clear the form and the map
 			    Event.observe('wrong_address', 'click', function(){
-			        this.markers = $A();
-			        this.map.clearOverlays();
-			        this.updateForm();
-			        marker.closeInfoWindow();
+			        this.clearForm();
+			        confirmation.update();
 			    }.bind(this));
 			}
 			//If no point was found, give us an alert
@@ -311,18 +314,12 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
        
     setOrMoveMarker: function(point) {
         
-        //If we have a marker, move it
+        // Get rid of existing markers.
         if(this.markers.size() > 0) {
-            
-            var marker = this.markers.pop();            
-            marker.setLatLng(point);
-            this.markers.push(marker);
+            this.clearForm();
         }
-        //Otherwise make a new marker
-        else {
-            var marker = new GMarker(point);
-            this.addMarker(marker);
-        }
+        
+        var marker = this.addMarker(point.lat(), point.lng());
         
         this.updateForm(point);
         
@@ -332,7 +329,6 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
     //This is coupled to the structure of the form
     //It would be nice if it wasn't
     updateForm: function(point) {
-                
         var latElement = document.getElementsByName('geolocation[0][latitude]')[0];
         var lngElement = document.getElementsByName('geolocation[0][longitude]')[0];
         var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
@@ -348,6 +344,12 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
             lngElement.value = '';
             zoomElement.value = '';
         }        
+    },
+    
+    clearForm: function() {
+        this.map.clearOverlays();
+        this.markers.clear();
+        this.updateForm();
     },
     
     removeFormMarker: function(marker) {
