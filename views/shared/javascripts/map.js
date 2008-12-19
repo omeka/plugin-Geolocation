@@ -171,7 +171,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
     
     makeQuery: function(uri, params) {
         var url = uri;
-        var query = $H(params).toQueryString();
+        var query = 'searchJson=' + Object.toJSON(params);
 
 		if(url.indexOf('?') != -1) {
 			url += "&" + query;

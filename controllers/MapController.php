@@ -6,6 +6,9 @@ class Geolocation_MapController extends Omeka_Controller_Action
 {
     public function browseAction()
     {        
+        if ($searchJson = $this->_getParam('searchJson')) {
+            $_GET = Zend_Json::decode($searchJson);
+        }
         // Need to use a plugin hook here to make sure that this search retrieves
         // only items that are on the map.
         $this->_setParam('only_map_items', true);
