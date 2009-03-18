@@ -17,7 +17,7 @@ class Geolocation_MapController extends Omeka_Controller_Action
         
         $items      = $results['items'];
         $totalItems = $this->_getTotalItems();
-        $locations  = get_location_for_item($items);
+        $locations  = geolocation_get_location_for_item($items);
 
         // Make the pagination values accessible from the plugin template 
         // helpers.

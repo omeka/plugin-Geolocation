@@ -1,5 +1,5 @@
 <?php
-define('GEOLOCATION_PLUGIN_VERSION', '1.0.2');
+define('GEOLOCATION_PLUGIN_VERSION', '1.0.3');
 define('GOOGLE_MAPS_API_VERSION', '2.x');
 
 require_once 'Location.php';
@@ -17,8 +17,8 @@ add_plugin_hook('item_browse_sql', 'geolocation_show_only_map_items');
 
 // Plugin Filters
 add_filter('admin_navigation_main', 'geolocation_admin_nav');
-add_filter('define_response_contexts', 'kml_response_context');
-add_filter('define_action_contexts', 'kml_action_context');
+add_filter('define_response_contexts', 'geolocation_kml_response_context');
+add_filter('define_action_contexts', 'geolocation_kml_action_context');
 
 // Hook Functions
 function geolocation_install()
@@ -145,14 +145,14 @@ function geolocation_admin_nav($navArray)
     return $navArray;
 }
 
-function kml_response_context($context)
+function geolocation_kml_response_context($context)
 {
     $context['kml'] = array('suffix'  => 'kml', 
                             'headers' => array('Content-Type' => 'application/vnd.google-earth.kml+xml'));
     return $context;
 }
 
-function kml_action_context($context, $controller)
+function geolocation_kml_action_context($context, $controller)
 {
     if ($controller instanceof Geolocation_MapController) {
         $context['browse'] = array('kml');
@@ -222,7 +222,7 @@ echo js('map');
  * @param array|int $item_id
  * @return array
  **/
-function get_location_for_item($item_id)
+function geolocation_get_location_for_item($item_id)
 {
     return get_db()->getTable('Location')->findLocationByItem($item_id);
 }
@@ -306,7 +306,7 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
 </style>
 <h2>Geolocation</h2>
 <?php        
-    $location = current(get_location_for_item($item));
+    $location = current(geolocation_get_location_for_item($item));
     
     // Only set the center of the map if this item actually has a location 
     // associated with it
@@ -329,7 +329,7 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
 
 function geolocation_map_form($item, $width = 612, $height = 400) { 
     	geolocation_scripts();    
-    	$loc = array_pop(get_location_for_item($item));
+    	$loc = array_pop(geolocation_get_location_for_item($item));
         $usePost = !empty($_POST);
         if ($usePost) {
 			echo $usePost;
