@@ -35,17 +35,17 @@ function geolocation_install()
     `address` TEXT NOT NULL ,
     INDEX (`item_id`)) ENGINE = MYISAM";
     $db->query($sql);
-    set_option('geo_plugin_version', GEOLOCATION_PLUGIN_VERSION);    
+    set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);    
 }
 
 function geolocation_uninstall()
 {
-	delete_option('geo_plugin_version');
-	delete_option('geo_gmaps_key');
-	delete_option('geo_default_latitude');
-	delete_option('geo_default_longitude');
-	delete_option('geo_default_zoom_level');
-	delete_option('geo_per_page');
+	delete_option('geolocation_plugin_version');
+	delete_option('geolocation_gmaps_key');
+	delete_option('geolocation_default_latitude');
+	delete_option('geolocation_default_longitude');
+	delete_option('geolocation_default_zoom_level');
+	delete_option('geolocation_per_page');
 
 	$db = get_db();
 	$db->query("DROP TABLE $db->Location");
@@ -59,11 +59,11 @@ function geolocation_config_form()
 function geolocation_config()
 {
     //Use the form to set a bunch of default options in the db
-    set_option('geo_gmaps_key', $_POST['map_key']);
-    set_option('geo_default_latitude', $_POST['default_latitude']);
-    set_option('geo_default_longitude', $_POST['default_longitude']);
-    set_option('geo_default_zoom_level', $_POST['default_zoomlevel']); 
-    set_option('geo_per_page', $_POST['per_page']);
+    set_option('geolocation_gmaps_key', $_POST['map_key']);
+    set_option('geolocation_default_latitude', $_POST['default_latitude']);
+    set_option('geolocation_default_longitude', $_POST['default_longitude']);
+    set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
+    set_option('geolocation_per_page', $_POST['per_page']);
 }
 
 /**
@@ -188,7 +188,7 @@ function geolocation_show_only_map_items($select, $params)
 
 function geolocation_get_map_items_per_page()
 {
-    $itemsPerMap = (int)get_option('geo_per_page') or $itemsPerMap = 10;
+    $itemsPerMap = (int)get_option('geolocation_per_page') or $itemsPerMap = 10;
     return $itemsPerMap;
 }
 
@@ -200,7 +200,7 @@ function geolocation_get_map_items_per_page()
  **/
 function geolocation_scripts()
 {
-    $key = get_option('geo_gmaps_key');
+    $key = get_option('geolocation_gmaps_key');
 
     if (!$key) {
         ?>
@@ -230,9 +230,9 @@ function geolocation_get_location_for_item($item_id)
 function geolocation_get_center()
 {
     return array(
-        'latitude'=>  (double) get_option('geo_default_latitude'), 
-        'longitude'=> (double) get_option('geo_default_longitude'), 
-        'zoomLevel'=> (double) get_option('geo_default_zoom_level'));
+        'latitude'=>  (double) get_option('geolocation_default_latitude'), 
+        'longitude'=> (double) get_option('geolocation_default_longitude'), 
+        'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'));
 }
 
 /**
