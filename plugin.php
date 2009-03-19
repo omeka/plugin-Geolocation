@@ -35,7 +35,16 @@ function geolocation_install()
     `address` TEXT NOT NULL ,
     INDEX (`item_id`)) ENGINE = MYISAM";
     $db->query($sql);
-    set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);    
+    
+    // check for old plugin options, and transfer to new options
+    $options = array('gmaps_key', 'default_latitude', 'default_longitude', 'default_zoom_level', 'per_page');
+    foreach($options as $option) {
+      set_option('geolocation_' . $option, get_option('geo_' . $option));
+      delete_option('geo_' . $option);
+    }
+    
+    // set the plugin version
+    set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);
 }
 
 function geolocation_uninstall()
