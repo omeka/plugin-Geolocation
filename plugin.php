@@ -9,7 +9,7 @@ add_plugin_hook('install', 'geolocation_install');
 add_plugin_hook('uninstall', 'geolocation_uninstall');
 add_plugin_hook('config_form', 'geolocation_config_form');
 add_plugin_hook('config', 'geolocation_config');
-add_plugin_hook('add_routes', 'geolocation_add_routes');
+add_plugin_hook('define_routes', 'geolocation_add_routes');
 add_plugin_hook('after_save_item', 'geolocation_save_location');
 add_plugin_hook('append_to_item_form', 'geolocation_map_form');
 add_plugin_hook('admin_append_to_items_show_secondary', 'geolocation_admin_map_for_item');
@@ -36,13 +36,9 @@ function geolocation_install()
     INDEX (`item_id`)) ENGINE = MYISAM";
     $db->query($sql);
     
-    // check for old plugin options, and transfer to new options
-    $options = array('gmaps_key', 'default_latitude', 'default_longitude', 'default_zoom_level', 'per_page');
-    foreach($options as $option) {
-      set_option('geolocation_' . $option, get_option('geo_' . $option));
-      delete_option('geo_' . $option);
-    }
-    
+    // if necessary, upgrade the plugin options
+    geolocation_upgrade_options();
+        
     // set the plugin version
     set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);
 }
@@ -62,17 +58,33 @@ function geolocation_uninstall()
 
 function geolocation_config_form()
 {
+    // if necessary, upgrade the plugin options
+    geolocation_upgrade_options();
+
 	include 'config_form.php';
 }
 
 function geolocation_config()
-{
+{   
     //Use the form to set a bunch of default options in the db
     set_option('geolocation_gmaps_key', $_POST['map_key']);
     set_option('geolocation_default_latitude', $_POST['default_latitude']);
     set_option('geolocation_default_longitude', $_POST['default_longitude']);
     set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
     set_option('geolocation_per_page', $_POST['per_page']);
+}
+
+function geolocation_upgrade_options() 
+{
+    // check for old plugin options, and if necessary, transfer to new options
+    $options = array('gmaps_key', 'default_latitude', 'default_longitude', 'default_zoom_level', 'per_page');
+    foreach($options as $option) {
+        $oldOptionValue = get_option('geo_' . $option);
+        if ($oldOptionValue != '') {
+            set_option('geolocation_' . $option, $oldOptionValue);
+            delete_option('geo_' . $option);        
+        }
+    }
 }
 
 /**
@@ -91,9 +103,10 @@ function geolocation_add_routes($router)
     $mapRoute = new Zend_Controller_Router_Route('items/map/:page', 
                                                  array('controller' => 'map', 
                                                        'action'     => 'browse', 
-                                                       'module'     => 'geolocation'), 
+                                                       'module'     => 'geolocation',
+                                                       'page'       => '1'), 
                                                  array('page' => '\d+'));
-    $router->addRoute('items_map', $mapRoute);    
+    $router->addRoute('items_map', $mapRoute);
     
     // Trying to make the route look like a KML file so google will eat it.
     // @todo Include page parameter if this works.
@@ -369,7 +382,7 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
     <input type="hidden" name="geolocation[0][longitude]" value="<?php echo $lng; ?>" />
     <input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom; ?>" />
     <input type="hidden" name="geolocation[0][map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
-    <label>Find Your location via address:</label>
+    <label>Find Your Location Via Address:</label>
     <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
     <button type="button" name="find_location_by_address" id="find_location_by_address">Find By Address</button>
     
