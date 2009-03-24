@@ -372,7 +372,7 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
         width: <?php echo $width; ?>px;
         height: <?php echo $height; ?>px;
     }
-    #find_location_by_address {margin-bottom:18px;}
+    #geolocation_find_location_by_address {margin-bottom:18px;}
     #confirm_address,
     #wrong_address {background:#eae9db; padding:8px 12px; color: #333; cursor:pointer;}
     #confirm_address:hover, #wrong_address:hover {background:#c60; color:#fff;}
@@ -384,9 +384,9 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
     <input type="hidden" name="geolocation[0][map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
     <label>Find Your Location Via Address:</label>
     <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
-    <button type="button" name="find_location_by_address" id="find_location_by_address">Find By Address</button>
+    <button type="button" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find By Address</button>
     
-    <div id="geolocation-geocoder-confirmation"></div>
+    <!-- <div id="geolocation-geocoder-confirmation"></div> -->
 </div>
 <?php 
     $options = array();

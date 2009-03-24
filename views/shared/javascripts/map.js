@@ -226,6 +226,8 @@ OmekaMap.Single = Class.create(OmekaMap.Base, {
     mapSize: 'small'
 });
 
+
+
 OmekaMap.Form = Class.create(OmekaMap.Base, {
     
     mapSize: 'large',
@@ -235,21 +237,31 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
         $super(div, center, options);
         
         this.formDiv = $(this.options.form.id);
-         
+             
        var that = this;
        //Make the map clickable to add location point (or points, in future)
 		GEvent.addListener(this.map, 'click', function(marker, point) {
 			
 			//If we are clicking a new spot on the map
 			if(marker == null) {
-				that.setOrMoveMarker(point);
+			    if (confirm('Are you sure you want to change the location of the item?')) {
+    			    that.setOrMoveMarker(point);
+    			    $('geolocation_address').value = '';			        
+			    }
 			}else {
 			    that.clearForm();
 			}
-		});	
+		});
+		
+		
+		//Make the map update on zoom changes
+    	GEvent.addListener(this.map, 'zoomend', function(oldLevel, newLevel) {
+    		that.updateZoomForm();
+    	});
+		
 		
 		//Geocoder address lookup
-		Event.observe('find_location_by_address', 'click', function(){
+		Event.observe('geolocation_find_location_by_address', 'click', function(){
 			var address = $F('geolocation_address');
 
 			that.findAddress(address);
@@ -257,6 +269,13 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
 			//Don't submit the form
 			return false;
 		});
+		
+		// make the return key in the geolocation address input box click the button to find the address
+        Event.observe('geolocation_address', 'keypress', function(event){ 
+            if (event.keyCode == Event.KEY_RETURN) {
+                $('geolocation_find_location_by_address').click();
+            }    
+        });
 		
 		// Add the existing map point.
 		if (this.options.point) {
@@ -270,47 +289,55 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
             this.geocoder = new GClientGeocoder();
         }
                 
-        var balloonHtml = function(address) {
-            var html = '<div id="geocoder_confirm">';	
-        	    html += "<p>Your searched for <strong>" + address + '</strong> Is this location correct?</p>';
-        	    html += '<p><a id="confirm_address">Yes</a> <a id="wrong_address">No</a></p>';
-        	    html += '</div>';
-        	return html;
-        }
+        //var balloonHtml = function(address) {
+        //    var html = '<div id="geocoder_confirm">';	
+        //	    html += "<p>Your searched for <strong>" + address + '</strong> Is this location correct?</p>';
+        //	    html += '<p><a id="confirm_address">Yes</a> <a id="wrong_address">No</a></p>';
+        //	    html += '</div>';
+        //	return html;
+        //}
                 
         //This is what happens when the geocoder finds/does not find the address
-        var openBalloonForPoint = function(point) {
+        var confirmPointChange = function(point) {
 
             //If the point was found, then put the marker on that spot
 			if(point != null) {
-			    var confirmation = $('geolocation-geocoder-confirmation');
-			    
+
 			    this.clearForm();
-			    var marker = this.addMarker(point.lat(), point.lng());
-			    
-			    this.map.panTo(point);
-			    confirmation.update(balloonHtml(address));
+		        var marker = this.addMarker(point.lat(), point.lng());
+		        this.map.panTo(point);
+    		                     
+    			if (confirm('Are you sure you want to change the location of the item?')) {
+			        var marker = this.setOrMoveMarker(point);
+    			} else {
+                    this.clearForm();
+                    $('geolocation_address').focus();
+    			}
+                  
+			    //var confirmation = $('geolocation-geocoder-confirmation');
+			    //confirmation.update(balloonHtml(address));
 			    
 			    //Update the form and close the window
-			    Event.observe('confirm_address', 'click', function(){
-			        var marker = this.setOrMoveMarker(point);
-			        confirmation.update();
-			    }.bind(this));
+			    //Event.observe('confirm_address', 'click', function(){
+			    //    var marker = this.setOrMoveMarker(point);
+			    //    confirmation.update();
+			    //}.bind(this));
 			    
 			    //Clear the form and the map
-			    Event.observe('wrong_address', 'click', function(){
-			        this.clearForm();
-			        confirmation.update();
-					$('geolocation_address').focus();
-			    }.bind(this));
-			}
-			//If no point was found, give us an alert
-			else {
+			    //Event.observe('wrong_address', 'click', function(){
+			    //    this.clearForm();
+			    //    confirmation.update();
+				//	$('geolocation_address').focus();
+			    //}.bind(this));
+			
+			} else {
+			    
+			  	//If no point was found, give us an alert
 			    alert('Error: "' + address + '" was not found!');
 			}
         }.bind(this);        
         
-        this.geocoder.getLatLng(address, openBalloonForPoint);
+        this.geocoder.getLatLng(address, confirmPointChange);
     },
        
     setOrMoveMarker: function(point) {
@@ -343,8 +370,13 @@ OmekaMap.Form = Class.create(OmekaMap.Base, {
         else {
             latElement.value = '';
             lngElement.value = '';
-            zoomElement.value = '';
+            zoomElement.value = this.map.getZoom();          
         }        
+    },
+    
+    updateZoomForm: function() {
+        var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
+        zoomElement.value = this.map.getZoom();
     },
     
     clearForm: function() {
