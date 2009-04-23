@@ -11,7 +11,6 @@ add_plugin_hook('config_form', 'geolocation_config_form');
 add_plugin_hook('config', 'geolocation_config');
 add_plugin_hook('define_routes', 'geolocation_add_routes');
 add_plugin_hook('after_save_item', 'geolocation_save_location');
-add_plugin_hook('append_to_item_form', 'geolocation_map_form');
 add_plugin_hook('admin_append_to_items_show_secondary', 'geolocation_admin_map_for_item');
 add_plugin_hook('item_browse_sql', 'geolocation_show_only_map_items');
 
@@ -19,6 +18,7 @@ add_plugin_hook('item_browse_sql', 'geolocation_show_only_map_items');
 add_filter('admin_navigation_main', 'geolocation_admin_nav');
 add_filter('define_response_contexts', 'geolocation_kml_response_context');
 add_filter('define_action_contexts', 'geolocation_kml_action_context');
+add_filter('admin_items_form_tabs', 'geolocation_item_form_tabs');
 
 // Hook Functions
 function geolocation_install()
@@ -214,33 +214,56 @@ function geolocation_get_map_items_per_page()
     return $itemsPerMap;
 }
 
+/**
+ * Add a Map tab to the edit item page
+ * @return array
+ **/
+function geolocation_item_form_tabs($tabs)
+{
+    // insert the map tab before the Miscellaneous tab
+    $item = get_current_item();
+    $ttabs = array();
+    foreach($tabs as $key => $html) {
+        if ($key == 'Miscellaneous') {
+            $ttabs['Map'] = geolocation_map_form($item);
+        }
+        $ttabs[$key] = $html;
+    }
+    $tabs = $ttabs;
+    return $tabs;
+}
+
 // Helpers
 
 /**
- * Output the script tags that include the GMaps JS from afar
- * @return void
+ * Returns the script tags that include the GMaps JS from afar
+ * @return string
  **/
 function geolocation_scripts()
 {
-    $key = get_option('geolocation_gmaps_key');
+    $ht = '';
+    ob_start();
 
+    $key = get_option('geolocation_gmaps_key');
     if (!$key) {
         ?>
         <script type="text/javascript" charset="utf-8">
             alert('Warning: The Geolocation plugin will not work properly until your Google Maps API key has been properly configured.');
         </script>
         <?
-        return;
-    }
-    
+    } else {
 ?>
-<script src="http://maps.google.com/maps?file=api&amp;v=<?php echo GOOGLE_MAPS_API_VERSION; ?>&amp;key=<?php echo $key;?>" type="text/javascript"></script>
+        <script src="http://maps.google.com/maps?file=api&amp;v=<?php echo GOOGLE_MAPS_API_VERSION; ?>&amp;key=<?php echo $key;?>" type="text/javascript"></script>
 <?php
-echo js('map');
+        echo js('map');
+    }
+    $ht .= ob_get_contents();
+    ob_end_clean();
+    return $ht;
 }
 
 /**
- * Return a multidimensional array of location info
+ * Returns a multidimensional array of location info
  * @param array|int $item_id
  * @return array
  **/
@@ -249,6 +272,10 @@ function geolocation_get_location_for_item($item_id)
     return get_db()->getTable('Location')->findLocationByItem($item_id);
 }
 
+/**
+ * Returns the default center point for the Google Map
+ * @return array
+ **/
 function geolocation_get_center()
 {
     return array(
@@ -257,14 +284,19 @@ function geolocation_get_center()
         'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'));
 }
 
+
 /**
- * Possible options include:
+ * Returns the default center point for the Google Map
+ * @param string $divName The name of the div that holds the google map
+ * @param array $options Possible options include:
  *     form = 'geolocation'  (provides the prefix for form elements that should 
  *     catch the map coordinates)
+ * @return array
  **/
 function geolocation_google_map($divName = 'map', $options = array()) {
+    $ht = '';
     
-    echo "<div id=\"$divName\" class=\"map\"></div>";
+    $ht .= "<div id=\"$divName\" class=\"map\"></div>";
     
     //Load this junk in from the plugin config
     $center = geolocation_get_center();
@@ -298,12 +330,22 @@ function geolocation_google_map($divName = 'map', $options = array()) {
     $options = Zend_Json::encode($options);
     $center = Zend_Json::encode($center);
     
-    echo "<script type=\"text/javascript\">var ${divName}Omeka = new OmekaMap.Browse('$divName', $center, $options);</script>";
+    $ht .= "<script type=\"text/javascript\">var ${divName}Omeka = new OmekaMap.Browse('$divName', $center, $options);</script>";
+    return $ht;
 }
 
+/**
+ * Returns the google map code for an item
+ * @param Item $item
+ * @param int $width
+ * @param int $height
+ * @return string
+ **/
 function geolocation_map_for_item($item, $width = 200, $height = 200) {        
-    geolocation_scripts(); 
+    $ht = '';
+    $ht .= geolocation_scripts(); 
     $divId = "item-map-{$item->id}";
+    ob_start();
 ?>
 <style type="text/css" media="screen">
     /* The map for the items page needs a bit of styling on it */
@@ -346,25 +388,38 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
         echo "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Single('$divId', $center, $options);</script>";
     } else {
         echo '<p class="map-notification">This item has no location info associated with it.</p>';
-    } 
+    }
+    
+    $ht .= ob_get_contents();
+    ob_end_clean();
+    return $ht;
 }
 
+/**
+ * Returns the form code for geographically searching for items
+ * @param Item $item
+ * @param int $width
+ * @param int $height
+ * @return string
+ **/
 function geolocation_map_form($item, $width = 612, $height = 400) { 
-    	geolocation_scripts();    
-    	$loc = array_pop(geolocation_get_location_for_item($item));
-        $usePost = !empty($_POST);
-        if ($usePost) {
-			echo $usePost;
-            $lng  = (double) @$_POST['geolocation'][0]['longitude'];
-            $lat  = (double) @$_POST['geolocation'][0]['latitude'];
-            $zoom = (int) @$_POST['geolocation'][0]['zoom_level'];
-            $addr = @$_POST['geolocation'][0]['address'];
-        } else if ($loc) {
-            $lng  = (double) $loc['longitude'];
-            $lat  = (double) $loc['latitude'];
-            $zoom = (int) $loc['zoom_level'];
-            $addr = $loc['address'];
-        }
+	$ht = geolocation_scripts();    
+	$loc = array_pop(geolocation_get_location_for_item($item));
+    $usePost = !empty($_POST);
+    if ($usePost) {
+		echo $usePost;
+        $lng  = (double) @$_POST['geolocation'][0]['longitude'];
+        $lat  = (double) @$_POST['geolocation'][0]['latitude'];
+        $zoom = (int) @$_POST['geolocation'][0]['zoom_level'];
+        $addr = @$_POST['geolocation'][0]['address'];
+    } else if ($loc) {
+        $lng  = (double) $loc['longitude'];
+        $lat  = (double) $loc['latitude'];
+        $zoom = (int) $loc['zoom_level'];
+        $addr = $loc['address'];
+    }
+    
+    ob_start();
 ?>
 <style type="text/css" media="screen">
     /* Need a bit of styling for the geocoder balloon */
@@ -388,7 +443,10 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
     
     <!-- <div id="geolocation-geocoder-confirmation"></div> -->
 </div>
-<?php 
+<?php
+    $ht .= ob_get_contents();
+    ob_end_clean();
+    
     $options = array();
     
     $options['form'] = array('id' => 'location_form', 
@@ -408,18 +466,31 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
     $center = Zend_Json::encode($center);
     $options = Zend_Json::encode($options);
     
-    echo '<div id="omeka-map-form"></div>';
-    echo "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Form('omeka-map-form', $center, $options);</script>";
+    $ht .= '<div id="omeka-map-form"></div>';
+    $ht .= "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Form('omeka-map-form', $center, $options);</script>";
+
+    return $ht;
 }
 
+/**
+ * Shows a small map on the admin show page in the secondary column
+ * @param Item $item
+ * @return void
+ **/
 function geolocation_admin_map_for_item($item)
 {
+    $ht = '';
+    ob_start();
 ?>
 <style type="text/css" media="screen">
 	.info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
 </style>
   <?php
-	echo '<div class="info-panel">';
-	geolocation_map_for_item($item,'224','270');
-	echo '</div>';
+    $ht .= ob_get_contents();
+    ob_end_clean();
+	$ht .= '<div class="info-panel">';
+	$ht .= geolocation_map_for_item($item,'224','270');
+	$ht .= '</div>';
+	echo $ht;
+	return;
 }
