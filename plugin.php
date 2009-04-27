@@ -20,6 +20,7 @@ add_filter('define_response_contexts', 'geolocation_kml_response_context');
 add_filter('define_action_contexts', 'geolocation_kml_action_context');
 add_filter('admin_items_form_tabs', 'geolocation_item_form_tabs');
 
+
 // Hook Functions
 function geolocation_install()
 {    
@@ -294,9 +295,8 @@ function geolocation_get_center()
  * @return array
  **/
 function geolocation_google_map($divName = 'map', $options = array()) {
-    $ht = '';
-    
-    $ht .= "<div id=\"$divName\" class=\"map\"></div>";
+    $ht = geolocation_scripts();
+    $ht .= '<div id="' . $divName . '" class="map"></div>';
     
     //Load this junk in from the plugin config
     $center = geolocation_get_center();
@@ -330,7 +330,14 @@ function geolocation_google_map($divName = 'map', $options = array()) {
     $options = Zend_Json::encode($options);
     $center = Zend_Json::encode($center);
     
-    $ht .= "<script type=\"text/javascript\">var ${divName}Omeka = new OmekaMap.Browse('$divName', $center, $options);</script>";
+    ob_start();
+    echo geolocation_marker_style();
+?>  
+    <script type="text/javascript">var <?php echo $divName; ?>Omeka = new OmekaMap.Browse('<?php echo $divName . "'," . $center . ',' . $options; ?>);</script>
+<?php
+    $ht .= ob_get_contents();
+    ob_end_clean();
+    
     return $ht;
 }
 
@@ -339,13 +346,17 @@ function geolocation_google_map($divName = 'map', $options = array()) {
  * @param Item $item
  * @param int $width
  * @param int $height
+ * @param boolean $hasBalloonForMarker
  * @return string
  **/
-function geolocation_map_for_item($item, $width = 200, $height = 200) {        
+function geolocation_google_map_for_item($item, $width = 200, $height = 200, $hasBalloonForMarker = true, $markerHtmlClassName='geolocation_balloon') {        
     $ht = '';
     $ht .= geolocation_scripts(); 
     $divId = "item-map-{$item->id}";
     ob_start();
+    if ($hasBalloonForMarker) {
+        echo geolocation_marker_style();        
+    }
 ?>
 <style type="text/css" media="screen">
     /* The map for the items page needs a bit of styling on it */
@@ -379,7 +390,9 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
         $center['longitude']    = $location->longitude;
         $center['zoomLevel']    = $location->zoom_level;
         $center['show']         = true;
-        
+        if ($hasBalloonForMarker) {
+            $center['markerHtml']   = geolocation_get_marker_html_for_item($item, $markerHtmlClassName);            
+        }
         $center = Zend_Json::encode($center);
         $options = Zend_Json::encode($options);
         
@@ -393,6 +406,15 @@ function geolocation_map_for_item($item, $width = 200, $height = 200) {
     $ht .= ob_get_contents();
     ob_end_clean();
     return $ht;
+}
+
+
+function geolocation_get_marker_html_for_item($item, $markerHtmlClassName='geolocation_balloon')
+{
+    $titleLink = link_to_item(item('Dublin Core', 'Title', array(), $item), array(), 'show', $item);
+    $thumbnailLink = !(item_has_thumbnail($item)) ? '' : link_to_item(item_thumbnail(array(), 0, $item), array(), 'show', $item);
+    $description = item('Dublin Core', 'Description', array('snippet'=>150), $item);
+    return '<div class="' . $markerHtmlClassName . '"><p class="geolocation_marker_title">' . $titleLink . '</p>' . $thumbnailLink . '<p>' . $description . '</p></div>';
 }
 
 /**
@@ -473,6 +495,27 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
 }
 
 /**
+ * Returns the html for the marker style
+ * @param $markerWidth
+ * @return string
+ **/
+function geolocation_marker_style($markerWidth=200)
+{
+    $ht = '';
+    ob_start();
+?>
+    <style type="text/css" media="screen">
+    	.info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
+        .geolocation_balloon {width:<?php echo $markerWidth; ?>px;}
+        .geolocation_balloon .geolocation_balloon_title {font-weight:bold; font-size:18px; margin-bottom:0px;}
+    </style>
+<?php
+    $ht = ob_get_contents();
+    ob_end_clean();
+    return $ht;
+}
+
+/**
  * Shows a small map on the admin show page in the secondary column
  * @param Item $item
  * @return void
@@ -481,15 +524,13 @@ function geolocation_admin_map_for_item($item)
 {
     $ht = '';
     ob_start();
+    echo geolocation_marker_style();
 ?>
-<style type="text/css" media="screen">
-	.info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
-</style>
   <?php
     $ht .= ob_get_contents();
     ob_end_clean();
 	$ht .= '<div class="info-panel">';
-	$ht .= geolocation_map_for_item($item,'224','270');
+	$ht .= geolocation_google_map_for_item($item,'224','270',false);
 	$ht .= '</div>';
 	echo $ht;
 	return;

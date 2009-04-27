@@ -6,10 +6,10 @@
         <Style id="item-info-balloon">
             <BalloonStyle>
                 <text><![CDATA[
-                    <div class="balloon">
-                        <div class="title">$[name]</div>
-                        <div class="description">$[Snippet]</div>
+                    <div class="geolocation_balloon">
+                        <div class="geolocation_balloon_title">$[namewithlink]</div>
                         <div class="body">$[description]</div>
+                        <div class="geolocation_balloon_description">$[Snippet]</div>
                     </div>
                 ]]></text>
             </BalloonStyle>
@@ -20,8 +20,8 @@
         $location = $locations[$item->id];
         ?>
         <Placemark>
-            <name><![CDATA[<?php echo item('Dublin Core', 'Title');
-            ?>]]></name>
+            <name><![CDATA[<?php echo item('Dublin Core', 'Title');?>]]></name>
+            <namewithlink><![CDATA[<?php echo link_to_item(item('Dublin Core', 'Title'), array('class' => 'view-item')); ?>]]></namewithlink>
             <Snippet maxLines="2"><![CDATA[<?php
             echo item('Dublin Core', 'Description', array('snippet' => 150));
             ?>]]></Snippet>    
@@ -30,8 +30,9 @@
             // so can't use display_files(). Description field contains the HTML 
             // for displaying the first file (if possible)
             //echo display_files($item->Files[0]);
-            echo thumbnail($item->Files[0]);
-            echo link_to_item('View Item',array('class' => 'view-item'));
+            if (item_has_thumbnail($item)) {
+                echo link_to_item(thumbnail($item->Files[0]),array('class' => 'view-item'));                
+            }
             ?>]]></description>
             <Point>
                 <coordinates><?php echo $location['longitude']; ?>,<?php echo $location['latitude']; ?></coordinates>

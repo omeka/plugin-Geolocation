@@ -46,7 +46,7 @@ OmekaMap.Base.prototype = {
         
         // Show the center marker if we have that enabled.
         if (this.center.show) {
-            this.addMarker(this.center.latitude, this.center.longitude, {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"});
+            this.addMarker(this.center.latitude, this.center.longitude, {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"}, this.center.markerHtml);
         };        
     },
     
@@ -110,7 +110,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
                 /* KML can be parsed as:
                     kml - root element
                         Placemark
-                            name
+                            namewithlink
                             description
                             Point - longitude,latitude
                 */
@@ -126,8 +126,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
                     var buildMarker = that.buildMarkerFromPlacemark.bind(that);
                 
                     //Retrieve the balloon styling from the KML file
-                    var styling = that.getBalloonStyling(xml);
-                    that.browseBalloon = styling;
+                    that.browseBalloon = that.getBalloonStyling(xml);
                 
                     placeMarks.each(buildMarker);
                 
@@ -151,6 +150,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
     buildMarkerFromPlacemark: function(placeMark) {
        //Get the info for each location on the map
         var title = Xml.getValue(placeMark, 'name');
+        var titleWithLink = Xml.getValue(placeMark, 'namewithlink');
         var body = Xml.getValue(placeMark, 'description');
         var snippet = Xml.getValue(placeMark, 'Snippet');
             
@@ -164,7 +164,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
             
         //Use the KML formatting (do some string sub magic)
         var gBalloon = this.browseBalloon;
-        gBalloon = gBalloon.replace('$[name]', title).replace('$[description]', body).replace('$[Snippet]', snippet);
+        gBalloon = gBalloon.replace('$[namewithlink]', titleWithLink).replace('$[description]', body).replace('$[Snippet]', snippet);
         
         var gMarker = this.addMarker(latitude, longitude, {title: title}, gBalloon);
     },
@@ -191,7 +191,6 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
     },
     
     buildListLinks: function(container) {
-
      var list = document.createElement('ul');
      container.appendChild(list);
 
@@ -207,7 +206,7 @@ OmekaMap.Browse = Class.create(OmekaMap.Base, {
          link.addClassName('item-link');
 
          //Links open up the markers on the map, clicking them doesn't actually go anywhere
-         link.setAttribute('href', 'javascript:void(0)');
+         link.setAttribute('href', 'javascript:void(0);');
          link.innerHTML = marker.getTitle();
 
          //Clicking the link should take us to the map
