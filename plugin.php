@@ -1,5 +1,5 @@
 <?php
-define('GEOLOCATION_PLUGIN_VERSION', '1.0.3');
+define('GEOLOCATION_PLUGIN_VERSION', get_plugin_ini('Geolocation', 'version'));
 define('GOOGLE_MAPS_API_VERSION', '2.x');
 
 require_once 'Location.php';
