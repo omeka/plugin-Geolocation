@@ -28,10 +28,9 @@
             <description><![CDATA[<?php 
             // @since 3/26/08: movies do not display properly on the map in IE6, 
             // so can't use display_files(). Description field contains the HTML 
-            // for displaying the first file (if possible)
-            //echo display_files($item->Files[0]);
+            // for displaying the first file (if possible).
             if (item_has_thumbnail($item)) {
-                echo link_to_item(thumbnail($item->Files[0]),array('class' => 'view-item'));                
+                echo link_to_item(item_thumbnail(), array('class' => 'view-item'));                
             }
             ?>]]></description>
             <Point>
