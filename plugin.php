@@ -185,26 +185,31 @@ function geolocation_kml_action_context($context, $controller)
     
 function geolocation_show_only_map_items($select, $params)
 {
-    // It would be nice if the item_browse_sql hook also passed in the request object.
+    // It would be nice if the item_browse_sql hook also passed in the request 
+    // object.
     $request = Omeka_Context::getInstance()->getRequest();
-
-    if ($request->get('only_map_items')) {
-        $db = get_db();
-        //INNER JOIN the locations table
-        $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id', 
-            array('latitude', 'longitude', 'address'));
-    }
     
-    // This would be better as a filter that actually manipulated the 'per_page'
-    // value via this plugin. Until then, we need to hack the LIMIT clause for
-    // the SQL query that determines how many items to return.
-    if ($request->get('use_map_per_page')) {
-        // If the limit of the SQL query is 1, we're probably doing a COUNT(*)
-        $limitCount = $select->getPart('limitcount');
-        if ($limitCount != 1) {
-            $select->reset('limit');
-            $pageNum = $request->get('page') or $pageNum = 1;
-            $select->limitPage($pageNum, geolocation_get_map_items_per_page());
+    if ($request) {
+        if ($request->get('only_map_items')) {
+            $db = get_db();
+            //INNER JOIN the locations table
+            $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id', 
+                array('latitude', 'longitude', 'address'));
+        }
+    
+        // This would be better as a filter that actually manipulated the 
+        // 'per_page' value via this plugin. Until then, we need to hack the 
+        // LIMIT clause for the SQL query that determines how many items to 
+        // return.
+        if ($request->get('use_map_per_page')) {
+            // If the limit of the SQL query is 1, we're probably doing a 
+            // COUNT(*)
+            $limitCount = $select->getPart('limitcount');
+            if ($limitCount != 1) {
+                $select->reset('limit');
+                $pageNum = $request->get('page') or $pageNum = 1;
+                $select->limitPage($pageNum, geolocation_get_map_items_per_page());
+            }
         }
     }
 }
