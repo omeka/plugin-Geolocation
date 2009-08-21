@@ -1,5 +1,4 @@
 <?php
-define('GEOLOCATION_PLUGIN_VERSION', get_plugin_ini('Geolocation', 'version'));
 define('GOOGLE_MAPS_API_VERSION', '2.x');
 
 require_once 'Location.php';
@@ -38,15 +37,11 @@ function geolocation_install()
     $db->query($sql);
     
     // if necessary, upgrade the plugin options
-    geolocation_upgrade_options();
-        
-    // set the plugin version
-    set_option('geolocation_plugin_version', GEOLOCATION_PLUGIN_VERSION);
+    geolocation_upgrade_options();        
 }
 
 function geolocation_uninstall()
 {
-	delete_option('geolocation_plugin_version');
 	delete_option('geolocation_gmaps_key');
 	delete_option('geolocation_default_latitude');
 	delete_option('geolocation_default_longitude');
