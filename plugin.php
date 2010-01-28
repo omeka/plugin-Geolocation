@@ -37,7 +37,12 @@ function geolocation_install()
     $db->query($sql);
     
     // if necessary, upgrade the plugin options
-    geolocation_upgrade_options();        
+    geolocation_upgrade_options();
+    
+    set_option('geolocation_default_latitude', '38');
+    set_option('geolocation_default_longitude', '-77');
+    set_option('geolocation_default_zoom_level', '5');
+    set_option('geolocation_per_page', '10');     
 }
 
 function geolocation_uninstall()
@@ -199,9 +204,10 @@ function geolocation_show_only_map_items($select, $params)
         if ($request->get('use_map_per_page')) {
             // If the limit of the SQL query is 1, we're probably doing a 
             // COUNT(*)
-            $limitCount = $select->getPart('limitcount');
+            $limitCount = $select->getPart(Zend_Db_Select::LIMIT_COUNT);
             if ($limitCount != 1) {
-                $select->reset('limit');
+                $select->reset(Zend_Db_Select::LIMIT_COUNT);
+                $select->reset(Zend_Db_Select::LIMIT_OFFSET);
                 $pageNum = $request->get('page') or $pageNum = 1;
                 $select->limitPage($pageNum, geolocation_get_map_items_per_page());
             }
@@ -449,7 +455,7 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
         width: <?php echo $width; ?>px;
         height: <?php echo $height; ?>px;
     }
-    #geolocation_find_location_by_address {margin-bottom:18px;}
+    #geolocation_find_location_by_address {margin-bottom:18px; float:none;}
     #confirm_address,
     #wrong_address {background:#eae9db; padding:8px 12px; color: #333; cursor:pointer;}
     #confirm_address:hover, #wrong_address:hover {background:#c60; color:#fff;}
