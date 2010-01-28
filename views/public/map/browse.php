@@ -8,6 +8,7 @@
 #map_browse { width: 500px; height: 500px;}
 #map-links li {overflow:hidden; border-bottom:1px dotted #ccc;}
 #map-links li a {float:right; width:50%; text-decoration:none; }
+#map_block { clear:both; }
 </style>
 
 <h1>Browse Items on the Map (<?php echo $totalItems; ?> items total)</h1>

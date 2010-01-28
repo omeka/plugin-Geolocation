@@ -301,7 +301,9 @@ function geolocation_get_center()
  * @return array
  **/
 function geolocation_google_map($divName = 'map', $options = array()) {
-    $ht = geolocation_scripts();
+
+    $ht = '';
+    $ht .= geolocation_scripts();
     $ht .= '<div id="' . $divName . '" class="map"></div>';
     
     //Load this junk in from the plugin config
