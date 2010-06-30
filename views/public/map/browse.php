@@ -1,6 +1,6 @@
 <?php head(); ?>
 
-<?php geolocation_scripts(); ?>
+<?php echo geolocation_scripts(); ?>
 
 <div id="primary">
 

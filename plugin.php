@@ -139,24 +139,20 @@ function geolocation_save_location($item)
     if (!$post['geolocation']) {
         return;
     }
+        
+    // Find the location object for the item
+    $location = geolocation_get_location_for_item($item, true);
     
-    $geolocation_post = $post['geolocation'][0];
-  
-    // Find the ActiveRecord location object
-    $location = get_db()->getTable('Location')->findLocationByItem($item, true);
-                    
     // If we have filled out info for the geolocation, then submit to the db
-    if (!empty($geolocation_post) 
-        && (!empty($geolocation_post['latitude']) 
-            && !empty($geolocation_post['longitude']))) {
+    $geolocationPost = $post['geolocation'][0];
+    if (!empty($geolocationPost) && 
+        (((string)$geolocationPost['latitude']) != '') && 
+        (((string)$geolocationPost['longitude']) != '')) {
         if (!$location) {
             $location = new Location;
-            $location->item_id = $item->id;  
-             
+            $location->item_id = $item->id;
         }
-        if ($location->saveForm($geolocation_post) ) {
-            return true;
-        }
+        $location->saveForm($geolocationPost);
     // If the form is empty, then we want to delete whatever location is 
     // currently stored
     } else {
@@ -170,7 +166,6 @@ function geolocation_save_location($item)
 function geolocation_admin_nav($navArray)
 {
     $geoNav = array('Map' => uri('geolocation/map/browse'));
-
     $navArray += $geoNav;
     return $navArray;
 }
@@ -269,6 +264,12 @@ function geolocation_scripts()
 ?>
         <script src="http://maps.google.com/maps?file=api&amp;v=<?php echo GOOGLE_MAPS_API_VERSION; ?>&amp;key=<?php echo $key;?>" type="text/javascript"></script>
 <?php
+        echo js('jquery');
+
+        echo '<script type="text/javascript" charset="utf-8">' . "\n";
+        echo 'jQuery.noConflict();' . "\n";
+        echo '</script>' . "\n";
+
         echo js('map');
     }
     $ht .= ob_get_contents();
@@ -277,13 +278,14 @@ function geolocation_scripts()
 }
 
 /**
- * Returns a multidimensional array of location info
- * @param array|int $item_id
- * @return array
+ * Returns a location (or array of locations) for an item (or array of items)
+ * @param array|Item|int $item An item or item id, or an array of items or item ids
+ * @param boolean $findOnlyOne Whether or not to return only one location if it exists for the item
+ * @return array|Location A location or an array of locations
  **/
-function geolocation_get_location_for_item($item_id)
+function geolocation_get_location_for_item($item, $findOnlyOne=false)
 {
-    return get_db()->getTable('Location')->findLocationByItem($item_id);
+    return get_db()->getTable('Location')->findLocationByItem($item, $findOnlyOne);
 }
 
 /**
@@ -301,17 +303,17 @@ function geolocation_get_center()
 
 /**
  * Returns the default center point for the Google Map
- * @param string $divName The name of the div that holds the google map
+ * @param string $divId The id of the div that holds the google map
  * @param array $options Possible options include:
  *     form = 'geolocation'  (provides the prefix for form elements that should 
  *     catch the map coordinates)
  * @return array
  **/
-function geolocation_google_map($divName = 'map', $options = array()) {
+function geolocation_google_map($divId = 'map', $options = array()) {
 
     $ht = '';
     $ht .= geolocation_scripts();
-    $ht .= '<div id="' . $divName . '" class="map"></div>';
+    $ht .= '<div id="' . $divId . '" class="map"></div>';
     
     //Load this junk in from the plugin config
     $center = geolocation_get_center();
@@ -348,7 +350,11 @@ function geolocation_google_map($divName = 'map', $options = array()) {
     ob_start();
     echo geolocation_marker_style();
 ?>  
-    <script type="text/javascript">var <?php echo $divName; ?>Omeka = new OmekaMap.Browse('<?php echo $divName . "'," . $center . ',' . $options; ?>);</script>
+    <script type="text/javascript">
+        jQuery(document).ready(function() {
+            var <?php echo $divId; ?>OmekaMapBrowse = new OmekaMapBrowse('<?php echo $divId . "'," . $center . ',' . $options; ?>);            
+        });
+    </script>
 <?php
     $ht .= ob_get_contents();
     ob_end_clean();
@@ -396,7 +402,7 @@ function geolocation_google_map_for_item($item, $width = 200, $height = 200, $ha
 </style>
 <h2>Geolocation</h2>
 <?php        
-    $location = current(geolocation_get_location_for_item($item));
+    $location = geolocation_get_location_for_item($item, true);
     
     // Only set the center of the map if this item actually has a location 
     // associated with it
@@ -413,7 +419,7 @@ function geolocation_google_map_for_item($item, $width = 200, $height = 200, $ha
         
         
         echo '<div id="' . $divId . '" class="map"></div>';
-        echo "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Single('$divId', $center, $options);</script>";
+        echo "<script type=\"text/javascript\">var anOmekaMapSingle = new OmekaMapSingle('$divId', $center, $options);</script>";
     } else {
         echo '<p class="map-notification">This item has no location info associated with it.</p>';
     }
@@ -441,7 +447,7 @@ function geolocation_get_marker_html_for_item($item, $markerHtmlClassName='geolo
  **/
 function geolocation_map_form($item, $width = 612, $height = 400) { 
 	$ht = geolocation_scripts();    
-	$loc = array_pop(geolocation_get_location_for_item($item));
+	$location = geolocation_get_location_for_item($item, true);
     $usePost = !empty($_POST);
     if ($usePost) {
 		echo $usePost;
@@ -449,11 +455,11 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
         $lat  = (double) @$_POST['geolocation'][0]['latitude'];
         $zoom = (int) @$_POST['geolocation'][0]['zoom_level'];
         $addr = @$_POST['geolocation'][0]['address'];
-    } else if ($loc) {
-        $lng  = (double) $loc['longitude'];
-        $lat  = (double) $loc['latitude'];
-        $zoom = (int) $loc['zoom_level'];
-        $addr = $loc['address'];
+    } else if ($location) {
+        $lng  = (double) $location['longitude'];
+        $lat  = (double) $location['latitude'];
+        $zoom = (int) $location['zoom_level'];
+        $addr = $location['address'];
     }
     
     ob_start();
@@ -490,7 +496,7 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
                              'posted' => $usePost);
     
     
-    if ($loc or $usePost) {
+    if ($location or $usePost) {
         $options['point'] = array('latitude'=>$lat, 'longitude'=>$lng, 'zoomLevel'=>$zoom);
     }
     
@@ -504,7 +510,7 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
     $options = Zend_Json::encode($options);
     
     $ht .= '<div id="omeka-map-form"></div>';
-    $ht .= "<script type=\"text/javascript\">var formOmeka = new OmekaMap.Form('omeka-map-form', $center, $options);</script>";
+    $ht .= "<script type=\"text/javascript\">var anOmekaMapForm = new OmekaMapForm('omeka-map-form', $center, $options);</script>";
 
     return $ht;
 }

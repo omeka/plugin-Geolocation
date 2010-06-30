@@ -1,6 +1,6 @@
 <?php head(); ?>
 
-<?php geolocation_scripts(); ?>
+<?php echo geolocation_scripts(); ?>
 <h1>Browse Items on the Map (<?php echo $totalItems; ?> items total)</h1>
 
 <div id="primary">
@@ -27,7 +27,11 @@
     }
 
 </style>
-
+<script type="text/javascript" charset="utf-8">
+    jQuery(document).ready(function() {
+        Omeka.Search.activateSearchButtons();
+    });
+</script>
 <div id="geolocation-browse">
 	<div class="pagination">
 	    <?php echo pagination_links(); ?>

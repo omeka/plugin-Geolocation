@@ -15,8 +15,8 @@ class Location extends Omeka_Record
     
     protected function _validate()
     {
-        if(empty($this->item_id)) {
-            $this->addError('item_id', 'Location requires an item ID#');
+        if (empty($this->item_id)) {
+            $this->addError('item_id', 'Location requires an item id.');
         }
     }
 }
