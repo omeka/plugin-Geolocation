@@ -29,11 +29,3 @@
 	    <p class="explanation">An integer greater than or equal to 0, where 0 represents the most zoomed out scale.</p>
 	</div>
 </div>
-
-<div class="field">
-	<label for="map_key">Google Maps API Key:</label>
-	<div class="inputs">
-		<input type="text" class="textinput"  name="map_key" size="60" value="<?php echo get_option('geolocation_gmaps_key'); ?>" id="map_key" />
-	    <p class="explanation">A Google Maps API key.</p>
-	</div>
-</div>

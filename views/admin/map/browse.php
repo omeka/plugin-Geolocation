@@ -6,10 +6,10 @@
 <div id="primary">
 
 <style type="text/css" media="screen">
-    #map_browse{
-        width: 572px;
+    #map_browse {
+        width: 100%;
         height: 436px;
-		float:right;
+		float:left;
 		border:1px solid #ccc; border-width: 1px 1px 1px 0;
 
     }

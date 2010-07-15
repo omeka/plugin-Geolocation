@@ -49,12 +49,16 @@ function geolocation_install()
 
 function geolocation_uninstall()
 {
-	delete_option('geolocation_gmaps_key');
-	delete_option('geolocation_default_latitude');
+    // Delete the plugin options
+    delete_option('geolocation_default_latitude');
 	delete_option('geolocation_default_longitude');
 	delete_option('geolocation_default_zoom_level');
 	delete_option('geolocation_per_page');
+    
+    /* This is for older versions of Geolocation, which used to store a Google Map API key. */
+	delete_option('geolocation_gmaps_key');
 
+    // Drop the Location table
 	$db = get_db();
 	$db->query("DROP TABLE $db->Location");
 }
@@ -70,7 +74,6 @@ function geolocation_config_form()
 function geolocation_config()
 {   
     //Use the form to set a bunch of default options in the db
-    set_option('geolocation_gmaps_key', $_POST['map_key']);
     set_option('geolocation_default_latitude', $_POST['default_latitude']);
     set_option('geolocation_default_longitude', $_POST['default_longitude']);
     set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
@@ -252,26 +255,16 @@ function geolocation_scripts()
 {
     $ht = '';
     ob_start();
-
-    $key = get_option('geolocation_gmaps_key');
-    if (!$key) {
-        ?>
-        <script type="text/javascript" charset="utf-8">
-            alert('Warning: The Geolocation plugin will not work properly until your Google Maps API key has been properly configured.');
-        </script>
-        <?
-    } else {
 ?>
-        <script src="http://maps.google.com/maps?file=api&amp;v=<?php echo GOOGLE_MAPS_API_VERSION; ?>&amp;key=<?php echo $key;?>" type="text/javascript"></script>
+    <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
 <?php
-        echo js('jquery');
+    echo js('jquery');
 
-        echo '<script type="text/javascript" charset="utf-8">' . "\n";
-        echo 'jQuery.noConflict();' . "\n";
-        echo '</script>' . "\n";
+    echo '<script type="text/javascript" charset="utf-8">' . "\n";
+    echo 'jQuery.noConflict();' . "\n";
+    echo '</script>' . "\n";
 
-        echo js('map');
-    }
+    echo js('map');
     $ht .= ob_get_contents();
     ob_end_clean();
     return $ht;
@@ -317,9 +310,6 @@ function geolocation_google_map($divId = 'map', $options = array()) {
     
     //Load this junk in from the plugin config
     $center = geolocation_get_center();
-    
-    //Load the Key into the plugin config
-    //$options['api_key'] = $plugin->getConfig('Google Maps API Key');
     
     //The request parameters get put into the map options
     $params = array();
@@ -445,7 +435,7 @@ function geolocation_get_marker_html_for_item($item, $markerHtmlClassName='geolo
  * @param int $height
  * @return string
  **/
-function geolocation_map_form($item, $width = 612, $height = 400) { 
+function geolocation_map_form($item, $width = '612px', $height = '400px') { 
 	$ht = geolocation_scripts();    
 	$location = geolocation_get_location_for_item($item, true);
     $usePost = !empty($_POST);
@@ -466,9 +456,9 @@ function geolocation_map_form($item, $width = 612, $height = 400) {
 ?>
 <style type="text/css" media="screen">
     /* Need a bit of styling for the geocoder balloon */
-    #omeka-map-form{
-        width: <?php echo $width; ?>px;
-        height: <?php echo $height; ?>px;
+    #omeka-map-form {
+        width: <?php echo $width; ?>;
+        height: <?php echo $height; ?>;
     }
     #geolocation_find_location_by_address {margin-bottom:18px; float:none;}
     #confirm_address,
