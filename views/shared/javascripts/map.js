@@ -90,9 +90,9 @@ function OmekaMapBrowse(mapDivId, center, options) {
 OmekaMapBrowse.prototype = {
     
     afterLoadItems: function() {
-        var listDiv = jQuery(this.options.list);
+        var listDiv = jQuery('#' + this.options.list);
 
-        if (!listDiv) {
+        if (!listDiv.size()) {
           alert('Error: You have no map links div!');
         } else {
           //Create HTML links for each of the markers

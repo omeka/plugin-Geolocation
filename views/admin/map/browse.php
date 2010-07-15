@@ -6,7 +6,7 @@
 
 <style type="text/css" media="screen">
     #map_browse {
-        width: 100%;
+        width: 569px;
         height: 436px;
 		float:left;
 		border:1px solid #ccc; border-width: 1px 1px 1px 0;
