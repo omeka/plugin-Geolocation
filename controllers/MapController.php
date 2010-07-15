@@ -1,5 +1,4 @@
 <?php
-
 require_once 'Omeka/Controller/Action.php';
 
 class Geolocation_MapController extends Omeka_Controller_Action
@@ -9,6 +8,7 @@ class Geolocation_MapController extends Omeka_Controller_Action
         if ($searchJson = $this->_getParam('searchJson')) {
             $_GET = Zend_Json::decode($searchJson);
         }
+        
         // Need to use a plugin hook here to make sure that this search retrieves
         // only items that are on the map.
         $this->_setParam('only_map_items', true);
@@ -16,7 +16,7 @@ class Geolocation_MapController extends Omeka_Controller_Action
         $results = $this->_helper->searchItems();
         
         $items      = $results['items'];
-        $totalItems = $this->_getTotalItems();
+        $totalItems = $results['total_results'];
         $locations  = geolocation_get_location_for_item($items);
 
         // Make the pagination values accessible from the plugin template 
@@ -32,13 +32,4 @@ class Geolocation_MapController extends Omeka_Controller_Action
         
         $this->view->assign(compact('items', 'totalItems', 'locations'));
     }
-
-    private function _getTotalItems()
-    {
-        $itemTable = $this->getTable('Item');
-        $itemSelect = $itemTable->getSelectForCount();
-        $itemSelect->joinInner(array('l' => $this->getDb()->Location), 'l.item_id = i.id', array());
-        return $itemTable->fetchOne($itemSelect);
-    }
-
 }

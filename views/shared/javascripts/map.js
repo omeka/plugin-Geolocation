@@ -1,51 +1,17 @@
 function OmekaMap(mapDivId, center, options) {
-    
+    this.mapDivId = mapDivId;
+    this.center = center;
     this.options = options;
-    
-    // Build the map.
-    var mapOptions = {
-      zoom: center.zoomLevel,
-      center: new google.maps.LatLng(center.latitude, center.longitude),
-      mapTypeId: google.maps.MapTypeId.ROADMAP,
-      navigationControl: true,
-      mapTypeControl: true
-    };    
-    switch(this.mapSize) {
-        case 'small':
-            mapOptions.navigationControlOptions = {
-                style: google.maps.NavigationControlStyle.SMALL
-            }
-        break;
-        case 'large':
-        default:
-            mapOptions.navigationControlOptions = {
-                style: google.maps.NavigationControlStyle.DEFAULT
-            }
-        break;
-    }
-    this.map = new google.maps.Map(document.getElementById(mapDivId), mapOptions); 
-        
-    if (!center) {
-        alert('Error: The center of the map has not been set!');
-        return;
-    }
-    
-    // Show the center marker if we have that enabled.
-    if (center.show) {
-        this.addMarker(center.latitude, 
-                       center.longitude, 
-                       {title: "(" + center.latitude + ',' + center.longitude + ")"}, 
-                       center.markerHtml);
-    }
 }
 
 OmekaMap.prototype = {
     
     map: null,
-    mapDiv: null,
+    mapDivId: null,
     mapSize: 'small',
     markers: [],
     options: {},
+    center: null,
     
     addMarker: function(lat, lng, options, bindHtml) 
     {        
@@ -68,12 +34,53 @@ OmekaMap.prototype = {
                
         this.markers.push(marker);
         return marker;
+    },
+    
+    initMap: function() {
+        
+        // Build the map.
+        var mapOptions = {
+          zoom: this.center.zoomLevel,
+          center: new google.maps.LatLng(this.center.latitude, this.center.longitude),
+          mapTypeId: google.maps.MapTypeId.ROADMAP,
+          navigationControl: true,
+          mapTypeControl: true,
+        };    
+        switch(this.mapSize) {
+            case 'small':
+                mapOptions.navigationControlOptions = {
+                    style: google.maps.NavigationControlStyle.SMALL
+                }
+            break;
+            case 'large':
+            default:
+                mapOptions.navigationControlOptions = {
+                    style: google.maps.NavigationControlStyle.DEFAULT
+                }
+            break;
+        }
+
+        this.map = new google.maps.Map(document.getElementById(this.mapDivId), mapOptions); 
+
+        if (!this.center) {
+            alert('Error: The center of the map has not been set!');
+            return;
+        }
+
+        // Show the center marker if we have that enabled.
+        if (this.center.show) {
+            this.addMarker(this.center.latitude, 
+                           this.center.longitude, 
+                           {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"}, 
+                           this.center.markerHtml);
+        }
     }
 };
 
-function OmekaMapBrowse(mapDiv, center, options) {
-     var omekaMap = new OmekaMap(mapDiv, center, options);
+function OmekaMapBrowse(mapDivId, center, options) {
+     var omekaMap = new OmekaMap(mapDivId, center, options);
      jQuery.extend(true, this, omekaMap);
+     this.initMap();
      
      var kmlUrl = this.makeQuery(this.options.uri, this.options.params);
     //XML loads asynchronously, so need to call for further config only after it has executed
@@ -206,26 +213,29 @@ OmekaMapBrowse.prototype = {
     }
 };
 
-function OmekaMapSingle(mapDiv, center, options) {
-    var omekaMap = new OmekaMap(mapDiv, center, options);
+function OmekaMapSingle(mapDivId, center, options) {
+    var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
+    this.initMap();
 }
 OmekaMapSingle.prototype = {
     mapSize: 'small',
 };
 
-function OmekaMapForm(mapDiv, center, options) {
+function OmekaMapForm(mapDivId, center, options) {
     var that = this;
-    var omekaMap = new OmekaMap(mapDiv, center, options);
+    var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
+    this.initMap();
     
-    this.formDiv = jQuery(this.options.form.id);       
-    
+    this.formDiv = jQuery('#' + this.options.form.id);       
+        
     // Make the map clickable to add a location point
     google.maps.event.addListener(this.map, 'click', function(event) {
 		// If we are clicking a new spot on the map
 		if (confirm('Are you sure you want to change the location of the item?')) {
-		    var marker = that.setOrMoveMarker(event.latLng);
+            var point = event.latLng;
+		    var marker = that.setOrMoveMarker(point);
 		    
 		    //  Make the marker clear the form if clicked.
             google.maps.event.addListener(marker, 'click', function(event) {
@@ -259,15 +269,15 @@ function OmekaMapForm(mapDiv, center, options) {
 	
 	// Add the existing map point.
 	if (this.options.point) {
-	    var marker = this.addMarker(this.options.point.latitude, this.options.point.longitude);
+	    this.map.setZoom(this.options.point.zoomLevel);
+	    
+	    var marker = this.addMarker(this.options.point.latitude, this.options.point.longitude);	    
+	    this.map.setCenter(marker.getPosition());
 	    
 	    //  Make the marker clear the form if clicked.
         google.maps.event.addListener(marker, 'click', function(event) {
             that.clearForm();
         });
-	    
-	    this.map.setCenter(marker.getPosition());
-	    this.map.setZoom(this.options.point.zoomLevel);
 	}
 }
 
@@ -280,7 +290,7 @@ OmekaMapForm.prototype = {
             this.geocoder = new google.maps.Geocoder();
         }    
         this.geocoder.geocode({'address': address}, function(results, status) {
-            //If the point was found, then put the marker on that spot
+            // If the point was found, then put the marker on that spot
 			if (status == google.maps.GeocoderStatus.OK) {
 			    that.clearForm();
 		        var point = results[0].geometry.location;
@@ -294,7 +304,7 @@ OmekaMapForm.prototype = {
                     jQuery('#geolocation_address').focus();
     			}
 			} else {
-			  	//If no point was found, give us an alert
+			  	// If no point was found, give us an alert
 			    alert('Error: "' + address + '" was not found!');
 			}
         });
@@ -304,12 +314,11 @@ OmekaMapForm.prototype = {
         var that = this;
         
         // Get rid of existing markers.
-        if (this.markers.size()) {
-            this.clearForm();
-        }
+        this.clearForm();
         
         // Add the marker
         var marker = this.addMarker(point.lat(), point.lng());
+        that.map.panTo(point);
         
         this.updateForm(point);
         return marker;
@@ -322,7 +331,7 @@ OmekaMapForm.prototype = {
         var lngElement = document.getElementsByName('geolocation[0][longitude]')[0];
         var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
         
-        // If we passed a point, then set the form to that.  If there is no point, clear the form
+        // If we passed a point, then set the form to that. If there is no point, clear the form
         if (point) {
             latElement.value = point.lat();
             lngElement.value = point.lng();

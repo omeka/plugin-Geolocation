@@ -1,7 +1,6 @@
 <?php head(); ?>
 
-<?php echo geolocation_scripts(); ?>
-<h1>Browse Items on the Map (<?php echo $totalItems; ?> items total)</h1>
+<h1>Browse Items on the Map (<?php echo html_escape($totalItems); ?> total)</h1>
 
 <div id="primary">
 

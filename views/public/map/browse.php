@@ -1,7 +1,5 @@
 <?php head(); ?>
 
-<?php echo geolocation_scripts(); ?>
-
 <div id="primary">
 
 <style type="text/css" media="screen">
@@ -11,7 +9,7 @@
 #map_block { clear:both; }
 </style>
 
-<h1>Browse Items on the Map (<?php echo $totalItems; ?> items total)</h1>
+<h1>Browse Items on the Map (<?php echo $totalItems; ?> total)</h1>
 
 <div class="pagination">
     <?php echo pagination_links(); ?>
