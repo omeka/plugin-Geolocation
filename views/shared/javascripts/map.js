@@ -230,12 +230,12 @@ function OmekaMapForm(mapDivId, center, options) {
     
     this.formDiv = jQuery('#' + this.options.form.id);       
         
-    // Make the map clickable to add a location point
+    // Make the map clickable to add a location point.
     google.maps.event.addListener(this.map, 'click', function(event) {
 		// If we are clicking a new spot on the map
 		if (confirm('Are you sure you want to change the location of the item?')) {
             var point = event.latLng;
-		    var marker = that.setOrMoveMarker(point);
+		    var marker = that.setMarker(point);
 		    
 		    //  Make the marker clear the form if clicked.
             google.maps.event.addListener(marker, 'click', function(event) {
@@ -246,12 +246,12 @@ function OmekaMapForm(mapDivId, center, options) {
 	    }	    
 	});
 	
-	// Make the map update on zoom changes
+	// Make the map update on zoom changes.
 	google.maps.event.addListener(this.map, 'zoom_changed', function() {
 		that.updateZoomForm();
 	});
 	
-	// Geocoder address lookup
+	// Make the Find By Address button lookup the geocode of an address and add a marker.
 	jQuery('#geolocation_find_location_by_address').bind('click', function(event){
 		var address = jQuery('#geolocation_address').val();
 		that.findAddress(address);
@@ -260,7 +260,7 @@ function OmekaMapForm(mapDivId, center, options) {
 		return false;
 	});
 	
-	// Make the return key in the geolocation address input box click the button to find the address
+	// Make the return key in the geolocation address input box click the button to find the address.
     jQuery('#geolocation_address').bind('keyup', function(event){ 
         if (event.which == 13) {
             jQuery('#geolocation_find_location_by_address').click();
@@ -276,7 +276,9 @@ function OmekaMapForm(mapDivId, center, options) {
 	    
 	    //  Make the marker clear the form if clicked.
         google.maps.event.addListener(marker, 'click', function(event) {
-            that.clearForm();
+            if (confirm('Are you sure you want to remove the location of the item?')) {
+                that.clearForm();
+            }
         });
 	}
 }
@@ -284,6 +286,9 @@ function OmekaMapForm(mapDivId, center, options) {
 OmekaMapForm.prototype = {
     mapSize: 'large',
     
+    /* Find the geocode of the address and ask the user 
+    if they want to add a marker to that point.  
+    If so, add the marker. */
     findAddress: function(address) {
         var that = this;
         if (!this.geocoder) {
@@ -292,15 +297,14 @@ OmekaMapForm.prototype = {
         this.geocoder.geocode({'address': address}, function(results, status) {
             // If the point was found, then put the marker on that spot
 			if (status == google.maps.GeocoderStatus.OK) {
-			    that.clearForm();
-		        var point = results[0].geometry.location;
-		        var marker = that.addMarker(point.lat(), point.lng());
-		        that.map.panTo(point);
-    		                     
     			if (confirm('Are you sure you want to change the location of the item?')) {
-			        var marker = that.setOrMoveMarker(point);
+			        that.clearForm();
+		            var point = results[0].geometry.location;
+		            var marker = that.addMarker(point.lat(), point.lng());
+		            that.map.panTo(point);             
+			        var marker = that.setMarker(point);
     			} else {
-                    that.clearForm();
+    			    jQuery('#geolocation_address').val('');
                     jQuery('#geolocation_address').focus();
     			}
 			} else {
@@ -309,8 +313,9 @@ OmekaMapForm.prototype = {
 			}
         });
     },
-       
-    setOrMoveMarker: function(point) {
+    
+    /* Set the marker to the point. */   
+    setMarker: function(point) {
         var that = this;
         
         // Get rid of existing markers.
@@ -318,14 +323,15 @@ OmekaMapForm.prototype = {
         
         // Add the marker
         var marker = this.addMarker(point.lat(), point.lng());
+        
+        // Pan the map to the marker
         that.map.panTo(point);
         
         this.updateForm(point);
         return marker;
     },
     
-    // This is coupled to the structure of the form
-    // It would be nice if it wasn't
+    /* Update the latitude, longitude, and zoom of the form. */
     updateForm: function(point) {
         var latElement = document.getElementsByName('geolocation[0][latitude]')[0];
         var lngElement = document.getElementsByName('geolocation[0][longitude]')[0];
@@ -343,11 +349,13 @@ OmekaMapForm.prototype = {
         }        
     },
     
+    /* Update the zoom input of the form to be the current zoom on the map. */
     updateZoomForm: function() {
         var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
         zoomElement.value = this.map.getZoom();
     },
     
+    /* Clear the form of all markers. */
     clearForm: function() {
         // Remove the markers from the map
         for (var i = 0; i < this.markers.length; i++) {
@@ -359,5 +367,17 @@ OmekaMapForm.prototype = {
         
         // Update the form
         this.updateForm();
+    },
+    
+    /* Resize the map and center it on the first marker. */
+    resize: function() {
+        google.maps.event.trigger(this.map, 'resize');
+        if (this.markers.size()) {
+            var marker = this.markers[0];
+            var point = marker.getPosition();
+        } else {
+            var point = new google.maps.LatLng(this.center.latitude, this.center.longitude);
+        }
+        this.map.setCenter(point);
     }
 };

@@ -1,5 +1,5 @@
 <?php head(); ?>
-
+<?php echo geolocation_scripts(); ?>
 <h1>Browse Items on the Map (<?php echo html_escape($totalItems); ?> total)</h1>
 
 <div id="primary">
@@ -27,7 +27,7 @@
 
 </style>
 <script type="text/javascript" charset="utf-8">
-    jQuery(document).ready(function() {
+    jQuery(window).load(function() {
         Omeka.Search.activateSearchButtons();
     });
 </script>

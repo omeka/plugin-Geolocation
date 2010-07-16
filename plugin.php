@@ -259,7 +259,7 @@ function geolocation_scripts()
     <script type="text/javascript" charset="utf-8">
         jQuery.noConflict();
         
-        jQuery(document).ready(function() {
+        jQuery(window).load(function() {
             var script = document.createElement("script");
             script.type = "text/javascript";
             script.src = "http://maps.google.com/maps/api/js?sensor=false&callback=initializeGoogleMaps";
@@ -316,7 +316,6 @@ function geolocation_get_center()
 function geolocation_google_map($divId = 'map', $options = array()) {
 
     $ht = '';
-    $ht .= geolocation_scripts();
     $ht .= '<div id="' . $divId . '" class="map"></div>';
     
     // Load this junk in from the plugin config
@@ -371,7 +370,6 @@ function geolocation_google_map($divId = 'map', $options = array()) {
  **/
 function geolocation_google_map_for_item($item, $width = '200px', $height = '200px', $hasBalloonForMarker = true, $markerHtmlClassName = 'geolocation_balloon') {        
     $ht = '';
-    $ht .= geolocation_scripts(); 
     $divId = "item-map-{$item->id}";
     ob_start();
     if ($hasBalloonForMarker) {
@@ -508,8 +506,11 @@ function geolocation_map_form($item, $width = '500px', $height = '410px') {
 ?>
     <div id="<?php echo html_escape($divId); ?>"></div>
     <script type="text/javascript">
-        googleMapInitializeCallbacks.push(function() {
-            var anOmekaMapForm = new OmekaMapForm('<?php echo $divId . "'," . $center . ',' . $options; ?>);            
+        googleMapInitializeCallbacks.push(function() {            
+            var anOmekaMapForm = new OmekaMapForm('<?php echo $divId . "'," . $center . ',' . $options; ?>);
+            document.observe('omeka:edititemtabafterchanged', function(e){
+                anOmekaMapForm.resize();
+            });
         });
     </script>
 <?php

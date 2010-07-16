@@ -1,4 +1,5 @@
 <?php head(); ?>
+<?php echo geolocation_scripts(); ?>
 
 <div id="primary">
 
