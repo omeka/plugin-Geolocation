@@ -29,3 +29,10 @@
 	    <p class="explanation">An integer greater than or equal to 0, where 0 represents the most zoomed out scale.</p>
 	</div>
 </div>
+
+<div class="field">
+    <label for="add_geolocation_field_to_contribution_form">Add Geolocation Field To Contribution Form:</label>
+    <?php echo __v()->formCheckbox('add_geolocation_field_to_contribution_form', true, 
+     array('checked'=>(boolean)get_option('add_geolocation_field_to_contribution_form'))); ?>
+     <p class="explanation">If the Contribution plugin is installed and activated, Geolocation  will add a geolocation field to the contribution form to associate a geolocation to a contributed item.</p>
+</div>

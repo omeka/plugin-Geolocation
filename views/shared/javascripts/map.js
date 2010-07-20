@@ -202,9 +202,9 @@ OmekaMapBrowse.prototype = {
             link.html(marker.getTitle());
 
             // Clicking the link should take us to the map
-            link.bind('click', {map: that.map}, function(event) {
+            link.bind('click', {}, function(event) {
                 google.maps.event.trigger(marker, 'click');
-                map.panTo(marker.getPosition()); 
+                that.map.panTo(marker.getPosition()); 
             });     
 
             link.appendTo(listElement);
@@ -233,15 +233,9 @@ function OmekaMapForm(mapDivId, center, options) {
     // Make the map clickable to add a location point.
     google.maps.event.addListener(this.map, 'click', function(event) {
 		// If we are clicking a new spot on the map
-		if (confirm('Are you sure you want to change the location of the item?')) {
+		if (!that.options.confirmLocationChange || confirm('Are you sure you want to change the location of the item?')) {
             var point = event.latLng;
 		    var marker = that.setMarker(point);
-		    
-		    //  Make the marker clear the form if clicked.
-            google.maps.event.addListener(marker, 'click', function(event) {
-                that.clearForm();
-            });
-		    
 		    jQuery('#geolocation_address').val('');			        
 	    }	    
 	});
@@ -261,9 +255,11 @@ function OmekaMapForm(mapDivId, center, options) {
 	});
 	
 	// Make the return key in the geolocation address input box click the button to find the address.
-    jQuery('#geolocation_address').bind('keyup', function(event){ 
+    jQuery('#geolocation_address').bind('keydown', function(event){ 
         if (event.which == 13) {
             jQuery('#geolocation_find_location_by_address').click();
+            event.stopPropagation();
+    		return false;
         }
     });
 	
@@ -271,15 +267,9 @@ function OmekaMapForm(mapDivId, center, options) {
 	if (this.options.point) {
 	    this.map.setZoom(this.options.point.zoomLevel);
 	    
-	    var marker = this.addMarker(this.options.point.latitude, this.options.point.longitude);	    
+	    var point = new google.maps.LatLng(this.options.point.latitude, this.options.point.longitude);
+	    var marker = this.setMarker(point);	    
 	    this.map.setCenter(marker.getPosition());
-	    
-	    //  Make the marker clear the form if clicked.
-        google.maps.event.addListener(marker, 'click', function(event) {
-            if (confirm('Are you sure you want to remove the location of the item?')) {
-                that.clearForm();
-            }
-        });
 	}
 }
 
@@ -297,11 +287,8 @@ OmekaMapForm.prototype = {
         this.geocoder.geocode({'address': address}, function(results, status) {
             // If the point was found, then put the marker on that spot
 			if (status == google.maps.GeocoderStatus.OK) {
-    			if (confirm('Are you sure you want to change the location of the item?')) {
-			        that.clearForm();
+    			if (!that.options.confirmLocationChange || confirm('Are you sure you want to change the location of the item?')) {
 		            var point = results[0].geometry.location;
-		            var marker = that.addMarker(point.lat(), point.lng());
-		            that.map.panTo(point);             
 			        var marker = that.setMarker(point);
     			} else {
     			    jQuery('#geolocation_address').val('');
@@ -326,6 +313,13 @@ OmekaMapForm.prototype = {
         
         // Pan the map to the marker
         that.map.panTo(point);
+        
+        //  Make the marker clear the form if clicked.
+        google.maps.event.addListener(marker, 'click', function(event) {
+            if (!that.options.confirmLocationChange || confirm('Are you sure you want to remove the location of the item?')) {
+                that.clearForm();
+            }
+        });
         
         this.updateForm(point);
         return marker;
