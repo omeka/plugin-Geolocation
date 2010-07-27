@@ -81,7 +81,7 @@ function OmekaMapBrowse(mapDivId, center, options) {
      var omekaMap = new OmekaMap(mapDivId, center, options);
      jQuery.extend(true, this, omekaMap);
      this.initMap();
-     
+
      var kmlUrl = this.makeQuery(this.options.uri, this.options.params);
     //XML loads asynchronously, so need to call for further config only after it has executed
     this.loadKmlIntoMap(kmlUrl);
@@ -249,6 +249,7 @@ function OmekaMapForm(mapDivId, center, options) {
 	jQuery('#geolocation_find_location_by_address').bind('click', function(event){
 		var address = jQuery('#geolocation_address').val();
 		that.findAddress(address);
+				
 		//Don't submit the form
         event.stopPropagation();
 		return false;
@@ -276,9 +277,7 @@ function OmekaMapForm(mapDivId, center, options) {
 OmekaMapForm.prototype = {
     mapSize: 'large',
     
-    /* Find the geocode of the address and ask the user 
-    if they want to add a marker to that point.  
-    If so, add the marker. */
+    /* Get the geolocation of the address and add marker. */
     findAddress: function(address) {
         var that = this;
         if (!this.geocoder) {
@@ -287,16 +286,20 @@ OmekaMapForm.prototype = {
         this.geocoder.geocode({'address': address}, function(results, status) {
             // If the point was found, then put the marker on that spot
 			if (status == google.maps.GeocoderStatus.OK) {
-    			if (!that.options.confirmLocationChange || confirm('Are you sure you want to change the location of the item?')) {
-		            var point = results[0].geometry.location;
-			        var marker = that.setMarker(point);
-    			} else {
-    			    jQuery('#geolocation_address').val('');
+    			var point = results[0].geometry.location;
+    			
+        		// If required, ask the user if they want to add a marker to the geolocation point of the address.  
+                // If so, add the marker, otherwise clear the address.
+        		if (!that.options.confirmLocationChange || confirm('Are you sure you want to change the location of the item?')) {
+        	        var marker = that.setMarker(point);
+        		} else {
+        		    jQuery('#geolocation_address').val('');
                     jQuery('#geolocation_address').focus();
-    			}
+        		}
 			} else {
 			  	// If no point was found, give us an alert
 			    alert('Error: "' + address + '" was not found!');
+			    return null;
 			}
         });
     },

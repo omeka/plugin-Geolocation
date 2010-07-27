@@ -4,10 +4,38 @@
 <div id="primary">
 
 <style type="text/css" media="screen">
-#map_browse { width: 100%; height: 500px;}
-#map-links li {overflow:hidden; border-bottom:1px dotted #ccc;}
-#map-links li a {float:right; width:50%; text-decoration:none; }
-#map_block { clear:both; }
+#map_browse { 
+    width: 569px; 
+    height: 436px;
+}
+
+#map-links ul {
+    margin-top: 20px;
+}
+
+#map-links li {
+    overflow:hidden; 
+    border-bottom:1px dotted #ccc;
+}
+
+#map-links li a {
+    float:right; 
+    text-decoration:none; 
+}
+
+#map_block { 
+    float:right; 
+    clear:both; 
+}
+
+#map-links {
+    float:left;
+}
+
+#map-links a {
+    display:block;
+}
+
 </style>
 
 <h1>Browse Items on the Map (<?php echo $totalItems; ?> total)</h1>

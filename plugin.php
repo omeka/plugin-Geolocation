@@ -8,11 +8,13 @@ add_plugin_hook('install', 'geolocation_install');
 add_plugin_hook('uninstall', 'geolocation_uninstall');
 add_plugin_hook('config_form', 'geolocation_config_form');
 add_plugin_hook('config', 'geolocation_config');
+add_plugin_hook('define_acl', 'geolocation_define_acl');
 add_plugin_hook('define_routes', 'geolocation_add_routes');
 add_plugin_hook('after_save_form_item', 'geolocation_save_location');
 add_plugin_hook('admin_append_to_items_show_secondary', 'geolocation_admin_show_item_map');
-add_plugin_hook('item_browse_sql', 'geolocation_show_only_map_items');
-add_plugin_hook('define_acl', 'geolocation_define_acl');
+add_plugin_hook('admin_append_to_advanced_search', 'geolocation_admin_append_to_advanced_search');
+add_plugin_hook('public_append_to_advanced_search', 'geolocation_public_append_to_advanced_search');
+add_plugin_hook('item_browse_sql', 'geolocation_item_browse_sql');
 add_plugin_hook('contribution_append_to_type_form', 'geolocation_append_contribution_form');
 add_plugin_hook('contribution_save_form', 'geolocation_save_contribution_form');
 
@@ -191,38 +193,6 @@ function geolocation_kml_action_context($context, $controller)
     }
     return $context;
 }
-    
-function geolocation_show_only_map_items($select, $params)
-{
-    // It would be nice if the item_browse_sql hook also passed in the request 
-    // object.
-    $request = Omeka_Context::getInstance()->getRequest();
-    
-    if ($request) {
-        if ($request->get('only_map_items')) {            
-            $db = get_db();
-            //INNER JOIN the locations table
-            $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id', 
-                array('latitude', 'longitude', 'address'));
-        }
-    
-        // This would be better as a filter that actually manipulated the 
-        // 'per_page' value via this plugin. Until then, we need to hack the 
-        // LIMIT clause for the SQL query that determines how many items to 
-        // return.
-        if ($request->get('use_map_per_page')) {            
-            // If the limit of the SQL query is 1, we're probably doing a 
-            // COUNT(*)
-            $limitCount = $select->getPart(Zend_Db_Select::LIMIT_COUNT);
-            if ($limitCount != 1) {                
-                $select->reset(Zend_Db_Select::LIMIT_COUNT);
-                $select->reset(Zend_Db_Select::LIMIT_OFFSET);
-                $pageNum = $request->get('page') or $pageNum = 1;                
-                $select->limitPage($pageNum, geolocation_get_map_items_per_page());
-            }
-        }
-    }
-}
 
 function geolocation_get_map_items_per_page()
 {
@@ -255,52 +225,78 @@ function geolocation_item_form_tabs($tabs)
 // Helpers
 
 /**
- * Returns the script tags that include the GMaps JS from afar
+ * Returns the html for loading the javascripts used by the plugin.
+ *
+ * @param bool $loadJQuery Whether or not to load the jQuery script.
+ * @param bool $pageLoaded Whether or not the page is already loaded.  
+ * If this function is used with AJAX, this parameter may need to be set to true.
  * @return string
- **/
+ */
 function geolocation_scripts($loadJQuery=true, $pageLoaded=false)
 {
     $ht = '';
-    
     if ($loadJQuery) {
-        $ht .= js('jquery');
-        ob_start();
-?>
-        <script type="text/javascript" charset="utf-8">
-            jQuery.noConflict();
-        </script>
-<?php
-        $ht .= ob_get_contents();
-        ob_end_clean();
+        $ht .= geolocation_load_jquery();
     }
-    
+    $ht .= geolocation_load_google_maps($pageLoaded);
+    $ht .= js('map');
+    return $ht;
+}
+
+/**
+ * Returns the html for loading the Google Maps javascript
+ *
+ * @param bool $pageLoaded Whether or not the page is already loaded.  
+ * If this function is used with AJAX, this parameter may need to be set to true.
+ * @return string
+ */
+function geolocation_load_google_maps($pageLoaded=false)
+{
+    $ht = '';
     ob_start();
 ?>
     <script type="text/javascript" charset="utf-8">
     <?php if (!$pageLoaded) { ?>
         jQuery(window).load(function() {
     <?php } ?>
-    
             var script = document.createElement("script");
             script.type = "text/javascript";
             script.src = "http://maps.google.com/maps/api/js?sensor=false&callback=initializeGoogleMaps";
             document.body.appendChild(script);
-    
     <?php if (!$pageLoaded) { ?>
         });
     <?php } ?>
+        
         function initializeGoogleMaps() {
             for(var i=0; i < googleMapInitializeCallbacks.length; i++) {
                 googleMapInitializeCallbacks[i]();
             }
         }
-        
+
         var googleMapInitializeCallbacks = new Array();
     </script>
 <?php
     $ht .= ob_get_contents();
     ob_end_clean();
-    $ht .= js('map');
+    return $ht;
+}
+
+/**
+ * Returns the html for loading the jQuery javascript
+ * @return string
+ */
+function geolocation_load_jquery() 
+{
+    $ht = '';
+    $ht .= js('jquery');
+    ob_start();
+?>
+    <script type="text/javascript" charset="utf-8">
+        jQuery.noConflict();
+    </script>
+<?php
+    $ht .= ob_get_contents();
+    ob_end_clean();
     return $ht;
 }
 
@@ -615,4 +611,149 @@ function geolocation_save_contribution_form($contributionType, $item, $post)
     if (get_option('add_geolocation_field_to_contribution_form') == '1') {
         geolocation_save_location($item);
     }
+}
+
+function geolocation_item_browse_sql($select, $params)
+{
+    // It would be nice if the item_browse_sql hook also passed in the request 
+    // object.
+    if ($request = Omeka_Context::getInstance()->getRequest()) {
+
+        $db = get_db();
+
+        // Get the address, latitude, longitude, and the radius from parameters
+        $address = trim($request->getParam('geolocation-address'));
+        $currentLat = trim($request->getParam('geolocation-latitude'));
+        $currentLng = trim($request->getParam('geolocation-longitude'));
+        $radius = trim($request->getParam('geolocation-radius'));
+
+        if ($request->get('only_map_items') || $address != '') {
+            //INNER JOIN the locations table
+            $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id', 
+                array('latitude', 'longitude', 'address'));
+        }
+        
+        // Limit items to those that exist within a geographic radius if an address and radius are provided 
+        if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
+            // SELECT distance based upon haversine forumula
+            $select->columns('3956 * 2 * ASIN(SQRT(  POWER(SIN(('.$currentLat.' - l.latitude) * pi()/180 / 2), 2) + COS('.$currentLat.' * pi()/180) *  COS(l.latitude * pi()/180) *  POWER(SIN(('.$currentLng.' -l.longitude) * pi()/180 / 2), 2)  )) as distance');
+            // WHERE the distance is within radius miles of the specified lat & long
+             $select->where('(latitude BETWEEN '.$currentLat.' - ' . $radius . '/69 AND ' . $currentLat . ' + ' . $radius .  '/69)
+             AND (longitude BETWEEN ' . $currentLng . ' - ' . $radius . '/69 AND ' . $currentLng  . ' + ' . $radius .  '/69)');
+            //ORDER by the closest distances
+            $select->order('distance');
+        }
+    
+        // This would be better as a filter that actually manipulated the 
+        // 'per_page' value via this plugin. Until then, we need to hack the 
+        // LIMIT clause for the SQL query that determines how many items to 
+        // return.
+        if ($request->get('use_map_per_page')) {            
+            // If the limit of the SQL query is 1, we're probably doing a 
+            // COUNT(*)
+            $limitCount = $select->getPart(Zend_Db_Select::LIMIT_COUNT);
+            if ($limitCount != 1) {                
+                $select->reset(Zend_Db_Select::LIMIT_COUNT);
+                $select->reset(Zend_Db_Select::LIMIT_OFFSET);
+                $pageNum = $request->get('page') or $pageNum = 1;                
+                $select->limitPage($pageNum, geolocation_get_map_items_per_page());
+            }
+        }
+    }
+}
+
+function geolocation_admin_append_to_advanced_search() 
+{
+    $ht = '';
+    
+    // Get the request object
+    $request = Omeka_Context::getInstance()->getRequest();
+    
+    if ($request->getControllerName() == 'map' && $request->getActionName() == 'browse') {
+        $ht .= geolocation_append_to_advanced_search('search');
+    } else if ($request->getControllerName() == 'items' && $request->getActionName() == 'advanced-search') {
+        $ht .= geolocation_scripts(true, false);
+        $ht .= geolocation_append_to_advanced_search();
+    }
+    
+    echo $ht;
+}
+
+function geolocation_public_append_to_advanced_search() 
+{
+    $ht = '';
+    $ht .= geolocation_scripts(true, false);
+    $ht .= geolocation_append_to_advanced_search();
+    echo $ht;
+}
+
+function geolocation_append_to_advanced_search($searchFormId = 'advanced-search-form', $searchButtonId = 'submit_search_advanced')
+{
+    // Get the request object
+    $request = Omeka_Context::getInstance()->getRequest();
+
+    // Get the address, latitude, longitude, and the radius from parameters
+    $address = trim($request->getParam('geolocation-address'));
+    $currentLat = trim($request->getParam('geolocation-latitude'));
+    $currentLng = trim($request->getParam('geolocation-longitude'));
+    $radius = trim($request->getParam('geolocation-radius'));
+    
+    if (empty($radius)) {
+        $radius = 10; // 10 miles
+    }
+    
+    $ht = '';
+    ob_start();
+?>    
+    <div class="field">
+	    <?php echo label('geolocation-address', 'Geographic Address'); ?>
+	    <div class="inputs">
+	        <?php echo text(array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput'),$address); ?>
+            <?php echo hidden(array('name'=>'geolocation-latitude','id'=>'geolocation-latitude'),$currentLat); ?>
+            <?php echo hidden(array('name'=>'geolocation-longitude','id'=>'geolocation-longitude'),$currentLng); ?>
+            <?php echo hidden(array('name'=>'geolocation-radius','id'=>'geolocation-radius'),$radius); ?>
+	    </div>
+	</div>
+	
+	<div class="field">
+		<?php echo label('geolocation-radius','Geographic Radius (miles)'); ?>
+		<div class="inputs">
+	        <?php echo text(array('name'=>'geolocation-radius','size' => '40','id'=>'geolocation-radius','class'=>'textinput'),$radius); ?>
+	    </div>
+	</div>
+	
+	<script>
+	    jQuery(document).ready(function() {
+    	    jQuery('#<?php echo $searchButtonId; ?>').click(function(event) {
+    	            	        
+    	        // Find the geolocation for the address
+    	        var address = jQuery('#geolocation-address').val();
+                
+                if (jQuery.trim(address).length > 0) {
+                    var geocoder = new google.maps.Geocoder();	        
+                    geocoder.geocode({'address': address}, function(results, status) {
+                        // If the point was found, then put the marker on that spot
+                		if (status == google.maps.GeocoderStatus.OK) {
+                			var gLatLng = results[0].geometry.location;
+                	        // Set the latitude and longitude hidden inputs
+                	        jQuery('#geolocation-latitude').val(gLatLng.lat());
+                	        jQuery('#geolocation-longitude').val(gLatLng.lng());
+                            jQuery('#<?php echo $searchFormId; ?>').submit();
+                		} else {
+                		  	// If no point was found, give us an alert
+                		    alert('Error: "' + address + '" was not found!');
+                		}
+                    });
+                    
+                    event.stopImmediatePropagation();
+        	        return false;
+                }                
+    	    });
+	    });
+	</script>
+	
+<?php
+    $ht .= ob_get_contents();
+    ob_end_clean();
+    return $ht;
 }

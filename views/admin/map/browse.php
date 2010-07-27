@@ -10,7 +10,6 @@
         height: 436px;
 		float:left;
 		border:1px solid #ccc; border-width: 1px 1px 1px 0;
-
     }
 	.balloon {width:400px !important; font-size:1.2em;}
 	.balloon .title {font-weight:bold;margin-bottom:1.5em;} 
