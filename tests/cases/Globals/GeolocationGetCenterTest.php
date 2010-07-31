@@ -2,7 +2,7 @@
 /**
  * Tests for geolocation_get_center function
  */
-class GeolocationGetCenter extends Geolocation_TestCase 
+class GeolocationGetCenterTest extends Geolocation_TestCase 
 {
 	/**
 	 * Tests whether geolocation_get_center correctly returns the default latitude, longitude, and zoom level
@@ -10,7 +10,6 @@ class GeolocationGetCenter extends Geolocation_TestCase
 	public function testGeolocationGetCenter()
 	{
         $this->_checkValidCenter();
-        
         set_option('geolocation_default_latitude', '4');
         set_option('geolocation_default_longitude', '5');
         set_option('geolocation_default_zoom', '6');
