@@ -539,9 +539,11 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
     <script type="text/javascript">
         googleMapInitializeCallbacks.push(function() {            
             var anOmekaMapForm = new OmekaMapForm('<?php echo $divId . "'," . $center . ',' . $options; ?>);
-            document.observe('omeka:edititemtabafterchanged', function(e){
-                anOmekaMapForm.resize();
-            });
+            if (Control.Tabs) {
+                Control.Tabs.observe('afterChange',function(){  
+                    anOmekaMapForm.resize();
+                });
+            }
         });
     </script>
 <?php
