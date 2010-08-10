@@ -6,9 +6,9 @@
  * @package Omeka
  */
 
-defined('GEOLOCATION_DIR') || define('GEOLOCATION_DIR', dirname(dirname(__FILE__)));
-require_once 'Geolocation_ViewTestCase.php';
-require_once 'Geolocation_TestCase.php';
+define('GEOLOCATION_DIR', dirname(dirname(__FILE__)));
+
+require_once 'Geolocation_IntegrationHelper.php';
 
 /**
  * 
