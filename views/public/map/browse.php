@@ -1,4 +1,4 @@
-<?php head(); ?>
+<?php head(array('title' => 'Browse Map','bodyid'=>'map','bodyclass' => 'browse item')); ?>
 <?php echo geolocation_scripts(); ?>
 
 <div id="primary">
