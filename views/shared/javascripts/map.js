@@ -44,7 +44,7 @@ OmekaMap.prototype = {
           center: new google.maps.LatLng(this.center.latitude, this.center.longitude),
           mapTypeId: google.maps.MapTypeId.ROADMAP,
           navigationControl: true,
-          mapTypeControl: true,
+          mapTypeControl: true
         };    
         switch(this.mapSize) {
             case 'small':
@@ -219,7 +219,7 @@ function OmekaMapSingle(mapDivId, center, options) {
     this.initMap();
 }
 OmekaMapSingle.prototype = {
-    mapSize: 'small',
+    mapSize: 'small'
 };
 
 function OmekaMapForm(mapDivId, center, options) {
@@ -369,11 +369,12 @@ OmekaMapForm.prototype = {
     /* Resize the map and center it on the first marker. */
     resize: function() {
         google.maps.event.trigger(this.map, 'resize');
+        var point;
         if (this.markers.size()) {
             var marker = this.markers[0];
-            var point = marker.getPosition();
+            point = marker.getPosition();
         } else {
-            var point = new google.maps.LatLng(this.center.latitude, this.center.longitude);
+            point = new google.maps.LatLng(this.center.latitude, this.center.longitude);
         }
         this.map.setCenter(point);
     }
