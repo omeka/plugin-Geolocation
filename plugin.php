@@ -370,7 +370,7 @@ function geolocation_google_map($divId = 'map', $options = array()) {
 ?>  
     <script type="text/javascript">
         googleMapInitializeCallbacks.push(function() {
-            var <?php echo Inflector::variablize($divId); ?>OmekaMapBrowse = new OmekaMapBrowse('<?php echo $divId . "'," . $center . ',' . $options; ?>);            
+            var <?php echo Inflector::variablize($divId); ?>OmekaMapBrowse = new OmekaMapBrowse(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
         });
     </script>
 <?php
@@ -435,7 +435,7 @@ function geolocation_google_map_for_item($item, $width = '200px', $height = '200
 ?>        
         <script type="text/javascript">
             googleMapInitializeCallbacks.push(function() {
-                var <?php echo Inflector::variablize($divId); ?>OmekaMapSingle = new OmekaMapSingle('<?php echo $divId . "'," . $center . ',' . $options; ?>);            
+                var <?php echo Inflector::variablize($divId); ?>OmekaMapSingle = new OmekaMapSingle(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
             });
         </script>
 <?php         
@@ -538,7 +538,7 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
     <div id="<?php echo html_escape($divId); ?>"></div>
     <script type="text/javascript">
         googleMapInitializeCallbacks.push(function() {            
-            var anOmekaMapForm = new OmekaMapForm('<?php echo $divId . "'," . $center . ',' . $options; ?>);
+            var anOmekaMapForm = new OmekaMapForm(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
             if (Control.Tabs) {
                 Control.Tabs.observe('afterChange',function(){  
                     anOmekaMapForm.resize();
@@ -619,7 +619,7 @@ function geolocation_item_browse_sql($select, $params)
 {
     // It would be nice if the item_browse_sql hook also passed in the request 
     // object.
-    if ($request = Omeka_Context::getInstance()->getRequest()) {
+    if (($request = Omeka_Context::getInstance()->getRequest())) {
 
         $db = get_db();
 
@@ -724,7 +724,7 @@ function geolocation_append_to_advanced_search($searchFormId = 'advanced-search-
 	    </div>
 	</div>
 	
-	<script>
+	<script type="text/javascript">
 	    jQuery(document).ready(function() {
     	    jQuery('#<?php echo $searchButtonId; ?>').click(function(event) {
     	            	        
