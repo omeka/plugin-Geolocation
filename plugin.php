@@ -182,7 +182,7 @@ function geolocation_admin_nav($navArray)
 function geolocation_kml_response_context($context)
 {
     $context['kml'] = array('suffix'  => 'kml', 
-                            'headers' => array('Content-Type' => 'application/vnd.google-earth.kml+xml'));
+                            'headers' => array('Content-Type' => 'text/xml'));
     return $context;
 }
 

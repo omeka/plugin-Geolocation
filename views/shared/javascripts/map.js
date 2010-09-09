@@ -102,37 +102,44 @@ OmekaMapBrowse.prototype = {
     /* Note to self: have to parse KML manually b/c Google Maps API cannot access the KML behind the admin interface */
     loadKmlIntoMap: function (kmlUrl) {
         var that = this;
+        jQuery.ajax({
+            type: 'GET',
+            dataType: 'xml',
+            url: kmlUrl, 
+            success: function(data) {
+                var xml = jQuery(data);
         
-        jQuery.get(kmlUrl, {}, function (data) {
+                /* KML can be parsed as:
+                    kml - root element
+                        Placemark
+                            namewithlink
+                            description
+                            Point - longitude,latitude
+                */
+                var placeMarks = xml.find('Placemark');
+        
+                // If we have some placemarks, load them
+                if (placeMarks.size()) {
+                    // Retrieve the balloon styling from the KML file
+                    that.browseBalloon = that.getBalloonStyling(xml);
                 
-            var xml = jQuery(data);
-        
-            /* KML can be parsed as:
-                kml - root element
-                    Placemark
-                        namewithlink
-                        description
-                        Point - longitude,latitude
-            */
-            var placeMarks = xml.find('Placemark');
-        
-            // If we have some placemarks, load them
-            if (placeMarks.size()) {
+                    // Build the markers from the placemarks
+                    jQuery.each(placeMarks, function (index, placeMark) {
+                        placeMark = jQuery(placeMark);
+                        that.buildMarkerFromPlacemark(placeMark);
+                    });
             
-                // Retrieve the balloon styling from the KML file
-                that.browseBalloon = that.getBalloonStyling(xml);
-                
-                // Build the markers from the placemarks
-                jQuery.each(placeMarks, function (index, placeMark) {
-                    placeMark = jQuery(placeMark);
-                    that.buildMarkerFromPlacemark(placeMark);
-                });
-            
-                // We have successfully loaded some map points, so continue setting up the map object
-                return that.afterLoadItems();
-            } else {
-                // @todo Elaborate with an error message
-                return false;
+                    // We have successfully loaded some map points, so continue setting up the map object
+                    return that.afterLoadItems();
+                } else {
+                    // @todo Elaborate with an error message
+                    return false;
+                }            
+            },
+            error: function(xhr, type, exception) {
+                alert("Error XHR: " + xhr);
+                alert("Error type: " + type);
+                alert("Error exception: " + exception.message);
             }
         });        
     },
