@@ -466,14 +466,14 @@ function geolocation_get_marker_html_for_item($item, $markerHtmlClassName = 'geo
  * @return string
  **/
 function geolocation_map_form($item, $width = '500px', $height = '410px', $label = 'Find A Location For The Item:', $confirmLocationChange = true,  $post = null) { 	
-	$ht = '';
+    $ht = '';
 	
-	$center = geolocation_get_center();
+    $center = geolocation_get_center();
     $center['show'] = false;
-	
-	$location = geolocation_get_location_for_item($item, true);
+
+    $location = geolocation_get_location_for_item($item, true);
     
-    if ($post===null) {
+    if ($post === null) {
         $post = $_POST;
     }
         
@@ -490,10 +490,7 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
             $zoom = (int) $location['zoom_level'];
             $addr = $location['address'];
         } else {
-            $lng  = (double) $center['longitude'];
-            $lat  = (double) $center['latitude'];
-            $zoom = (int) $center['zoomLevel'];
-            $addr = '';
+            $lng = $lat = $zoom = $addr = '';
         }
     }
     ob_start();
