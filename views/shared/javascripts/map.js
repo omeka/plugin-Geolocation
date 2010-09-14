@@ -239,7 +239,7 @@ function OmekaMapForm(mapDivId, center, options) {
     // Make the map clickable to add a location point.
     google.maps.event.addListener(this.map, 'click', function (event) {
         // If we are clicking a new spot on the map
-        if (!that.options.confirmLocationChange || confirm('Are you sure you want to change the location of the item?')) {
+        if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
             var point = event.latLng;
             var marker = that.setMarker(point);
             jQuery('#geolocation_address').val('');
@@ -296,7 +296,7 @@ OmekaMapForm.prototype = {
 
                 // If required, ask the user if they want to add a marker to the geolocation point of the address.
                 // If so, add the marker, otherwise clear the address.
-                if (!that.options.confirmLocationChange || confirm('Are you sure you want to change the location of the item?')) {
+                if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
                     var marker = that.setMarker(point);
                 } else {
                     jQuery('#geolocation_address').val('');
