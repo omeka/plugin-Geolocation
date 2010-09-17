@@ -135,11 +135,6 @@ OmekaMapBrowse.prototype = {
                     // @todo Elaborate with an error message
                     return false;
                 }            
-            },
-            error: function(xhr, type, exception) {
-                alert("Error XHR: " + xhr);
-                alert("Error type: " + type);
-                alert("Error exception: " + exception.message);
             }
         });        
     },
