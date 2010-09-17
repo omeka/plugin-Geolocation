@@ -23,6 +23,7 @@ add_filter('admin_navigation_main', 'geolocation_admin_nav');
 add_filter('define_response_contexts', 'geolocation_kml_response_context');
 add_filter('define_action_contexts', 'geolocation_kml_action_context');
 add_filter('admin_items_form_tabs', 'geolocation_item_form_tabs');
+add_filter('public_navigation_main', 'geolocation_public_nav');
 
 // Hook Functions
 function geolocation_install()
@@ -47,7 +48,7 @@ function geolocation_install()
     set_option('geolocation_default_longitude', '-77');
     set_option('geolocation_default_zoom_level', '5');
     set_option('geolocation_per_page', '10');
-    set_option('add_geolocation_field_to_contribution_form', '1');
+    set_option('geolocation_add_map_to_contribution_form', '1');
 }
 
 function geolocation_uninstall()
@@ -57,7 +58,7 @@ function geolocation_uninstall()
 	delete_option('geolocation_default_longitude');
 	delete_option('geolocation_default_zoom_level');
 	delete_option('geolocation_per_page');
-    delete_option('add_geolocation_field_to_contribution_form');
+    delete_option('geolocation_add_map_to_contribution_form');
     
     // This is for older versions of Geolocation, which used to store a Google Map API key.
 	delete_option('geolocation_gmaps_key');
@@ -82,7 +83,8 @@ function geolocation_config()
     set_option('geolocation_default_longitude', $_POST['default_longitude']);
     set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
     set_option('geolocation_per_page', $_POST['per_page']);
-    set_option('add_geolocation_field_to_contribution_form', $_POST['add_geolocation_field_to_contribution_form']);
+    set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
+    set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
 }
 
 function geolocation_upgrade_options() 
@@ -102,6 +104,14 @@ function geolocation_upgrade_options()
 function geolocation_define_acl($acl)
 {
     $acl->allow(null, 'Items', 'modifyPerPage');
+}
+
+function geolocation_public_nav($nav)
+{
+    if (get_option('geolocation_link_to_nav')) {
+        $nav['Items Map'] = uri('items/map');
+    }
+    return $nav;
 }
 
 /**
@@ -595,7 +605,7 @@ function geolocation_admin_show_item_map($item)
 
 function geolocation_append_contribution_form($contributionType)
 {
-    if (get_option('add_geolocation_field_to_contribution_form') == '1') {
+    if (get_option('geolocation_add_map_to_contribution_form') == '1') {
         $ht = '';
         $ht .= '<div id="geolocation_contribution">' . "\n";
         $ht .= geolocation_scripts(false, true);
@@ -607,7 +617,7 @@ function geolocation_append_contribution_form($contributionType)
 
 function geolocation_save_contribution_form($contributionType, $item, $post)
 {
-    if (get_option('add_geolocation_field_to_contribution_form') == '1') {
+    if (get_option('geolocation_add_map_to_contribution_form') == '1') {
         geolocation_save_location($item);
     }
 }
