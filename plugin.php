@@ -477,7 +477,7 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
         $post = $_POST;
     }
         
-    $usePost = !empty($post);
+    $usePost = !empty($post) && !empty($post['geolocation']);
     if ($usePost) {
         $lng  = (double) @$post['geolocation'][0]['longitude'];
         $lat  = (double) @$post['geolocation'][0]['latitude'];
@@ -599,7 +599,7 @@ function geolocation_append_contribution_form($contributionType)
         $ht = '';
         $ht .= '<div id="geolocation_contribution">' . "\n";
         $ht .= geolocation_scripts(false, true);
-        $ht .= geolocation_map_form(null, '500px', '410px', 'Find A Geographic Location For The ' . $contributionType->display_name . ':', false, array());
+        $ht .= geolocation_map_form(null, '500px', '410px', 'Find A Geographic Location For The ' . $contributionType->display_name . ':', false);
         $ht .= '</div>' . "\n";
         echo $ht;
     }
