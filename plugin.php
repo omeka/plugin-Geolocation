@@ -222,7 +222,7 @@ function geolocation_item_form_tabs($tabs)
     foreach($tabs as $key => $html) {
         if ($key == 'Miscellaneous') {
             $ht = '';
-            $ht .= geolocation_scripts(true, false);
+            $ht .= geolocation_scripts();
             $ht .= geolocation_map_form($item);
             $ttabs['Map'] = $ht;
         }
@@ -237,17 +237,13 @@ function geolocation_item_form_tabs($tabs)
 /**
  * Returns the html for loading the javascripts used by the plugin.
  *
- * @param bool $loadJQuery Whether or not to load the jQuery script.
  * @param bool $pageLoaded Whether or not the page is already loaded.  
  * If this function is used with AJAX, this parameter may need to be set to true.
  * @return string
  */
-function geolocation_scripts($loadJQuery=true, $pageLoaded=false)
+function geolocation_scripts($pageLoaded = false)
 {
     $ht = '';
-    if ($loadJQuery) {
-        $ht .= geolocation_load_jquery();
-    }
     $ht .= geolocation_load_google_maps($pageLoaded);
     $ht .= js('map');
     return $ht;
@@ -284,25 +280,6 @@ function geolocation_load_google_maps($pageLoaded=false)
         }
 
         var googleMapInitializeCallbacks = new Array();
-    </script>
-<?php
-    $ht .= ob_get_contents();
-    ob_end_clean();
-    return $ht;
-}
-
-/**
- * Returns the html for loading the jQuery javascript
- * @return string
- */
-function geolocation_load_jquery() 
-{
-    $ht = '';
-    $ht .= js('jquery');
-    ob_start();
-?>
-    <script type="text/javascript" charset="utf-8">
-        jQuery.noConflict();
     </script>
 <?php
     $ht .= ob_get_contents();
@@ -596,7 +573,7 @@ function geolocation_admin_show_item_map($item)
     $ht .= ob_get_contents();
     ob_end_clean();
 	$ht .= '<div class="info-panel">';
-	$ht .= geolocation_scripts(true, false);
+	$ht .= geolocation_scripts();
 	$ht .= geolocation_google_map_for_item($item,'224px','270px',false);
 	$ht .= '</div>';
 	echo $ht;
@@ -608,7 +585,7 @@ function geolocation_append_contribution_form($contributionType)
     if (get_option('geolocation_add_map_to_contribution_form') == '1') {
         $ht = '';
         $ht .= '<div id="geolocation_contribution">' . "\n";
-        $ht .= geolocation_scripts(false, true);
+        $ht .= geolocation_scripts(true);
         $ht .= geolocation_map_form(null, '500px', '410px', 'Find A Geographic Location For The ' . $contributionType->display_name . ':', false);
         $ht .= '</div>' . "\n";
         echo $ht;
@@ -681,7 +658,7 @@ function geolocation_admin_append_to_advanced_search()
     if ($request->getControllerName() == 'map' && $request->getActionName() == 'browse') {
         $ht .= geolocation_append_to_advanced_search('search');
     } else if ($request->getControllerName() == 'items' && $request->getActionName() == 'advanced-search') {
-        $ht .= geolocation_scripts(true, false);
+        $ht .= geolocation_scripts();
         $ht .= geolocation_append_to_advanced_search();
     }
     
@@ -691,7 +668,7 @@ function geolocation_admin_append_to_advanced_search()
 function geolocation_public_append_to_advanced_search() 
 {
     $ht = '';
-    $ht .= geolocation_scripts(true, false);
+    $ht .= geolocation_scripts();
     $ht .= geolocation_append_to_advanced_search();
     echo $ht;
 }
