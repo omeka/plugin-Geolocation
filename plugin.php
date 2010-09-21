@@ -12,6 +12,7 @@ add_plugin_hook('define_acl', 'geolocation_define_acl');
 add_plugin_hook('define_routes', 'geolocation_add_routes');
 add_plugin_hook('after_save_form_item', 'geolocation_save_location');
 add_plugin_hook('admin_append_to_items_show_secondary', 'geolocation_admin_show_item_map');
+add_plugin_hook('admin_append_to_items_show', 'geolocation_public_show_item_map');
 add_plugin_hook('admin_append_to_advanced_search', 'geolocation_admin_append_to_advanced_search');
 add_plugin_hook('public_append_to_advanced_search', 'geolocation_public_append_to_advanced_search');
 add_plugin_hook('item_browse_sql', 'geolocation_item_browse_sql');
@@ -544,18 +545,14 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
  **/
 function geolocation_marker_style($markerWidth = '200px')
 {
-    $ht = '';
-    ob_start();
-?>
-    <style type="text/css" media="screen">
-    	.info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
-        .geolocation_balloon {width:<?php echo $markerWidth; ?>;}
-        .geolocation_balloon .geolocation_balloon_title {font-weight:bold; font-size:18px; margin-bottom:0px;}
-    </style>
-<?php
-    $ht = ob_get_contents();
-    ob_end_clean();
-    return $ht;
+    $html = <<<HTML
+<style type="text/css" media="screen">
+    .info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
+    .geolocation_balloon {width: $markerWidth;}
+    .geolocation_balloon .geolocation_balloon_title {font-weight:bold; font-size:18px; margin-bottom:0px;}
+</style>
+HTML;
+    return $html;
 }
 
 /**
@@ -565,30 +562,31 @@ function geolocation_marker_style($markerWidth = '200px')
  **/
 function geolocation_admin_show_item_map($item)
 {
-    $ht = '';
-    ob_start();
-    echo geolocation_marker_style();
-?>
-  <?php
-    $ht .= ob_get_contents();
-    ob_end_clean();
-	$ht .= '<div class="info-panel">';
-	$ht .= geolocation_scripts();
-	$ht .= geolocation_google_map_for_item($item,'224px','270px',false);
-	$ht .= '</div>';
-	echo $ht;
-	return;
+    $html = geolocation_marker_style()
+          . '<div class="info-panel">'
+          . geolocation_scripts()
+          . geolocation_google_map_for_item($item,'224px','270px',false)
+          . '</div>';
+    echo $html;
+}
+
+function geolocation_public_show_item_map($item)
+{
+    $html = geolocation_marker_style()
+          . geolocation_scripts()
+          . geolocation_google_map_for_item($item, false);
+    echo $html;
+
 }
 
 function geolocation_append_contribution_form($contributionType)
 {
     if (get_option('geolocation_add_map_to_contribution_form') == '1') {
-        $ht = '';
-        $ht .= '<div id="geolocation_contribution">' . "\n";
-        $ht .= geolocation_scripts(true);
-        $ht .= geolocation_map_form(null, '500px', '410px', 'Find A Geographic Location For The ' . $contributionType->display_name . ':', false);
-        $ht .= '</div>' . "\n";
-        echo $ht;
+        $html = '<div id="geolocation_contribution">'
+              . geolocation_scripts(true)
+              . geolocation_map_form(null, '500px', '410px', 'Find A Geographic Location For The ' . $contributionType->display_name . ':', false)
+              . '</div>';
+        echo $html;
     }
 }
 
@@ -649,28 +647,25 @@ function geolocation_item_browse_sql($select, $params)
 }
 
 function geolocation_admin_append_to_advanced_search() 
-{
-    $ht = '';
-    
+{   
     // Get the request object
     $request = Omeka_Context::getInstance()->getRequest();
     
     if ($request->getControllerName() == 'map' && $request->getActionName() == 'browse') {
-        $ht .= geolocation_append_to_advanced_search('search');
+        $html = geolocation_append_to_advanced_search('search');
     } else if ($request->getControllerName() == 'items' && $request->getActionName() == 'advanced-search') {
-        $ht .= geolocation_scripts();
-        $ht .= geolocation_append_to_advanced_search();
+        $html = geolocation_scripts()
+              . geolocation_append_to_advanced_search();
     }
     
-    echo $ht;
+    echo $html;
 }
 
 function geolocation_public_append_to_advanced_search() 
 {
-    $ht = '';
-    $ht .= geolocation_scripts();
-    $ht .= geolocation_append_to_advanced_search();
-    echo $ht;
+    $html = geolocation_scripts()
+          . geolocation_append_to_advanced_search();
+    echo $html;
 }
 
 function geolocation_append_to_advanced_search($searchFormId = 'advanced-search-form', $searchButtonId = 'submit_search_advanced')
@@ -690,7 +685,7 @@ function geolocation_append_to_advanced_search($searchFormId = 'advanced-search-
     
     $ht = '';
     ob_start();
-?>    
+?> 
     <div class="field">
 	    <?php echo label('geolocation-address', 'Geographic Address'); ?>
 	    <div class="inputs">
