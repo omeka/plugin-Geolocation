@@ -37,7 +37,7 @@
                 <coordinates><?php echo $location['longitude']; ?>,<?php echo $location['latitude']; ?></coordinates>
             </Point>
             <?php if ($location['address']): ?>
-            <address><?php echo htmlentities($location['address']); ?></address>
+            <address><![CDATA[<?php echo $location['address']; ?>]]></address>
             <?php endif; ?>
         </Placemark>
         <?php endwhile; ?>
