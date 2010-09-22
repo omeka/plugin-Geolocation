@@ -12,7 +12,7 @@ add_plugin_hook('define_acl', 'geolocation_define_acl');
 add_plugin_hook('define_routes', 'geolocation_add_routes');
 add_plugin_hook('after_save_form_item', 'geolocation_save_location');
 add_plugin_hook('admin_append_to_items_show_secondary', 'geolocation_admin_show_item_map');
-add_plugin_hook('admin_append_to_items_show', 'geolocation_public_show_item_map');
+add_plugin_hook('public_append_to_items_show', 'geolocation_public_show_item_map');
 add_plugin_hook('admin_append_to_advanced_search', 'geolocation_admin_append_to_advanced_search');
 add_plugin_hook('public_append_to_advanced_search', 'geolocation_public_append_to_advanced_search');
 add_plugin_hook('item_browse_sql', 'geolocation_item_browse_sql');
@@ -83,6 +83,8 @@ function geolocation_config()
     set_option('geolocation_default_latitude', $_POST['default_latitude']);
     set_option('geolocation_default_longitude', $_POST['default_longitude']);
     set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
+    set_option('geolocation_item_map_width', $_POST['item_map_width']); 
+    set_option('geolocation_item_map_height', $_POST['item_map_height']); 
     set_option('geolocation_per_page', $_POST['per_page']);
     set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
     set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
@@ -375,7 +377,10 @@ function geolocation_google_map($divId = 'map', $options = array()) {
  * @param boolean $hasBalloonForMarker
  * @return string
  **/
-function geolocation_google_map_for_item($item, $width = '200px', $height = '200px', $hasBalloonForMarker = true, $markerHtmlClassName = 'geolocation_balloon') {        
+function geolocation_google_map_for_item($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = true, $markerHtmlClassName = 'geolocation_balloon') {  
+    if (!$item) {
+        $item = get_current_item();
+    }      
     $ht = '';
     $divId = "item-map-{$item->id}";
     ob_start();
@@ -422,9 +427,11 @@ function geolocation_google_map_for_item($item, $width = '200px', $height = '200
         echo '<div id="' . $divId . '" class="map"></div>';
 ?>        
         <script type="text/javascript">
+        //<![CDATA[
             googleMapInitializeCallbacks.push(function() {
                 var <?php echo Inflector::variablize($divId); ?>OmekaMapSingle = new OmekaMapSingle(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
             });
+        //]]>
         </script>
 <?php         
     } else {
@@ -570,13 +577,25 @@ function geolocation_admin_show_item_map($item)
     echo $html;
 }
 
-function geolocation_public_show_item_map($item)
+function geolocation_public_show_item_map($width = null, $height = null, $item = null)
 {
+    if (!$width) {
+        $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '100%';
+    }
+    
+    if (!$height) {
+        $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';
+    }
+    
+    if (!$item) {
+        $item = get_current_item();
+    }
+    
     $html = geolocation_marker_style()
           . geolocation_scripts()
-          . geolocation_google_map_for_item($item, false);
-    echo $html;
+          . geolocation_google_map_for_item($item, $width, $height, false);
 
+    echo $html;
 }
 
 function geolocation_append_contribution_form($contributionType)

@@ -31,6 +31,22 @@
 </div>
 
 <div class="field">
+	<label for="item_map_width">Width for Item Map</label>
+	<div class="inputs">
+		<input type="text" class="textinput"  name="item_map_width" size="8" value="<?php echo get_option('geolocation_item_map_width'); ?>" id="item_map_width" />
+        <p class="explanation">The width of the map displayed on your items/show page. If left blank, the default width of 100% will be used.</p>
+	</div>
+</div>
+
+<div class="field">
+	<label for="item_map_height">Height for Item Map</label>
+	<div class="inputs">
+		<input type="text" class="textinput"  name="item_map_height" size="8" value="<?php echo get_option('geolocation_item_map_height'); ?>" id="item_map_height" />
+        <p class="explanation">The height of the map displayed on your items/show page. If left blank, the default height of 300px will be used.</p>
+	</div>
+</div>
+
+<div class="field">
     <label for="geolocation_link_to_nav">Add Link to Map on Main Navigation</label>
     <?php echo __v()->formCheckbox('geolocation_link_to_nav', true, 
      array('checked'=>(boolean)get_option('geolocation_link_to_nav'))); ?>
