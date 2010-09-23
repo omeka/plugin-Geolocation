@@ -1,51 +1,19 @@
 <?php head(array('title' => 'Browse Map','bodyid'=>'map','bodyclass' => 'browse item')); ?>
-<?php echo geolocation_scripts(); ?>
 
 <div id="primary">
 
-<style type="text/css" media="screen">
-#map_browse { 
-    width: 569px; 
-    height: 436px;
-}
-
-#map-links ul {
-    margin-top: 20px;
-}
-
-#map-links li {
-    overflow:hidden; 
-    border-bottom:1px dotted #ccc;
-}
-
-#map-links li a {
-    float:right; 
-    text-decoration:none; 
-}
-
-#map_block { 
-    float:right; 
-    clear:both; 
-}
-
-#map-links {
-    float:left;
-}
-
-#map-links a {
-    display:block;
-}
-
-</style>
-
 <h1>Browse Items on the Map (<?php echo $totalItems; ?> total)</h1>
+
+<ul class="items-nav navigation" id="secondary-nav">
+	<?php echo public_nav_items(array('Browse All' => uri('items/browse'), 'Browse by Tag' => uri('items/tags'))); ?>
+</ul>
 
 <div class="pagination">
     <?php echo pagination_links(); ?>
 </div><!-- end pagination -->
 
-<div id="map_block">
-    <?php echo geolocation_google_map('map_browse', array('loadKml'=>true, 'list'=>'map-links'));?>
+<div id="map-block">
+    <?php echo geolocation_google_map('map-display', array('loadKml'=>true, 'list'=>'map-links'));?>
 </div><!-- end map_block -->
 
 <div id="link_block">

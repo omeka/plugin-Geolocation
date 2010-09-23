@@ -18,13 +18,14 @@ add_plugin_hook('public_append_to_advanced_search', 'geolocation_public_append_t
 add_plugin_hook('item_browse_sql', 'geolocation_item_browse_sql');
 add_plugin_hook('contribution_append_to_type_form', 'geolocation_append_contribution_form');
 add_plugin_hook('contribution_save_form', 'geolocation_save_contribution_form');
+add_plugin_hook('public_theme_header', 'geolocation_map_browse_header');
 
 // Plugin Filters
 add_filter('admin_navigation_main', 'geolocation_admin_nav');
 add_filter('define_response_contexts', 'geolocation_kml_response_context');
 add_filter('define_action_contexts', 'geolocation_kml_action_context');
 add_filter('admin_items_form_tabs', 'geolocation_item_form_tabs');
-add_filter('public_navigation_main', 'geolocation_public_nav');
+add_filter('public_navigation_items', 'geolocation_public_nav');
 
 // Hook Functions
 function geolocation_install()
@@ -313,6 +314,21 @@ function geolocation_get_center()
         'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'));
 }
 
+function geolocation_map_browse_header($request)
+{
+    if ( ($request->getModuleName() == 'geolocation' && $request->getControllerName() == 'map' && $request->getActionName() == 'browse') ):
+    
+?>
+    <!-- Scripts for the Geolocation items/map page -->
+    <?php echo geolocation_scripts(); ?>
+    
+    <!-- Styles for the Geolocation items/map page -->
+    <link rel="stylesheet" href="<?php echo css('geolocation-items-map'); ?>" />
+    <link rel="stylesheet" href="<?php echo css('geolocation-marker'); ?>" />
+    
+<?php
+endif;
+}
 
 /**
  * Returns html for a google map
@@ -356,7 +372,6 @@ function geolocation_google_map($divId = 'map', $options = array()) {
     $center = js_escape($center);
     
     ob_start();
-    echo geolocation_marker_style();
 ?>  
     <script type="text/javascript">
         googleMapInitializeCallbacks.push(function() {
@@ -546,19 +561,12 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
 }
 
 /**
- * Returns the html for the marker style
- * @param $markerWidth
+ * Returns the html for the marker CSS
  * @return string
  **/
-function geolocation_marker_style($markerWidth = '200px')
+function geolocation_marker_style()
 {
-    $html = <<<HTML
-<style type="text/css" media="screen">
-    .info-panel .map {margin-top:-18px;display:block; margin-left:-18px; margin-bottom:0;border-top:3px solid #eae9db; padding:0;}
-    .geolocation_balloon {width: $markerWidth;}
-    .geolocation_balloon .geolocation_balloon_title {font-weight:bold; font-size:18px; margin-bottom:0px;}
-</style>
-HTML;
+    $html = '<link rel="stylesheet" href="'.css("geolocation-marker").'" />';
     return $html;
 }
 
