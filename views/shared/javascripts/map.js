@@ -371,7 +371,7 @@ OmekaMapForm.prototype = {
     resize: function () {
         google.maps.event.trigger(this.map, 'resize');
         var point;
-        if (this.markers.size()) {
+        if (this.markers.length) {
             var marker = this.markers[0];
             point = marker.getPosition();
         } else {
