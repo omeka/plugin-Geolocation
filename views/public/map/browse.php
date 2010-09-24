@@ -4,7 +4,7 @@
 
 <h1>Browse Items on the Map (<?php echo $totalItems; ?> total)</h1>
 
-<?php if(function_exists('public_nav_browse')): ?>
+<?php if(function_exists('public_nav_items')): ?>
 <ul class="items-nav navigation" id="secondary-nav">
 	<?php echo public_nav_items(array('Browse All' => uri('items/browse'), 'Browse by Tag' => uri('items/tags'))); ?>
 </ul>
