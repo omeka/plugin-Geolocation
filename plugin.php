@@ -18,7 +18,7 @@ add_plugin_hook('public_append_to_advanced_search', 'geolocation_public_append_t
 add_plugin_hook('item_browse_sql', 'geolocation_item_browse_sql');
 add_plugin_hook('contribution_append_to_type_form', 'geolocation_append_contribution_form');
 add_plugin_hook('contribution_save_form', 'geolocation_save_contribution_form');
-add_plugin_hook('public_theme_header', 'geolocation_map_browse_header');
+add_plugin_hook('public_theme_header', 'geolocation_header');
 
 // Plugin Filters
 add_filter('admin_navigation_main', 'geolocation_admin_nav');
@@ -288,10 +288,13 @@ function geolocation_get_center()
         'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'));
 }
 
-function geolocation_map_browse_header($request)
+function geolocation_header($request)
 {
-    //if ( ($request->getModuleName() == 'geolocation' && $request->getControllerName() == 'map' && $request->getActionName() == 'browse')):
-    
+    $module = $request->getModuleName();
+    $controller = $request->getControllerName();
+    $action = $request->getActionName();
+    if ( ($module == 'geolocation' && $controller == 'map')
+      || ($module == 'contribution' && $controller == 'contribution' && $action == 'contribute' && get_option('geolocation_add_map_to_contribution_form') == '1')):
 ?>
     <!-- Scripts for the Geolocation items/map page -->
     <?php echo geolocation_scripts(); ?>
@@ -301,7 +304,7 @@ function geolocation_map_browse_header($request)
     <link rel="stylesheet" href="<?php echo css('geolocation-marker'); ?>" />
     
 <?php
-//endif;
+    endif;
 }
 
 /**
