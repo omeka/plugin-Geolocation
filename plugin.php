@@ -245,10 +245,10 @@ function geolocation_item_form_tabs($tabs)
  * If this function is used with AJAX, this parameter may need to be set to true.
  * @return string
  */
-function geolocation_scripts($pageLoaded = false)
+function geolocation_scripts()
 {
     $ht = '';
-    $ht .= geolocation_load_google_maps($pageLoaded);
+    $ht .= geolocation_load_google_maps();
     $ht .= js('map');
     return $ht;
 }
@@ -260,35 +260,9 @@ function geolocation_scripts($pageLoaded = false)
  * If this function is used with AJAX, this parameter may need to be set to true.
  * @return string
  */
-function geolocation_load_google_maps($pageLoaded=false)
+function geolocation_load_google_maps()
 {
-    $ht = '';
-    ob_start();
-?>
-    <script type="text/javascript" charset="utf-8">
-    <?php if (!$pageLoaded) { ?>
-        jQuery(window).load(function() {
-    <?php } ?>
-            var script = document.createElement("script");
-            script.type = "text/javascript";
-            script.src = "http://maps.google.com/maps/api/js?sensor=false&callback=initializeGoogleMaps";
-            document.body.appendChild(script);
-    <?php if (!$pageLoaded) { ?>
-        });
-    <?php } ?>
-        
-        function initializeGoogleMaps() {
-            for(var i=0; i < googleMapInitializeCallbacks.length; i++) {
-                googleMapInitializeCallbacks[i]();
-            }
-        }
-
-        var googleMapInitializeCallbacks = new Array();
-    </script>
-<?php
-    $ht .= ob_get_contents();
-    ob_end_clean();
-    return $ht;
+    return '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
 }
 
 /**
@@ -316,7 +290,7 @@ function geolocation_get_center()
 
 function geolocation_map_browse_header($request)
 {
-    if ( ($request->getModuleName() == 'geolocation' && $request->getControllerName() == 'map' && $request->getActionName() == 'browse') ):
+    //if ( ($request->getModuleName() == 'geolocation' && $request->getControllerName() == 'map' && $request->getActionName() == 'browse')):
     
 ?>
     <!-- Scripts for the Geolocation items/map page -->
@@ -327,7 +301,7 @@ function geolocation_map_browse_header($request)
     <link rel="stylesheet" href="<?php echo css('geolocation-marker'); ?>" />
     
 <?php
-endif;
+//endif;
 }
 
 /**
@@ -374,9 +348,9 @@ function geolocation_google_map($divId = 'map', $options = array()) {
     ob_start();
 ?>  
     <script type="text/javascript">
-        googleMapInitializeCallbacks.push(function() {
-            var <?php echo Inflector::variablize($divId); ?>OmekaMapBrowse = new OmekaMapBrowse(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
-        });
+    //<![CDATA[
+        var <?php echo Inflector::variablize($divId); ?>OmekaMapBrowse = new OmekaMapBrowse(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
+    //]]>
     </script>
 <?php
     $ht .= ob_get_contents();
@@ -443,9 +417,7 @@ function geolocation_google_map_for_item($item = null, $width = '200px', $height
 ?>        
         <script type="text/javascript">
         //<![CDATA[
-            googleMapInitializeCallbacks.push(function() {
-                var <?php echo Inflector::variablize($divId); ?>OmekaMapSingle = new OmekaMapSingle(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
-            });
+            var <?php echo Inflector::variablize($divId); ?>OmekaMapSingle = new OmekaMapSingle(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
         //]]>
         </script>
 <?php         
@@ -507,10 +479,6 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
 ?>
 <style type="text/css" media="screen">
     /* Need a bit of styling for the geocoder balloon */
-    #omeka-map-form {
-        width: <?php echo $width; ?>;
-        height: <?php echo $height; ?>;
-    }
     #geolocation_find_location_by_address {margin-bottom:18px; float:none;}
     #confirm_address, #wrong_address {background:#eae9db; padding:8px 12px; color: #333; cursor:pointer;}
     #confirm_address:hover, #wrong_address:hover {background:#c60; color:#fff;}
@@ -542,16 +510,17 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
     $options = js_escape($options);
     $divId = 'omeka-map-form';    
 ?>
-    <div id="<?php echo html_escape($divId); ?>"></div>
+    <div id="<?php echo html_escape($divId); ?>" style="width: <?php echo $width; ?>; height: <?php echo $height; ?>;"></div>
     <script type="text/javascript">
-        googleMapInitializeCallbacks.push(function() {            
-            var anOmekaMapForm = new OmekaMapForm(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
-            if (Control.Tabs) {
-                Control.Tabs.observe('afterChange',function(){  
-                    anOmekaMapForm.resize();
-                });
-            }
-        });
+        //<![CDATA[
+        var anOmekaMapForm = new OmekaMapForm(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
+        
+        if (typeof Control != 'undefined' && typeof Control.Tabs != 'undefined') {
+            Control.Tabs.observe('afterChange',function(){
+                anOmekaMapForm.resize();
+            });
+        }
+        //]]>
     </script>
 <?php
     $ht .= ob_get_contents();
@@ -610,9 +579,11 @@ function geolocation_append_contribution_form($contributionType)
 {
     if (get_option('geolocation_add_map_to_contribution_form') == '1') {
         $html = '<div id="geolocation_contribution">'
-              . geolocation_scripts(true)
               . geolocation_map_form(null, '500px', '410px', 'Find A Geographic Location For The ' . $contributionType->display_name . ':', false)
-              . '</div>';
+              . '</div>'
+              . '<script type="text/javascript">'
+              . 'jQuery("#contribution-type-form").bind("contribution-form-shown", function () {anOmekaMapForm.resize();});'
+              . '</script>';
         echo $html;
     }
 }
