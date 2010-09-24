@@ -361,7 +361,7 @@ OmekaMapForm.prototype = {
         }
         
         // Clear the markers array
-        this.markers.clear();
+        this.markers = [];
         
         // Update the form
         this.updateForm();
