@@ -48,14 +48,18 @@
 
 <div class="field">
     <label for="geolocation_link_to_nav">Add Link to Map on Main Navigation</label>
-    <?php echo __v()->formCheckbox('geolocation_link_to_nav', true, 
-     array('checked'=>(boolean)get_option('geolocation_link_to_nav'))); ?>
-     <p class="explanation">If checked, this will add a link to the main site navigation to the items map.</p>
+    <div class="inputs">
+        <?php echo __v()->formCheckbox('geolocation_link_to_nav', true, 
+         array('checked'=>(boolean)get_option('geolocation_link_to_nav'))); ?>
+         <p class="explanation">If checked, this will add a link to the main site navigation to the items map.</p>
+    </div>
 </div>
 
 <div class="field">
     <label for="geolocation_add_map_to_contribution_form">Add Map To Contribution Form</label>
-    <?php echo __v()->formCheckbox('geolocation_add_map_to_contribution_form', true, 
-     array('checked'=>(boolean)get_option('geolocation_add_map_to_contribution_form'))); ?>
-     <p class="explanation">If the Contribution plugin is installed and activated, Geolocation  will add a geolocation map field to the contribution form to associate a location to a contributed item.</p>
+    <div class="inputs">
+        <?php echo __v()->formCheckbox('geolocation_add_map_to_contribution_form', true, 
+         array('checked'=>(boolean)get_option('geolocation_add_map_to_contribution_form'))); ?>
+         <p class="explanation">If the Contribution plugin is installed and activated, Geolocation  will add a geolocation map field to the contribution form to associate a location to a contributed item.</p>
+    </div>
 </div>
