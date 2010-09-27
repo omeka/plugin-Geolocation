@@ -166,13 +166,21 @@ OmekaMapBrowse.prototype = {
     },
     
     makeQuery: function (uri, params) {
-        var query = 'searchJson=' + Object.toJSON(params);
-		if (uri.indexOf('?') != -1) {
-			uri += "&" + query;
-		} else {
-			uri += "?" + query;
-		}
-		return uri;
+        var query = '';
+
+        jQuery.each(params, function(index, value) {
+            var pair = encodeURIComponent(index) + '=' + encodeURIComponent(value);
+            if (query != '') {
+                query += '&' + pair;
+            }
+        });
+        
+        if (uri.indexOf('?') != -1) {
+            uri += "&" + query;
+	} else {
+            uri += "?" + query;
+	}
+	return uri;
     },
     
     // Calculate the zoom level given the 'range' value
