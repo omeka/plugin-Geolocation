@@ -77,13 +77,12 @@ OmekaMap.prototype = {
 };
 
 function OmekaMapBrowse(mapDivId, center, options) {
-     var omekaMap = new OmekaMap(mapDivId, center, options);
-     jQuery.extend(true, this, omekaMap);
-     this.initMap();
+    var omekaMap = new OmekaMap(mapDivId, center, options);
+    jQuery.extend(true, this, omekaMap);
+    this.initMap();
 
-     var kmlUrl = this.makeQuery(this.options.uri, this.options.params);
     //XML loads asynchronously, so need to call for further config only after it has executed
-    this.loadKmlIntoMap(kmlUrl);
+    this.loadKmlIntoMap(this.options.uri, this.options.params);
 }
 
 OmekaMapBrowse.prototype = {
@@ -99,13 +98,15 @@ OmekaMapBrowse.prototype = {
         }
     },
     
-    /* Note to self: have to parse KML manually b/c Google Maps API cannot access the KML behind the admin interface */
-    loadKmlIntoMap: function (kmlUrl) {
+    /* Need to parse KML manually b/c Google Maps API cannot access the KML 
+       behind the admin interface */
+    loadKmlIntoMap: function (kmlUrl, params) {
         var that = this;
         jQuery.ajax({
             type: 'GET',
             dataType: 'xml',
-            url: kmlUrl, 
+            url: kmlUrl,
+            data: params,
             success: function(data) {
                 var xml = jQuery(data);
         
@@ -163,24 +164,6 @@ OmekaMapBrowse.prototype = {
 
         // Build a marker, add HTML for it
         this.addMarker(latitude, longitude, {title: title}, balloon);
-    },
-    
-    makeQuery: function (uri, params) {
-        var query = '';
-
-        jQuery.each(params, function(index, value) {
-            var pair = encodeURIComponent(index) + '=' + encodeURIComponent(value);
-            if (query != '') {
-                query += '&' + pair;
-            }
-        });
-        
-        if (uri.indexOf('?') != -1) {
-            uri += "&" + query;
-	} else {
-            uri += "?" + query;
-	}
-	return uri;
     },
     
     // Calculate the zoom level given the 'range' value
