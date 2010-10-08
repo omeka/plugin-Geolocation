@@ -1,4 +1,4 @@
-<?php head(array('title' => 'Browse Map','bodyid'=>'map','bodyclass' => 'browse item')); ?>
+<?php head(array('title' => 'Browse Map','bodyid'=>'map','bodyclass' => 'browse')); ?>
 
 <div id="primary">
 

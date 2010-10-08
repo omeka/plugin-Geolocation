@@ -113,7 +113,7 @@ function geolocation_define_acl($acl)
 function geolocation_public_nav($nav)
 {
     if (get_option('geolocation_link_to_nav')) {
-        $nav['Items Map'] = uri('items/map');
+        $nav['Browse Map'] = uri('items/map');
     }
     return $nav;
 }
