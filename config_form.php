@@ -47,11 +47,11 @@
 </div>
 
 <div class="field">
-    <label for="geolocation_link_to_nav">Add Link to Map on Main Navigation</label>
+    <label for="geolocation_link_to_nav">Add Link to Map on Items/Browse Navigation</label>
     <div class="inputs">
         <?php echo __v()->formCheckbox('geolocation_link_to_nav', true, 
          array('checked'=>(boolean)get_option('geolocation_link_to_nav'))); ?>
-         <p class="explanation">If checked, this will add a link to the main site navigation to the items map.</p>
+         <p class="explanation">If checked, this will add a link to the items map on all the items/browse pages.</p>
     </div>
 </div>
 
