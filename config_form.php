@@ -2,7 +2,7 @@
 	<label for="per_page">Number of Locations Per Page:</label>
 	<div class="inputs">
 	<input type="text" class="textinput"  name="per_page" size="4" value="<?php echo get_option('geolocation_per_page'); ?>" id="per_page" />
-	<p class="explanation">The number of locations displayed per page.</p>
+	<p class="explanation">The number of locations displayed per page (max <?php echo GEOLOCATION_MAX_LOCATIONS_PER_PAGE; ?>).</p>
 	</div>
 </div>
 

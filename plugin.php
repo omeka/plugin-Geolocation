@@ -1,5 +1,7 @@
 <?php
 define('GOOGLE_MAPS_API_VERSION', '3.x');
+define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 50);
+define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 10);
 
 require_once 'Location.php';
 
@@ -49,7 +51,7 @@ function geolocation_install()
     set_option('geolocation_default_latitude', '38');
     set_option('geolocation_default_longitude', '-77');
     set_option('geolocation_default_zoom_level', '5');
-    set_option('geolocation_per_page', '10');
+    set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
     set_option('geolocation_add_map_to_contribution_form', '1');
 }
 
@@ -86,7 +88,13 @@ function geolocation_config()
     set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']); 
     set_option('geolocation_item_map_width', $_POST['item_map_width']); 
     set_option('geolocation_item_map_height', $_POST['item_map_height']); 
-    set_option('geolocation_per_page', $_POST['per_page']);
+    $perPage = (int)$_POST['per_page'];
+    if ($perPage <= 0) {
+        $perPage = GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE;
+    } else if ($perPage > GEOLOCATION_MAX_LOCATIONS_PER_PAGE) {
+        $perPage = GEOLOCATION_MAX_LOCATIONS_PER_PAGE;
+    }
+    set_option('geolocation_per_page', $perPage);
     set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
     set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
 }
