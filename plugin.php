@@ -409,7 +409,7 @@ function geolocation_google_map_for_item($item = null, $width = '200px', $height
         font-size: 2em;
     }
 </style>
-<h2>Geolocation</h2>
+<h3>Geolocation</h3>
 <?php        
     $location = geolocation_get_location_for_item($item, true);
     // Only set the center of the map if this item actually has a location 
