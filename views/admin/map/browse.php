@@ -25,11 +25,6 @@
     }
 
 </style>
-<script type="text/javascript" charset="utf-8">
-    jQuery(window).load(function() {
-        Omeka.Search.activateSearchButtons();
-    });
-</script>
 <div id="geolocation-browse">
 	<div class="pagination">
 	    <?php echo pagination_links(); ?>
