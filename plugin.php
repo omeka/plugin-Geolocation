@@ -525,12 +525,9 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
     <script type="text/javascript">
         //<![CDATA[
         var anOmekaMapForm = new OmekaMapForm(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
-        
-        if (typeof Control != 'undefined' && typeof Control.Tabs != 'undefined') {
-            Control.Tabs.observe('afterChange',function(){
-                anOmekaMapForm.resize();
-            });
-        }
+        jQuery(document).bind('omeka:tabselected', function () {
+            anOmekaMapForm.resize();
+        });
         //]]>
     </script>
 <?php
