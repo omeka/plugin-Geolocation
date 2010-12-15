@@ -409,7 +409,6 @@ function geolocation_google_map_for_item($item = null, $width = '200px', $height
         font-size: 2em;
     }
 </style>
-<h3>Geolocation</h3>
 <?php        
     $location = geolocation_get_location_for_item($item, true);
     // Only set the center of the map if this item actually has a location 
@@ -554,10 +553,10 @@ function geolocation_marker_style()
  **/
 function geolocation_admin_show_item_map($item)
 {
-    $html = geolocation_marker_style()
+    $html = geolocation_scripts()
           . '<div class="info-panel">'
-          . geolocation_scripts()
-          . geolocation_google_map_for_item($item,'224px','270px',false)
+          . '<h2>Geolocation</h2>'
+          . geolocation_google_map_for_item($item,'224px','270px')
           . '</div>';
     echo $html;
 }
@@ -576,9 +575,9 @@ function geolocation_public_show_item_map($width = null, $height = null, $item =
         $item = get_current_item();
     }
     
-    $html = geolocation_marker_style()
-          . geolocation_scripts()
-          . geolocation_google_map_for_item($item, $width, $height, false);
+    $html = geolocation_scripts()
+          . '<h3>Geolocation</h3>'
+          . geolocation_google_map_for_item($item, $width, $height);
 
     echo $html;
 }
