@@ -697,7 +697,6 @@ function geolocation_append_to_advanced_search($searchFormId = 'advanced-search-
 	        <?php echo text(array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput'),$address); ?>
             <?php echo hidden(array('name'=>'geolocation-latitude','id'=>'geolocation-latitude'),$currentLat); ?>
             <?php echo hidden(array('name'=>'geolocation-longitude','id'=>'geolocation-longitude'),$currentLng); ?>
-            <?php echo hidden(array('name'=>'geolocation-radius','id'=>'geolocation-radius'),$radius); ?>
 	    </div>
 	</div>
 	
