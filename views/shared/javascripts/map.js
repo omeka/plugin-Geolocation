@@ -305,6 +305,7 @@ OmekaMapForm.prototype = {
         
         // Add the marker
         var marker = this.addMarker(point.lat(), point.lng());
+        marker.setAnimation(google.maps.Animation.DROP);
         
         // Pan the map to the marker
         that.map.panTo(point);
