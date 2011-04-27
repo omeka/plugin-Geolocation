@@ -24,11 +24,11 @@ OmekaMap.prototype = {
         var marker = new google.maps.Marker(options);
         
         if (bindHtml) {
+            var infoWindow = new google.maps.InfoWindow({
+                content: bindHtml
+            });
             google.maps.event.addListener(marker, 'click', function () {
-                var infoWindow = new google.maps.InfoWindow({
-                    content: bindHtml
-                });
-                infoWindow.open(marker.getMap(), marker);
+                infoWindow.open(this.map, marker);
             });
         }
                
