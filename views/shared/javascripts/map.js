@@ -27,7 +27,14 @@ OmekaMap.prototype = {
             var infoWindow = new google.maps.InfoWindow({
                 content: bindHtml
             });
+
+            var that = this;
             google.maps.event.addListener(marker, 'click', function () {
+                // Prevent multiple windows from being open at once.
+                if (that.lastWindow) {
+                    that.lastWindow.close();
+                }
+                that.lastWindow = infoWindow;
                 infoWindow.open(this.map, marker);
             });
         }
