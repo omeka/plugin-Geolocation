@@ -175,7 +175,7 @@ function geolocation_save_location($item)
     $location = geolocation_get_location_for_item($item, true);
     
     // If we have filled out info for the geolocation, then submit to the db
-    $geolocationPost = $post['geolocation'][0];
+    $geolocationPost = $post['geolocation'];
     if (!empty($geolocationPost) && 
         (((string)$geolocationPost['latitude']) != '') && 
         (((string)$geolocationPost['longitude']) != '')) {
@@ -472,10 +472,10 @@ function geolocation_map_form($item, $width = '100%', $height = '410px', $label 
         
     $usePost = !empty($post) && !empty($post['geolocation']);
     if ($usePost) {
-        $lng  = (double) @$post['geolocation'][0]['longitude'];
-        $lat  = (double) @$post['geolocation'][0]['latitude'];
-        $zoom = (int) @$post['geolocation'][0]['zoom_level'];
-        $addr = @$post['geolocation'][0]['address'];
+        $lng  = (double) @$post['geolocation']['longitude'];
+        $lat  = (double) @$post['geolocation']['latitude'];
+        $zoom = (int) @$post['geolocation']['zoom_level'];
+        $addr = @$post['geolocation']['address'];
     } else {
         if ($location) {
             $lng  = (double) $location['longitude'];
@@ -489,12 +489,12 @@ function geolocation_map_form($item, $width = '100%', $height = '410px', $label 
     ob_start();
 ?>
 <div id="location_form">
-    <input type="hidden" name="geolocation[0][latitude]" value="<?php echo $lat; ?>" />
-    <input type="hidden" name="geolocation[0][longitude]" value="<?php echo $lng; ?>" />
-    <input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom; ?>" />
-    <input type="hidden" name="geolocation[0][map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
+    <input type="hidden" name="geolocation[latitude]" value="<?php echo $lat; ?>" />
+    <input type="hidden" name="geolocation[longitude]" value="<?php echo $lng; ?>" />
+    <input type="hidden" name="geolocation[zoom_level]" value="<?php echo $zoom; ?>" />
+    <input type="hidden" name="geolocation[map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
     <label style="display:inline; float:none; vertical-align:baseline;"><?php echo html_escape($label); ?></label>
-    <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" class="textinput"/>
+    <input type="text" name="geolocation[address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" class="textinput"/>
     <button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>
 </div>
 <?php

@@ -330,9 +330,9 @@ OmekaMapForm.prototype = {
     
     /* Update the latitude, longitude, and zoom of the form. */
     updateForm: function (point) {
-        var latElement = document.getElementsByName('geolocation[0][latitude]')[0];
-        var lngElement = document.getElementsByName('geolocation[0][longitude]')[0];
-        var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
+        var latElement = document.getElementsByName('geolocation[latitude]')[0];
+        var lngElement = document.getElementsByName('geolocation[longitude]')[0];
+        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
         
         // If we passed a point, then set the form to that. If there is no point, clear the form
         if (point) {
@@ -348,7 +348,7 @@ OmekaMapForm.prototype = {
     
     /* Update the zoom input of the form to be the current zoom on the map. */
     updateZoomForm: function () {
-        var zoomElement = document.getElementsByName('geolocation[0][zoom_level]')[0];
+        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
         zoomElement.value = this.map.getZoom();
     },
     
