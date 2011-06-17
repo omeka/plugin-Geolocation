@@ -457,7 +457,8 @@ function geolocation_get_marker_html_for_item($item, $markerHtmlClassName = 'geo
  * @param int $height
  * @return string
  **/
-function geolocation_map_form($item, $width = '500px', $height = '410px', $label = 'Find A Location For The Item:', $confirmLocationChange = true,  $post = null) { 	
+function geolocation_map_form($item, $width = '100%', $height = '410px', $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
+{
     $ht = '';
 	
     $center = geolocation_get_center();
@@ -487,22 +488,14 @@ function geolocation_map_form($item, $width = '500px', $height = '410px', $label
     }
     ob_start();
 ?>
-<style type="text/css" media="screen">
-    /* Need a bit of styling for the geocoder balloon */
-    #geolocation_find_location_by_address {margin-bottom:18px; float:none;}
-    #confirm_address, #wrong_address {background:#eae9db; padding:8px 12px; color: #333; cursor:pointer;}
-    #confirm_address:hover, #wrong_address:hover {background:#c60; color:#fff;}
-</style>
 <div id="location_form">
     <input type="hidden" name="geolocation[0][latitude]" value="<?php echo $lat; ?>" />
     <input type="hidden" name="geolocation[0][longitude]" value="<?php echo $lng; ?>" />
     <input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom; ?>" />
     <input type="hidden" name="geolocation[0][map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
-    <label><?php echo html_escape($label); ?></label>
-    <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
-    <button type="button" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find By Address</button>
-    
-    <!-- <div id="geolocation-geocoder-confirmation"></div> -->
+    <label style="display:inline; float:none; vertical-align:baseline;"><?php echo html_escape($label); ?></label>
+    <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" class="textinput"/>
+    <button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>
 </div>
 <?php
     $options = array();
