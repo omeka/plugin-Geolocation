@@ -534,12 +534,15 @@ function geolocation_marker_style()
  **/
 function geolocation_admin_show_item_map($item)
 {
-    $html = geolocation_scripts()
-          . '<div class="info-panel">'
-          . '<h2>Geolocation</h2>'
-          . geolocation_google_map_for_item($item,'224px','270px')
-          . '</div>';
-    echo $html;
+    $location = geolocation_get_location_for_item($item, true);
+
+    if ($location) {
+        echo geolocation_scripts()
+           . '<div class="info-panel">'
+           . '<h2>Geolocation</h2>'
+           . geolocation_google_map_for_item($item,'224px','270px')
+           . '</div>';
+    }
 }
 
 function geolocation_public_show_item_map($width = null, $height = null, $item = null)
@@ -555,12 +558,14 @@ function geolocation_public_show_item_map($width = null, $height = null, $item =
     if (!$item) {
         $item = get_current_item();
     }
-    
-    $html = geolocation_scripts()
-          . '<h3>Geolocation</h3>'
-          . geolocation_google_map_for_item($item, $width, $height);
 
-    echo $html;
+    $location = geolocation_get_location_for_item($item, true);
+
+    if ($location) {
+        echo geolocation_scripts()
+           . '<h2>Geolocation</h2>'
+           . geolocation_google_map_for_item();
+    }
 }
 
 function geolocation_append_contribution_form($contributionType)
