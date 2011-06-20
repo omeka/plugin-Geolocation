@@ -396,18 +396,6 @@ function geolocation_google_map_for_item($item = null, $width = '200px', $height
     #address_balloon {
         width: 100px;
     }
-    #<?php echo $divId;?> {
-        width: <?php echo $width; ?>;
-        height: <?php echo $height; ?>;
-    }
-    div.map-notification {
-        width: <?php echo $width; ?>;
-        height: <?php echo $height; ?>;
-        display:block;
-        border: 1px dotted #ccc;
-        text-align:center;
-        font-size: 2em;
-    }
 </style>
 <?php        
     $location = geolocation_get_location_for_item($item, true);
@@ -423,8 +411,8 @@ function geolocation_google_map_for_item($item = null, $width = '200px', $height
         }
         $center = js_escape($center);
         $options = js_escape($options);
-        echo '<div id="' . $divId . '" class="map"></div>';
-?>        
+?>
+        <div id="<?php echo $divId;?>" style="width:<?php echo $width;?>; height:<?php echo $height;?>;" class="map"></div>
         <script type="text/javascript">
         //<![CDATA[
             var <?php echo Inflector::variablize($divId); ?>OmekaMapSingle = new OmekaMapSingle(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
