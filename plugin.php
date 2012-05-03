@@ -4,6 +4,7 @@ define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 50);
 define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 10);
 
 require_once 'Location.php';
+require_once HELPERS; // Added so that we can use item() in geolocation_get_default_location. RA
 
 // Plugin Hooks
 add_plugin_hook('install', 'geolocation_install');
@@ -21,6 +22,8 @@ add_plugin_hook('item_browse_sql', 'geolocation_item_browse_sql');
 add_plugin_hook('contribution_append_to_type_form', 'geolocation_append_contribution_form');
 add_plugin_hook('contribution_save_form', 'geolocation_save_contribution_form');
 add_plugin_hook('public_theme_header', 'geolocation_header');
+
+add_plugin_hook('after_save_item', 'geolocation_get_default_location');
 
 // Plugin Filters
 add_filter('admin_navigation_main', 'geolocation_admin_nav');
@@ -53,6 +56,9 @@ function geolocation_install()
     set_option('geolocation_default_zoom_level', '5');
     set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
     set_option('geolocation_add_map_to_contribution_form', '1');
+
+    set_option('geolocation_default_loc_set', 'Item Type Metadata');
+    set_option('geolocation_default_loc_field', 'Location');
 }
 
 function geolocation_uninstall()
@@ -64,6 +70,9 @@ function geolocation_uninstall()
 	delete_option('geolocation_per_page');
     delete_option('geolocation_add_map_to_contribution_form');
     
+    delete_option('geolocation_default_loc_set');
+    delete_option('geolocation_default_loc_field');
+
     // This is for older versions of Geolocation, which used to store a Google Map API key.
 	delete_option('geolocation_gmaps_key');
 
@@ -97,6 +106,9 @@ function geolocation_config()
     set_option('geolocation_per_page', $perPage);
     set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
     set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
+
+    set_option('geolocation_default_loc_set', $_POST['default_loc_set']);
+    set_option('geolocation_default_loc_field', $_POST['default_loc']);
 }
 
 function geolocation_upgrade_options() 
@@ -158,6 +170,50 @@ function geolocation_add_routes($router)
 }
 
 /**
+ * When we save an item that does not have a location yet, if it has an address in the field specified as the default location field,
+ * 	geocode that address and save it as the item's location. RA
+ * @return void
+ **/
+function geolocation_get_default_location($item)
+{
+	if (!geolocation_get_location_for_item($item, true)) { // if we don't already have a location, try to get a new one
+		try {
+			// Get the value of the default location element of this item.
+			$address = item(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field'),array(),$item);
+
+			if ($address != "") {
+				// Make a request to the Google Geocoding API
+				$client = new Zend_Http_Client('http://maps.googleapis.com/maps/api/geocode/xml?address='.urlencode($address).'&sensor=false');
+				$response = $client->request();
+
+				if ($response->isSuccessful()) {
+					$body = $response->getBody();		
+					$data = simplexml_load_string($body);
+	
+					if ($data->status == "OK") {
+						$lat = $data->result->geometry->location->lat;
+						$lng = $data->result->geometry->location->lng;
+						// Get lat and lng from XML results
+
+						$location = new Location; // Create new location object for this new item
+						$location->item_id = $item->id;
+						$location->latitude = $lat;
+						$location->longitude = $lng;
+						$location->address = $address;
+						$location->zoom_level = get_option('geolocation_default_zoom_level'); // use the default zoom level
+						$location->map_type = "Google Maps v".GOOGLE_MAPS_API_VERSION;
+
+						$location->save();
+					}
+				}
+			}
+	   } catch (Exception $e) {
+		   // Invalid field for this item, or some other issue. So, just don't do anything.
+	   }
+	}
+}
+
+/**
  * Each time we save an item, check the POST to see if we are also saving a 
  * location
  * @return void
@@ -175,7 +231,7 @@ function geolocation_save_location($item)
     $location = geolocation_get_location_for_item($item, true);
     
     // If we have filled out info for the geolocation, then submit to the db
-    $geolocationPost = $post['geolocation'];
+    $geolocationPost = $post['geolocation'][0];
     if (!empty($geolocationPost) && 
         (((string)$geolocationPost['latitude']) != '') && 
         (((string)$geolocationPost['longitude']) != '')) {
@@ -184,13 +240,18 @@ function geolocation_save_location($item)
             $location->item_id = $item->id;
         }
         $location->saveForm($geolocationPost);
-    // If the form is empty, then we want to delete whatever location is 
-    // currently stored
-    } else {
+    }
+	/* If the form is empty, then we want to delete whatever location is 
+    	currently stored  - that's the idea, but at the moment it's impossible to leave an
+		empty form (it merely warns that "" is not a valid address.) More importantly,
+		this deletes the location we automatically added in get_default_location.
+		Instead, we need a better way (e.g. a location with address = "none", and a checkbox
+		to remove the address on the form.) RA */
+	/* else {
         if ($location) {
             $location->delete();
         }
-    }
+    } */
 }
 
 // Filter Functions
@@ -396,6 +457,18 @@ function geolocation_google_map_for_item($item = null, $width = '200px', $height
     #address_balloon {
         width: 100px;
     }
+    #<?php echo $divId;?> {
+        width: <?php echo $width; ?>;
+        height: <?php echo $height; ?>;
+    }
+    div.map-notification {
+        width: <?php echo $width; ?>;
+        height: <?php echo $height; ?>;
+        display:block;
+        border: 1px dotted #ccc;
+        text-align:center;
+        font-size: 2em;
+    }
 </style>
 <?php        
     $location = geolocation_get_location_for_item($item, true);
@@ -411,8 +484,8 @@ function geolocation_google_map_for_item($item = null, $width = '200px', $height
         }
         $center = js_escape($center);
         $options = js_escape($options);
-?>
-        <div id="<?php echo $divId;?>" style="width:<?php echo $width;?>; height:<?php echo $height;?>;" class="map"></div>
+        echo '<div id="' . $divId . '" class="map"></div>';
+?>        
         <script type="text/javascript">
         //<![CDATA[
             var <?php echo Inflector::variablize($divId); ?>OmekaMapSingle = new OmekaMapSingle(<?php echo js_escape($divId); ?>, <?php echo $center; ?>, <?php echo $options; ?>);
@@ -445,8 +518,7 @@ function geolocation_get_marker_html_for_item($item, $markerHtmlClassName = 'geo
  * @param int $height
  * @return string
  **/
-function geolocation_map_form($item, $width = '100%', $height = '410px', $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
-{
+function geolocation_map_form($item, $width = '500px', $height = '410px', $label = 'Find A Location For The Item:', $confirmLocationChange = true,  $post = null) { 	
     $ht = '';
 	
     $center = geolocation_get_center();
@@ -460,10 +532,10 @@ function geolocation_map_form($item, $width = '100%', $height = '410px', $label 
         
     $usePost = !empty($post) && !empty($post['geolocation']);
     if ($usePost) {
-        $lng  = (double) @$post['geolocation']['longitude'];
-        $lat  = (double) @$post['geolocation']['latitude'];
-        $zoom = (int) @$post['geolocation']['zoom_level'];
-        $addr = @$post['geolocation']['address'];
+        $lng  = (double) @$post['geolocation'][0]['longitude'];
+        $lat  = (double) @$post['geolocation'][0]['latitude'];
+        $zoom = (int) @$post['geolocation'][0]['zoom_level'];
+        $addr = @$post['geolocation'][0]['address'];
     } else {
         if ($location) {
             $lng  = (double) $location['longitude'];
@@ -476,14 +548,22 @@ function geolocation_map_form($item, $width = '100%', $height = '410px', $label 
     }
     ob_start();
 ?>
+<style type="text/css" media="screen">
+    /* Need a bit of styling for the geocoder balloon */
+    #geolocation_find_location_by_address {margin-bottom:18px; float:none;}
+    #confirm_address, #wrong_address {background:#eae9db; padding:8px 12px; color: #333; cursor:pointer;}
+    #confirm_address:hover, #wrong_address:hover {background:#c60; color:#fff;}
+</style>
 <div id="location_form">
-    <input type="hidden" name="geolocation[latitude]" value="<?php echo $lat; ?>" />
-    <input type="hidden" name="geolocation[longitude]" value="<?php echo $lng; ?>" />
-    <input type="hidden" name="geolocation[zoom_level]" value="<?php echo $zoom; ?>" />
-    <input type="hidden" name="geolocation[map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
-    <label style="display:inline; float:none; vertical-align:baseline;"><?php echo html_escape($label); ?></label>
-    <input type="text" name="geolocation[address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" class="textinput"/>
-    <button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>
+    <input type="hidden" name="geolocation[0][latitude]" value="<?php echo $lat; ?>" />
+    <input type="hidden" name="geolocation[0][longitude]" value="<?php echo $lng; ?>" />
+    <input type="hidden" name="geolocation[0][zoom_level]" value="<?php echo $zoom; ?>" />
+    <input type="hidden" name="geolocation[0][map_type]" value="Google Maps v<?php echo GOOGLE_MAPS_API_VERSION;  ?>" />
+    <label><?php echo html_escape($label); ?></label>
+    <input type="text" name="geolocation[0][address]" id="geolocation_address" size="60" value="<?php echo $addr; ?>" />
+    <button type="button" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find By Address</button>
+    
+    <!-- <div id="geolocation-geocoder-confirmation"></div> -->
 </div>
 <?php
     $options = array();
@@ -534,15 +614,12 @@ function geolocation_marker_style()
  **/
 function geolocation_admin_show_item_map($item)
 {
-    $location = geolocation_get_location_for_item($item, true);
-
-    if ($location) {
-        echo geolocation_scripts()
-           . '<div class="info-panel">'
-           . '<h2>Geolocation</h2>'
-           . geolocation_google_map_for_item($item,'224px','270px')
-           . '</div>';
-    }
+    $html = geolocation_scripts()
+          . '<div class="info-panel">'
+          . '<h2>Geolocation</h2>'
+          . geolocation_google_map_for_item($item,'224px','270px')
+          . '</div>';
+    echo $html;
 }
 
 function geolocation_public_show_item_map($width = null, $height = null, $item = null)
@@ -558,14 +635,12 @@ function geolocation_public_show_item_map($width = null, $height = null, $item =
     if (!$item) {
         $item = get_current_item();
     }
+    
+    $html = geolocation_scripts()
+          . '<h3>Geolocation</h3>'
+          . geolocation_google_map_for_item($item, $width, $height);
 
-    $location = geolocation_get_location_for_item($item, true);
-
-    if ($location) {
-        echo geolocation_scripts()
-           . '<h2>Geolocation</h2>'
-           . geolocation_google_map_for_item();
-    }
+    echo $html;
 }
 
 function geolocation_append_contribution_form($contributionType)
@@ -683,6 +758,7 @@ function geolocation_append_to_advanced_search($searchFormId = 'advanced-search-
 	        <?php echo text(array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput'),$address); ?>
             <?php echo hidden(array('name'=>'geolocation-latitude','id'=>'geolocation-latitude'),$currentLat); ?>
             <?php echo hidden(array('name'=>'geolocation-longitude','id'=>'geolocation-longitude'),$currentLng); ?>
+            <?php echo hidden(array('name'=>'geolocation-radius','id'=>'geolocation-radius'),$radius); ?>
 	    </div>
 	</div>
 	
