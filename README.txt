@@ -1,0 +1,3 @@
+I extended the Geolocation plugin to automatically add a location to new items.
+
+Your items must have an element that contains their address (anything that Google maps recognizes, from a street address to a country). For example, if you defined an item type for a letter, it might have an element called "Destination". Go to the Geolocation configure page and enter the name of this element as the default location field. After that, any item that is saved (after you edit it or when it is first added to Omeka) and does not yet have a location, but has an address in the specified field, will be assigned the location given by that address. This is especially helpful when you're uploading a lot of items at once, e.g. with CSV Import.
