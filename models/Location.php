@@ -1,10 +1,10 @@
 <?php
-require_once 'LocationTable.php';
+
 /**
  * Location
  * @package: Omeka
  */
-class Location extends Omeka_Record
+class Location extends Omeka_Record_AbstractRecord
 {
     public $item_id;
     public $latitude;

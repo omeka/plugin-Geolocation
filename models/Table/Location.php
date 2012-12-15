@@ -1,5 +1,5 @@
 <?php
-class LocationTable extends Omeka_Db_Table
+class Table_Location extends Omeka_Db_Table
 {
     /**
      * Returns a location (or array of locations) for an item (or array of items)
@@ -49,5 +49,19 @@ class LocationTable extends Omeka_Db_Table
             $indexedLocations[$loc['item_id']] = $loc;
         }
         return $indexedLocations;
+    }
+    
+    public function findItemsBy($params = array(), $limit = null, $page = null)
+    {
+        $itemTable = $this->_db->getTable('Item'); 
+        $select = $itemTable->getSelectForFindBy(array(), $limit, $page);
+        $alias = $this->getTableAlias();
+        $select->join(array($alias, $this->getTableName()),                
+                "items.id = $alias.item_id",
+                array());
+        
+        $this->applySearchFilters($select, $params);
+        return $itemTable->fetchObjects($select);
+        
     }
 }

@@ -3,7 +3,6 @@ define('GOOGLE_MAPS_API_VERSION', '3.x');
 define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 50);
 define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 10);
 
-require_once 'Location.php';
 
 // Plugin Hooks
 add_plugin_hook('install', 'geolocation_install');

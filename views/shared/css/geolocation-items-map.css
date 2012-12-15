@@ -26,3 +26,19 @@
     display:block;
     text-decoration:none; 
 }
+
+
+/* The map for the items page needs a bit of styling on it */
+#address_balloon dt {
+    font-weight: bold;
+}
+#address_balloon {
+    width: 100px;
+}
+
+div.map-notification {
+    display:block;
+    border: 1px dotted #ccc;
+    text-align:center;
+    font-size: 2em;
+}

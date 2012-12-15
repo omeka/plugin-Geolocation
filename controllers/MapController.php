@@ -1,10 +1,36 @@
 <?php
-require_once 'Omeka/Controller/Action.php';
 
-class Geolocation_MapController extends Omeka_Controller_Action
+class Geolocation_MapController extends Omeka_Controller_AbstractActionController
 {
+    public function init()
+    {
+        $this->_helper->db->setDefaultModelName('Location');
+    }
+    
     public function browseAction()
     {
+        $this->_setParam('only_map_items', true);
+        $this->_setParam('use_map_per_page', true);
+        
+        $this->view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
+        $table = $this->_helper->db->getTable();
+        $items = $table->findItemsBy();
+        
+        $this->view->items = $items;
+        $this->view->locations = $table->findLocationByItem($items);
+        $this->view->totalItems = $table->count();
+        
+        $itemsPerMap = (int)get_option('geolocation_per_page') or $itemsPerMap = 10;
+        $params = array('page'  => 1,
+                'per_page'      => $itemsPerMap,
+                'total_results' => $this->view->totalItems);
+        
+        Zend_Registry::set('map_params', $params);
+        
+        // Make the pagination values accessible from pagination_links().
+        Zend_Registry::set('pagination', $params);        
+/*        
+        
         // Need to use a plugin hook here to make sure that this search retrieves
         // only items that are on the map.
         $this->_setParam('only_map_items', true);
@@ -27,5 +53,6 @@ class Geolocation_MapController extends Omeka_Controller_Action
         Zend_Registry::set('pagination', $params);
         
         $this->view->assign(compact('items', 'totalItems', 'locations'));
+        */
     }
 }
