@@ -38,7 +38,6 @@ if (empty($radius)) {
 	            	        
 	        // Find the geolocation for the address
 	        var address = jQuery('#geolocation-address').val();
-            
             if (jQuery.trim(address).length > 0) {
                 var geocoder = new google.maps.Geocoder();	        
                 geocoder.geocode({'address': address}, function(results, status) {

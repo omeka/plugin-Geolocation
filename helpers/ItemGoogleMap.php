@@ -1,8 +1,7 @@
 <?php
 
 class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
-{
-    
+{    
     
     public function itemGoogleMap($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = true, $markerHtmlClassName = 'geolocation_balloon')
     {
@@ -41,9 +40,9 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $options = array();
             $center = js_escape($center);
             $options = js_escape($options);
-            $html .= '<div id="' . $divId . '" class="map"></div>';
+            $html .= '<div id="' . $divId . '" class="map panel"></div>';
             
-            $js = "var Inflector::variablize($divId)";
+            $js = "var " . Inflector::variablize($divId) . ";";
             $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
             $html .= "<script type='text/javascript'>$js</script>";
         } else {

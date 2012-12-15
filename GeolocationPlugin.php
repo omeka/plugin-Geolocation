@@ -30,7 +30,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'action_contexts',
             'admin_items_form_tabs',
             'public_navigation_items'            
-            
             );
     
     
@@ -45,6 +44,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         
     public function hookAdminHead($args)
     {
+        $view = $args['view'];
+        $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         queue_css_file('geolocation-items-map');
         queue_css_file('geolocation-marker');
         queue_js_file('map');
@@ -66,14 +67,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         INDEX (`item_id`)) ENGINE = MYISAM";
         $db->query($sql);
         
-        // If necessary, upgrade the plugin options
-        geolocation_upgrade_options();
-        
         set_option('geolocation_default_latitude', '38');
         set_option('geolocation_default_longitude', '-77');
-                        set_option('geolocation_default_zoom_level', '5');
-                        set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
-                        set_option('geolocation_add_map_to_contribution_form', '1');        
+        set_option('geolocation_default_zoom_level', '5');
+        set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
+        set_option('geolocation_add_map_to_contribution_form', '1');        
     }
     
     public function hookUninstall()
@@ -192,14 +190,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function hookAdminItemsShowSidebar($args)
     {
+        $view = $args['view'];
+        $item = $args['item'];
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
         if ($location) {
-        echo geolocation_scripts()
-        . '<div class="info-panel">'
-        . '<h2>Geolocation</h2>'
-        . geolocation_google_map_for_item($item,'224px','270px')
-        . '</div>';
+            $html = '';
+            $html .= "<div class='info-panel panel'>";
+            $html .= $view->itemGoogleMap($item, '224px', '270px' );
+            $html .= "</div>";
+            echo $html;
         }        
     }
     
@@ -257,7 +257,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function hookItemBrowseSql($args)
     {
-// JF has made it clear that we. don't. need. that.
+// @zerocrates has made it clear that we. don't. need. that.
         if (($request = Zend_Controller_Front::getInstance()->getRequest())) {
             $db = $this->_db;
         
