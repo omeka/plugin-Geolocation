@@ -19,7 +19,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'public_items_show',
             'admin_items_search',
             'public_items_search',
-            'item_browse_sql',
+            'items_browse_sql',
             'public_head',
             'admin_head'          
             );
@@ -46,10 +46,21 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
-        queue_css_file('geolocation-items-map');
-        queue_css_file('geolocation-marker');
-        queue_js_file('map');
-        queue_js_url("http://maps.google.com/maps/api/js?sensor=false");  
+        $request = Zend_Controller_Front::getInstance()->getRequest();
+        $module = $request->getModuleName();
+        $controller = $request->getControllerName();
+        $action = $request->getActionName();        
+        if ( ($module == 'geolocation' && $controller == 'map')
+                    || ($module == 'contribution' 
+                        && $controller == 'contribution' 
+                        && $action == 'contribute' 
+                        && get_option('geolocation_add_map_to_contribution_form') == '1')
+                     || ($controller == 'items') )  {
+            queue_css_file('geolocation-items-map');
+            queue_css_file('geolocation-marker');
+            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
+            queue_js_file('map');
+        }
     }
         
     public function hookInstall()
@@ -173,7 +184,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                         (((string)$geolocationPost['latitude']) != '') &&
                         (((string)$geolocationPost['longitude']) != '')) {
             if (!$location) {
-                debug($item);
                 $location = new Location;
                 $location->item_id = $item->id;
             }
@@ -196,7 +206,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         if ($location) {
             $html = '';
-            $html .= "<div class='info-panel panel'>";
+            $html .= "<div id='geolocation' class='info-panel panel'>";
             $html .= $view->itemGoogleMap($item, '224px', '270px' );
             $html .= "</div>";
             echo $html;
@@ -212,7 +222,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $controller = $request->getControllerName();
         $action = $request->getActionName();
         if ( ($module == 'geolocation' && $controller == 'map')
-                        || ($module == 'contribution' && $controller == 'contribution' && $action == 'contribute' && get_option('geolocation_add_map_to_contribution_form') == '1')) {
+                        || ($module == 'contribution' 
+                            && $controller == 'contribution' 
+                            && $action == 'contribute' 
+                            && get_option('geolocation_add_map_to_contribution_form') == '1')
+                         || ($controller == 'items') )  {
             queue_css_file('geolocation-items-map');
             queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
@@ -224,17 +238,17 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $item = $args['item'];
-        $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '100%';
-        
-        $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';
-                
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
-        
+
         if ($location) {
-            $html = '<h2>Geolocation</h2>'; 
+            $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '100%';
+            $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';            
+            $html = "<div id='geolocation'>";
+            $html .= '<h2>Geolocation</h2>';
             $html .= $view->itemGoogleMap($item);
-        }     
-        echo $html;   
+            $html .= "</div>";
+            echo $html;
+        }
     }
     
     public function hookAdminItemsSearch($args)
@@ -255,51 +269,56 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         echo $view->partial('advanced-search-partial.php', array('searchFormId'=>'advanced-search-form', 'searchButtonId'=>'submit_search_advanced'));
     }
     
-    public function hookItemBrowseSql($args)
+    public function hookItemsBrowseSql($args)
     {
-// @zerocrates has made it clear that we. don't. need. that.
-        if (($request = Zend_Controller_Front::getInstance()->getRequest())) {
-            $db = $this->_db;
+        $db = $this->_db;
+        $select = $args['select'];
         
+        if(isset($args['params']['geolocation-address'])) {
+            
+            
             // Get the address, latitude, longitude, and the radius from parameters
-            $address = trim($request->getParam('geolocation-address'));
-            $currentLat = trim($request->getParam('geolocation-latitude'));
-            $currentLng = trim($request->getParam('geolocation-longitude'));
-            $radius = trim($request->getParam('geolocation-radius'));
+            $address = trim($args['params']['geolocation-address']);
+            $currentLat = trim($args['params']['geolocation-latitude']);
+            $currentLng = trim($args['params']['geolocation-longitude']);
+            $radius = trim($args['params']['geolocation-radius']);
         
-            if ($request->get('only_map_items') || $address != '') {
+            if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
                 //INNER JOIN the locations table
-                $select->joinInner(array('l' => $db->Location), 'l.item_id = i.id',
-                                array('latitude', 'longitude', 'address'));
+
+                if(!$select->hasJoin('locations')) {
+                    $select->joinInner(array('locations' => $db->Location), 'locations.item_id = items.id',
+                                array('latitude', 'longitude', 'address'));                    
+                }
             }
-        
             // Limit items to those that exist within a geographic radius if an address and radius are provided
             if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
                 // SELECT distance based upon haversine forumula
-                $select->columns('3956 * 2 * ASIN(SQRT(  POWER(SIN(('.$currentLat.' - l.latitude) * pi()/180 / 2), 2) + COS('.$currentLat.' * pi()/180) *  COS(l.latitude * pi()/180) *  POWER(SIN(('.$currentLng.' -l.longitude) * pi()/180 / 2), 2)  )) as distance');
+                $select->columns('3956 * 2 * ASIN(SQRT(  POWER(SIN(('.$currentLat.' - locations.latitude) * pi()/180 / 2), 2) + COS('.$currentLat.' * pi()/180) *  COS(locations.latitude * pi()/180) *  POWER(SIN(('.$currentLng.' -locations.longitude) * pi()/180 / 2), 2)  )) as distance');
                 // WHERE the distance is within radius miles of the specified lat & long
                 $select->where('(latitude BETWEEN '.$currentLat.' - ' . $radius . '/69 AND ' . $currentLat . ' + ' . $radius .  '/69)
              AND (longitude BETWEEN ' . $currentLng . ' - ' . $radius . '/69 AND ' . $currentLng  . ' + ' . $radius .  '/69)');
                 //ORDER by the closest distances
                 $select->order('distance');
             }
-        
             // This would be better as a filter that actually manipulated the
             // 'per_page' value via this plugin. Until then, we need to hack the
             // LIMIT clause for the SQL query that determines how many items to
             // return.
-            if ($request->get('use_map_per_page')) {
+            /*
+            if (isset($args['params']['use_map_per_page']) && $args['params']['use_map_per_page'] ) {
                 // If the limit of the SQL query is 1, we're probably doing a
                 // COUNT(*)
                 $limitCount = $select->getPart(Zend_Db_Select::LIMIT_COUNT);
                 if ($limitCount != 1) {
                     $select->reset(Zend_Db_Select::LIMIT_COUNT);
                     $select->reset(Zend_Db_Select::LIMIT_OFFSET);
-                    $pageNum = $request->get('page') or $pageNum = 1;
+                    $pageNum = $args['params']['page'];
                     $select->limitPage($pageNum, geolocation_get_map_items_per_page());
                 }
             }
-        }        
+            */
+        }
     }
         
     public function filterAdminNavigationMain($navArray)

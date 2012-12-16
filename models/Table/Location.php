@@ -51,16 +51,30 @@ class Table_Location extends Omeka_Db_Table
         return $indexedLocations;
     }
     
+    public function countItemsBy($params)
+    {
+        $itemTable = $this->_db->getTable('Item');
+        $select = $itemTable->getSelectForCount($params);
+        $alias = $this->getTableAlias();
+        $select->join(array($alias, $this->getTableName()),
+                        "items.id = $alias.item_id",
+                        array());
+                        $this->applySearchFilters($select, $params);
+                        fire_plugin_hook('items_browse_sql', array('select' => $select, 'params' => $params));
+        return $itemTable->fetchOne($select);
+    }
+    
     public function findItemsBy($params = array(), $limit = null, $page = null)
     {
         $itemTable = $this->_db->getTable('Item'); 
-        $select = $itemTable->getSelectForFindBy(array(), $limit, $page);
+        $select = $itemTable->getSelectForFindBy($params, $limit, $page);
         $alias = $this->getTableAlias();
         $select->join(array($alias, $this->getTableName()),                
                 "items.id = $alias.item_id",
                 array());
-        
         $this->applySearchFilters($select, $params);
+        fire_plugin_hook('items_browse_sql', array('select' => $select, 'params' => $params));
+        
         return $itemTable->fetchObjects($select);
         
     }

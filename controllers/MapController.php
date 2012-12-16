@@ -14,15 +14,23 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         
         $this->view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         $table = $this->_helper->db->getTable();
-        $items = $table->findItemsBy();
+        
+        $params = $this->getAllParams();
+        $currentPage = $this->getParam('page', 1);
+        if(isset($args['params']['use_map_per_page']) && $args['params']['use_map_per_page']) {
+            $limit = (int)get_option('geolocation_per_page');
+        } else {
+            $limit = null;
+        }
+        
+        $items = $table->findItemsBy($params, $limit, $currentPage);
         
         $this->view->items = $items;
         $this->view->locations = $table->findLocationByItem($items);
-        $this->view->totalItems = $table->count();
+        $this->view->totalItems = $table->countItemsBy($params);
         
-        $itemsPerMap = (int)get_option('geolocation_per_page') or $itemsPerMap = 10;
-        $params = array('page'  => 1,
-                'per_page'      => $itemsPerMap,
+        $params = array('page'  => $currentPage,
+                'per_page'      => $limit,
                 'total_results' => $this->view->totalItems);
         
         Zend_Registry::set('map_params', $params);

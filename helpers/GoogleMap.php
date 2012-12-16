@@ -41,7 +41,6 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
         $varDivId = Inflector::variablize($divId);
         $js = '';
         $js .= "var $varDivId" . "OmekaMapBrowse = new OmekaMapBrowse(" . js_escape($divId) .", $center, $options); ";
-        $js .= "console.log({$varDivId}OmekaMapBrowse);"; 
         $ht .= "<script type='text/javascript'>$js</script>";
         return $ht;
     }
