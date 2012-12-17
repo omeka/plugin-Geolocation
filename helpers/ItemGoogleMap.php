@@ -12,9 +12,8 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
         }";
         
         $divId = "item-map-{$item->id}";
-        
         $html .= "
-            #$divId{
+            #$divId {
                 width: $width;
                 height: $height;
             }";

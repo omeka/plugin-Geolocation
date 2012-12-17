@@ -44,7 +44,4 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
         $ht .= "<script type='text/javascript'>$js</script>";
         return $ht;
     }
-    
-    
-    
 }
