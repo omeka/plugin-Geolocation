@@ -301,23 +301,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 //ORDER by the closest distances
                 $select->order('distance');
             }
-            // This would be better as a filter that actually manipulated the
-            // 'per_page' value via this plugin. Until then, we need to hack the
-            // LIMIT clause for the SQL query that determines how many items to
-            // return.
-            /*
-            if (isset($args['params']['use_map_per_page']) && $args['params']['use_map_per_page'] ) {
-                // If the limit of the SQL query is 1, we're probably doing a
-                // COUNT(*)
-                $limitCount = $select->getPart(Zend_Db_Select::LIMIT_COUNT);
-                if ($limitCount != 1) {
-                    $select->reset(Zend_Db_Select::LIMIT_COUNT);
-                    $select->reset(Zend_Db_Select::LIMIT_OFFSET);
-                    $pageNum = $args['params']['page'];
-                    $select->limitPage($pageNum, geolocation_get_map_items_per_page());
-                }
-            }
-            */
         }
     }
         
@@ -347,11 +330,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         // insert the map tab before the Miscellaneous tab
         $item = $args['item'];
-        
-        $width = get_option('geolocation_item_map_width');
-        $height = get_option('geolocation_item_map_height');
-        
-        $tabs['Map'] = $this->_mapForm($item, $width);
+        $tabs['Map'] = $this->_mapForm($item);
         
         return $tabs;     
     }
@@ -359,7 +338,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function filterPublicNavigationItems($navArray)
     {
         if (get_option('geolocation_link_to_nav')) {
-            $navArray['Browse Map'] = uri('items/map');
+            $navArray['Browse Map'] = array(
+                                            'label'=>__('Browse Map'),
+                                            'uri' => url('items/map') 
+                                            );
         }
         return $navArray;        
     }     
@@ -372,7 +354,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      * @param int $height
      * @return string
      **/    
-    protected function _mapForm($item, $width = '100%', $height = '410px', $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
+    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
     {
         $html = '';
         
@@ -401,18 +383,25 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 $lng = $lat = $zoom = $addr = '';
             }
         }
-
-        $html .= '<div id="location_form">';
         
-        $html .= '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
-        $html .= '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
-        $html .= '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
-        $html .= '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . GOOGLE_MAPS_API_VERSION . '" />';
-        $html .= '<label style="display:inline; float:none; vertical-align:baseline;">' . html_escape($label) . '</label>';
-        $html .= '<input type="text" name="geolocation[address]" id="geolocation_address" size="60" value="' . $addr . '" class="textinput"/>';
-        $html .= '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>';
+        $html .= '<div class="field">';
+        $html .=     '<div id="location_form" class="two columns alpha">';
+        $html .=         '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
+        $html .=         '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
+        $html .=         '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
+        $html .=         '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . GOOGLE_MAPS_API_VERSION . '" />';
+        $html .=         '<label>' . html_escape($label) . '</label>';
+        $html .=     '</div>';
+        $html .=     '<div class="inputs five columns omega">';
+        $html .=          '<div class="input-block">';
+        $html .=            '<input type="text" name="geolocation[address]" id="geolocation_address" value="' . $addr . '" class="textinput"/>';
+        $html .=            '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>';        
+        $html .=          '</div>';
+        $html .=     '</div>';
         $html .= '</div>';
-
+        $html .= '<div  id="omeka-map-form" style="width: 100%; height: 300px"></div>';
+        
+        
         $options = array();
         $options['form'] = array('id' => 'location_form',
                 'posted' => $usePost);
@@ -425,20 +414,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $options['confirmLocationChange'] = $confirmLocationChange;
         
         $center = js_escape($center);
-        $options = js_escape($options);
-        $divId = 'omeka-map-form';
+        $options = js_escape($options);        
 
-        $html .= '<div id="' . html_escape($divId) . '" style="width: ' . $width . '; height: ' . $height .';"></div>';
-        
-        $js = "var anOmekaMapForm = new OmekaMapForm(" . js_escape($divId) . ", $center, $options);";
+        $js = "var anOmekaMapForm = new OmekaMapForm(" . js_escape('omeka-map-form') . ", $center, $options);";
         $js .= "
             jQuery(document).bind('omeka:tabselected', function () {
                 anOmekaMapForm.resize();
             });                        
         ";
+        
         $html .= "<script type='text/javascript'>" . $js . "</script>";
-        
-        
         return $html;
     }
     
