@@ -69,7 +69,7 @@ class Table_Location extends Omeka_Db_Table
         $itemTable = $this->_db->getTable('Item'); 
         $select = $itemTable->getSelectForFindBy($params, $limit, $page);
         $alias = $this->getTableAlias();
-        $select->join(array($alias, $this->getTableName()),                
+        $select->join(array($alias, $this->_db->Location),                
                 "items.id = $alias.item_id",
                 array());
         $this->applySearchFilters($select, $params);
