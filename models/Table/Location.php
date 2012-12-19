@@ -16,9 +16,9 @@ class Table_Location extends Omeka_Db_Table
         } else if (is_array($item) && !count($item)) {
             return array();
         }
-        
+        $alias = $this->getTableAlias();
         // Create a SELECT statement for the Location table
-        $select = $db->select()->from(array('l' => $db->Location), 'l.*');
+        $select = $db->select()->from(array($alias => $db->Location), "$alias.*");
         
         // Create a WHERE condition that will pull down all the location info
         if (is_array($item)) {
@@ -26,10 +26,10 @@ class Table_Location extends Omeka_Db_Table
             foreach ($item as $it) {
                 $itemIds[] = (int)(($it instanceof Item) ? $it->id : $it);
             }
-            $select->where('l.item_id IN (?)', $itemIds);
+            $select->where("$alias.item_id IN (?)", $itemIds);
         } else {
             $itemId = (int)(($item instanceof Item) ? $item->id : $item);
-            $select->where('l.item_id = ?', $itemId);
+            $select->where("$alias.item_id = ?", $itemId);
         }
         
         // Get the locations
@@ -56,11 +56,11 @@ class Table_Location extends Omeka_Db_Table
         $itemTable = $this->_db->getTable('Item');
         $select = $itemTable->getSelectForCount($params);
         $alias = $this->getTableAlias();
-        $select->join(array($alias, $this->getTableName()),
+        $select->join(array($alias, $this->_db->Location),
                         "items.id = $alias.item_id",
                         array());
-                        $this->applySearchFilters($select, $params);
-                        fire_plugin_hook('items_browse_sql', array('select' => $select, 'params' => $params));
+        $this->applySearchFilters($select, $params);
+        fire_plugin_hook('items_browse_sql', array('select' => $select, 'params' => $params));
         return $itemTable->fetchOne($select);
     }
     

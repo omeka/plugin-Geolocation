@@ -283,11 +283,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $currentLng = trim($args['params']['geolocation-longitude']);
             $radius = trim($args['params']['geolocation-radius']);
         
+            $alias = $this->getTableAlias();
             if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
                 //INNER JOIN the locations table
 
                 if(!$select->hasJoin('locations')) {
-                    $select->joinInner(array('locations' => $db->Location), 'locations.item_id = items.id',
+                    $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
                                 array('latitude', 'longitude', 'address'));                    
                 }
             }
