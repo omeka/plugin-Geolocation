@@ -22,7 +22,6 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         } else {
             $limit = null;
         }
-        
         $items = $table->findItemsBy($params, $limit, $currentPage);
         
         $this->view->items = $items;
