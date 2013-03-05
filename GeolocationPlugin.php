@@ -36,8 +36,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function setUp()
     {
         if(plugin_is_active('Contribution')) {
-            $this->_hooks[] = 'contribution_append_to_type_form';
-            $this->_hooks[] = 'contribution_save_form';
+           // $this->_hooks[] = 'contribution_append_to_type_form';
+           // $this->_hooks[] = 'contribution_save_form';
         }
         parent::setUp();
     }
@@ -241,7 +241,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
         if ($location) {
-            $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '100%';
+            $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '';
             $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';            
             $html = "<div id='geolocation'>";
             $html .= '<h2>Geolocation</h2>';
@@ -283,14 +283,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $currentLng = trim($args['params']['geolocation-longitude']);
             $radius = trim($args['params']['geolocation-radius']);
         
-            $alias = $this->getTableAlias();
+            $alias = $this->_db->getTable('Location')->getTableAlias();
             if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
                 //INNER JOIN the locations table
 
-                if(!$select->hasJoin('locations')) {
                     $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
                                 array('latitude', 'longitude', 'address'));                    
-                }
             }
             // Limit items to those that exist within a geographic radius if an address and radius are provided
             if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
