@@ -403,7 +403,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $html .=     '<div class="inputs five columns omega">';
         $html .=          '<div class="input-block">';
         $html .=            '<input type="text" name="geolocation[address]" id="geolocation_address" value="' . $addr . '" class="textinput"/>';
-        $html .=            '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>';        
+        $html .=            '<button type="button" style="float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>';        
         $html .=          '</div>';
         $html .=     '</div>';
         $html .= '</div>';
