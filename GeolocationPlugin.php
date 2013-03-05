@@ -36,8 +36,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function setUp()
     {
         if(plugin_is_active('Contribution')) {
-           // $this->_hooks[] = 'contribution_append_to_type_form';
-           // $this->_hooks[] = 'contribution_save_form';
+            $this->_hooks[] = 'contribution_type_form';
+            //$this->_hooks[] = 'contribution_save_form';
         }
         parent::setUp();
     }
@@ -166,9 +166,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function hookAfterSaveItem($args)
     {
-        $post = $args['post'];
+        $post = $_POST;
         $item = $args['record'];   
-
         // If we don't have the geolocation form on the page, don't do anything!
         if (!$post['geolocation']) {
             return;
@@ -345,7 +344,17 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         return $navArray;        
     }     
     
+    public function hookContributionTypeForm($args)
+    {
+        $contributionType = $args['type'];
+        echo $this->_mapForm(null, 'Find A Geographic Location For The ' . $contributionType->display_name . ':', false );
+    }
 
+    public function hookSaveContributionForm($args)
+    {
+        
+    }
+    
     /**
      * Returns the form code for geographically searching for items
      * @param Item $item
