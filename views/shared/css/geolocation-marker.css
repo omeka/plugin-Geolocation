@@ -1,3 +1,7 @@
+div#geolocation {
+	clear: both;
+}
+
 .info-panel .map {
     margin-top:-18px;
     display:block; 
