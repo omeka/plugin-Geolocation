@@ -272,7 +272,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $db = $this->_db;
         $select = $args['select'];
-        
+        $alias = $this->_db->getTable('Location')->getTableAlias();
         if(isset($args['params']['geolocation-address'])) {
             
             
@@ -282,12 +282,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $currentLng = trim($args['params']['geolocation-longitude']);
             $radius = trim($args['params']['geolocation-radius']);
         
-            $alias = $this->_db->getTable('Location')->getTableAlias();
+            
             if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
                 //INNER JOIN the locations table
 
-                    $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
-                                array('latitude', 'longitude', 'address'));                    
+                $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
+                            array('latitude', 'longitude', 'address'));                    
             }
             // Limit items to those that exist within a geographic radius if an address and radius are provided
             if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
@@ -299,7 +299,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 //ORDER by the closest distances
                 $select->order('distance');
             }
+        } else if( isset($args['params']['only_map_items'])) {
+            
+            $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
+                    array());            
         }
+        
     }
         
     public function filterAdminNavigationMain($navArray)
