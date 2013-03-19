@@ -26,6 +26,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     protected $_filters = array(
             'admin_navigation_main',
+            'public_navigation_main',
             'response_contexts',
             'action_contexts',
             'admin_items_form_tabs',
@@ -308,6 +309,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     }
         
     public function filterAdminNavigationMain($navArray)
+    {
+        $navArray['Geolocation'] = array('label'=>'Map', 'uri'=>url('geolocation/map/browse'));
+        return $navArray;        
+    }
+    
+    public function filterPublicNavigationMain($navArray)
     {
         $navArray['Geolocation'] = array('label'=>'Map', 'uri'=>url('geolocation/map/browse'));
         return $navArray;        
