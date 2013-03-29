@@ -17,11 +17,7 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         
         $params = $this->getAllParams();
         $currentPage = $this->getParam('page', 1);
-        if(isset($args['params']['use_map_per_page']) && $args['params']['use_map_per_page']) {
-            $limit = (int)get_option('geolocation_per_page');
-        } else {
-            $limit = null;
-        }
+        $limit = (int)get_option('geolocation_per_page');
         $params['only_map_items'] = true;
         $items = $table->findItemsBy($params, $limit, $currentPage);
         
