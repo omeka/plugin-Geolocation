@@ -83,7 +83,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_default_longitude', '-77');
         set_option('geolocation_default_zoom_level', '5');
         set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
-        set_option('geolocation_add_map_to_contribution_form', '1');        
+        set_option('geolocation_add_map_to_contribution_form', '1'); 
+        
+        set_option('geolocation_disable_images', '0');        
     }
     
     public function hookUninstall()
@@ -94,6 +96,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_default_zoom_level');
         delete_option('geolocation_per_page');
         delete_option('geolocation_add_map_to_contribution_form');
+        
+        delete_option('geolocation_disable_images');
         
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
@@ -135,7 +139,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         set_option('geolocation_per_page', $perPage);
         set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
-        set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);        
+        set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);    
+        
+        set_option('geolocation_disable_images', $_POST['geolocation_disable_images']);    
     }
     
     public function hookDefineAcl($args)

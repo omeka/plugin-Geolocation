@@ -97,3 +97,16 @@
         </div>
     </div>
 </div>
+
+<div class="field">
+    <div class="two columns alpha">
+        <label for="use_images">Disable thumbnail images on map?</label>    
+    </div>    
+    <div class="inputs five columns omega">
+        <p class="explanation">By default, thumbnail images will be included in the generated KML file and used for the pop up info bubble on the map. Check this option to disable images.</p>
+        <div class="input-block">        
+        <?php echo get_view()->formCheckbox('geolocation_disable_images', true, 
+         array('checked'=>(boolean)get_option('geolocation_disable_images'))); ?>        
+        </div>
+    </div>
+</div>
