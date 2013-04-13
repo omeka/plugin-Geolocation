@@ -1,0 +1,140 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-04-13 20:24+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: config_form.php:3
+msgid "Number of Locations Per Page:"
+msgstr "Sijainteja sivua kohti:"
+
+#: config_form.php:6
+msgid "The number of locations displayed per page when browsing the map. (Maximum is "
+msgstr "Kerralla näytettyjen sijaintien lukumäärä karttaselausnäkymässä. (Enimmäismäärä "
+
+#: config_form.php:16
+msgid "Default Latitude"
+msgstr "Pohjoiskoordinaatti"
+
+#: config_form.php:19
+msgid "Latitude of the map's initial center point, in degrees. Must be between -90 and 90."
+msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -90 ja 90."
+
+#: config_form.php:28
+msgid "Default Longitude"
+msgstr "Itäkoordinaatti"
+
+#: config_form.php:31
+msgid "Longitude of the map's initial center point, in degrees. Must be between -180 and 180."
+msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -180 ja 180."
+
+#: config_form.php:40
+msgid "Default Zoom Level"
+msgstr "Zoomausaste"
+
+#: config_form.php:43
+msgid "An integer greater than or equal to 0, where 0 represents the most zoomed out scale."
+msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu lähimpään asetukseensa."
+
+#: config_form.php:52
+msgid "Width for Item Map"
+msgstr "Aineistonäkymän kartan leveys"
+
+#: config_form.php:55
+msgid ""
+"The width of the map displayed on your items/show page. If left blank, the default width of 100% will be used."
+msgstr ""
+
+#: config_form.php:64
+msgid "Height for Item Map"
+msgstr "Aineistonäkymän kartan korkeus"
+
+#: config_form.php:67
+msgid ""
+"The height of the map displayed on your items/show page. If left blank, the "
+"default height of 300px will be used."
+msgstr ""
+
+#: config_form.php:76
+msgid "Use metric distances"
+msgstr "Käytä mittayksikkönä kilometrejä"
+
+#: config_form.php:79
+msgid "Use metric distances in proximity search."
+msgstr "Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena mittayksikkönä on maili."
+
+#: config_form.php:89
+msgid "Add Link to Map on Items/Browse Navigation"
+msgstr "Lisää linkki karttaan aineistojen selausnäkymiin"
+
+#: config_form.php:92
+msgid "Add a link to the items map on all the items/browse pages."
+msgstr ""
+
+#: config_form.php:103
+msgid "Add Map To Contribution Form"
+msgstr ""
+
+#: config_form.php:106
+msgid ""
+"If the Contribution plugin is installed and activated, Geolocation  will add "
+"a geolocation map field to the contribution form to associate a location to "
+"a contributed item."
+msgstr ""
+
+#: GeolocationPlugin.php:369 views/public/map/browse.php:23
+msgid "Browse Map"
+msgstr "Selaa karttaa"
+
+#: GeolocationPlugin.php:379
+msgid "Find A Geographic Location For The "
+msgstr ""
+
+#: GeolocationPlugin.php:397
+msgid "Find a Location by Address:"
+msgstr "Hae paikka osoitteen tai paikan nimen mukaan:"
+
+#: GeolocationPlugin.php:435
+msgid "Find"
+msgstr "Hae"
+
+#: helpers/ItemGoogleMap.php:47
+msgid "This item has no location info associated with it."
+msgstr "Aineistoon ei liity sijaintitietoja."
+
+#: models/Location.php:19
+msgid "Location requires an item id."
+msgstr ""
+
+#: views/admin/map/browse.php:39 views/public/map/browse.php:43
+msgid "Find An Item on the Map"
+msgstr "Hae aineistoja kartalta"
+
+#: views/public/map/browse.php:26
+msgid "Browse Items on the Map"
+msgstr "Selaa aineistoja kartalla"
+
+#: views/public/map/browse.php:26
+msgid "total"
+msgstr "yhteensä"
+
+#: views/shared/advanced-search-partial.php:19
+msgid "Geographic Address"
+msgstr "Paikan nimi tai osoite"
+
+#: views/shared/advanced-search-partial.php:29
+msgid "Geographic Radius (miles)"
+msgstr "Enimmäisetäisyys paikasta (kilometrejä)"

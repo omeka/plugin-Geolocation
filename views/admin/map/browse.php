@@ -36,7 +36,7 @@
     </div><!-- end map_block -->
 
     <div id="link_block">
-        <div id="map-links"><h2>Find An Item on the Map</h2></div><!-- Used by JavaScript -->
+        <div id="map-links"><h2><?php echo __('Find An Item on the Map'); ?></h2></div><!-- Used by JavaScript -->
     </div><!-- end link_block -->
 
 

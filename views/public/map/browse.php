@@ -23,7 +23,7 @@ queue_css_string($css);
 echo head(array('title' => __('Browse Map'),'bodyid'=>'map','bodyclass' => 'browse')); ?>
 
 
-<h1>Browse Items on the Map (<?php echo $totalItems; ?> total)</h1>
+<h1><?php echo __('Browse Items on the Map');?> (<?php echo $totalItems; ?> <?php echo __('total');?></h1>
 
 <nav class="items-nav navigation" id="secondary-nav">
     <?php echo public_nav_items(); ?>
@@ -40,7 +40,7 @@ echo head(array('title' => __('Browse Map'),'bodyid'=>'map','bodyclass' => 'brow
 </div><!-- end map_block -->
 
 <div id="link_block">
-    <div id="map-links"><h2>Find An Item on the Map</h2></div><!-- Used by JavaScript -->
+    <div id="map-links"><h2><?php echo __('Find An Item on the Map'); ?></h2></div><!-- Used by JavaScript -->
 </div><!-- end link_block -->
 
 </div><!-- end primary -->
