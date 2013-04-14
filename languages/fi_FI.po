@@ -44,7 +44,7 @@ msgstr "Zoomausaste"
 
 #: config_form.php:43
 msgid "An integer greater than or equal to 0, where 0 represents the most zoomed out scale."
-msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu lähimpään asetukseensa."
+msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu kauimpaan asetukseensa."
 
 #: config_form.php:52
 msgid "Width for Item Map"
