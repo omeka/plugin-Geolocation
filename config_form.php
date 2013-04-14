@@ -1,6 +1,6 @@
 <div class="field">
     <div class="two columns alpha">
-        <label for="per_page"><?php echo __('Number of Locations Per Page:'); ?></label>    
+        <label for="per_page"><?php echo __('Number of Locations Per Page'); ?></label>    
     </div>    
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The number of locations displayed per page when browsing the map. (Maximum is '); ?><?php echo GEOLOCATION_MAX_LOCATIONS_PER_PAGE; ?>).</p>

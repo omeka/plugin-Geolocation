@@ -327,13 +327,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         
     public function filterAdminNavigationMain($navArray)
     {
-        $navArray['Geolocation'] = array('label'=>'Map', 'uri'=>url('geolocation/map/browse'));
+        $navArray['Geolocation'] = array('label'=>__('Map'), 'uri'=>url('geolocation/map/browse'));
         return $navArray;        
     }
     
     public function filterPublicNavigationMain($navArray)
     {
-        $navArray['Geolocation'] = array('label'=>'Map', 'uri'=>url('geolocation/map/browse'));
+        $navArray['Geolocation'] = array('label'=>__('Map'), 'uri'=>url('geolocation/map/browse'));
         return $navArray;        
     }
     
@@ -357,7 +357,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         // insert the map tab before the Miscellaneous tab
         $item = $args['item'];
-        $tabs['Map'] = $this->_mapForm($item);
+        $tabs[__('Map')] = $this->_mapForm($item);
         
         return $tabs;     
     }

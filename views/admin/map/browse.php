@@ -20,7 +20,7 @@
             }";
     queue_css_string($css);
     
-    $title = "Browse Items on the Map (" . html_escape($totalItems) ." total)";
+    $title = __("Browse Items on the Map").' (' . html_escape($totalItems).' '.__('total').')';
 
 ?>
 
