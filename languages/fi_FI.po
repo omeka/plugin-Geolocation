@@ -1,0 +1,143 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Geolocation\n"
+"Report-Msgid-Bugs-To: https://github.com/omeka/plugin-Geolocation/issues\n"
+"POT-Creation-Date: 2013-04-12 21:49-0500\n"
+"PO-Revision-Date: 2013-04-14 12:42+0200\n"
+"Last-Translator: Matti Lassila <matti.lassila@gmail.com>\n"
+"Language-Team: Finnish (http://www.transifex.net/projects/p/omeka/team/fi/) <matti@sange.fi>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"X-Poedit-Language: Finnish\n"
+"X-Poedit-Country: FINLAND\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n\n"
+
+#: config_form.php:3
+msgid "Number of Locations Per Page"
+msgstr "Sijainteja sivua kohti"
+
+#: config_form.php:6
+msgid "The number of locations displayed per page when browsing the map. (Maximum is "
+msgstr "Kerralla näytettyjen sijaintien määrä karttaselausnäkymässä. (Enimmäismäärä "
+
+#: config_form.php:16
+msgid "Default Latitude"
+msgstr "Pohjoiskoordinaatti"
+
+#: config_form.php:19
+msgid "Latitude of the map's initial center point, in degrees. Must be between -90 and 90."
+msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -90 ja 90."
+
+#: config_form.php:28
+msgid "Default Longitude"
+msgstr "Itäkoordinaatti"
+
+#: config_form.php:31
+msgid "Longitude of the map's initial center point, in degrees. Must be between -180 and 180."
+msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -180 ja 180."
+
+#: config_form.php:40
+msgid "Default Zoom Level"
+msgstr "Zoomausaste"
+
+#: config_form.php:43
+msgid "An integer greater than or equal to 0, where 0 represents the most zoomed out scale."
+msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu kauimpaan asetukseensa."
+
+#: config_form.php:52
+msgid "Width for Item Map"
+msgstr "Aineistonäkymän kartan leveys"
+
+#: config_form.php:55
+msgid "The width of the map displayed on your items/show page. If left blank, the default width of 100% will be used."
+msgstr "Karttanäkymän leveys aineistosivulla. Oletuksena kartta näytetään sivupohjan suhteen täysleveänä (100%)."
+
+#: config_form.php:64
+msgid "Height for Item Map"
+msgstr "Aineistonäkymän kartan korkeus"
+
+#: config_form.php:67
+msgid "The height of the map displayed on your items/show page. If left blank, the default height of 300px will be used."
+msgstr "Karttanäkymän korkeus aineistolivulla. Oletuskorkeus on 300 pikseliä."
+
+#: config_form.php:76
+msgid "Use metric distances"
+msgstr "Käytä mittayksikkönä kilometrejä"
+
+#: config_form.php:79
+msgid "Use metric distances in proximity search."
+msgstr "Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena mittayksikkö on maili."
+
+#: config_form.php:89
+msgid "Add Link to Map on Items/Browse Navigation"
+msgstr "Lisää linkki karttaan aineistojen selausnäkymiin"
+
+#: config_form.php:92
+msgid "Add a link to the items map on all the items/browse pages."
+msgstr "Lisää karttalinkki selausnäkymiin."
+
+#: config_form.php:103
+msgid "Add Map To Contribution Form"
+msgstr "Lisää kartta julkiselle tallennuslomakkeelle"
+
+#: config_form.php:106
+msgid "If the Contribution plugin is installed and activated, Geolocation  will add a geolocation map field to the contribution form to associate a location to a contributed item."
+msgstr "Jos Contribution-lisäosa on asennettuna, julkisella tallennuslomakkeella voidaan näyttää karttanäkymä sijaintitietoa varten."
+
+#: GeolocationPlugin.php:330
+#: GeolocationPlugin.php:336
+msgid "Map"
+msgstr "Kartta"
+
+#: GeolocationPlugin.php:369
+#: views/public/map/browse.php:23
+msgid "Browse Map"
+msgstr "Selaa karttaa"
+
+#: GeolocationPlugin.php:379
+msgid "Find A Geographic Location For The "
+msgstr "Hae maantieteellinen sijainti"
+
+#: GeolocationPlugin.php:397
+msgid "Find a Location by Address:"
+msgstr "Hae paikka osoitteen tai paikan nimen mukaan:"
+
+#: GeolocationPlugin.php:435
+msgid "Find"
+msgstr "Hae"
+
+#: helpers/ItemGoogleMap.php:47
+msgid "This item has no location info associated with it."
+msgstr "Aineistoon ei liity sijaintitietoja."
+
+#: models/Location.php:19
+msgid "Location requires an item id."
+msgstr "Sijainti vaatii aineistotunnuksen."
+
+#: views/admin/map/browse.php:39
+#: views/public/map/browse.php:43
+msgid "Find An Item on the Map"
+msgstr "Aineistot kartalla"
+
+#: views/public/map/browse.php:26
+msgid "Browse Items on the Map"
+msgstr "Selaa aineistoja kartalla"
+
+#: views/public/map/browse.php:26
+msgid "total"
+msgstr "yhteensä"
+
+#: views/shared/advanced-search-partial.php:19
+msgid "Geographic Address"
+msgstr "Paikan nimi tai osoite"
+
+#: views/shared/advanced-search-partial.php:29
+msgid "Geographic Radius (miles)"
+msgstr "Enimmäisetäisyys paikasta (maileja)"
+
+#: views/shared/advanced-search-partial.php:29
+msgid "Geographic Radius (kilometers)"
+msgstr "Enimmäisetäisyys paikasta (kilometrejä)"
+

@@ -20,7 +20,7 @@
             }";
     queue_css_string($css);
     
-    $title = "Browse Items on the Map (" . html_escape($totalItems) ." total)";
+    $title = __("Browse Items on the Map").' (' . html_escape($totalItems).' '.__('total').')';
 
 ?>
 
@@ -36,7 +36,7 @@
     </div><!-- end map_block -->
 
     <div id="link_block">
-        <div id="map-links"><h2>Find An Item on the Map</h2></div><!-- Used by JavaScript -->
+        <div id="map-links"><h2><?php echo __('Find An Item on the Map'); ?></h2></div><!-- Used by JavaScript -->
     </div><!-- end link_block -->
 
 

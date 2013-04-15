@@ -44,7 +44,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
             $html .= "<script type='text/javascript'>$js</script>";
         } else {
-            $html .= '<p class="map-notification">This item has no location info associated with it.</p>';
+            $html .= '<p class="map-notification">'.__('This item has no location info associated with it.').'</p>';
         }
          return $html;   
     }    
