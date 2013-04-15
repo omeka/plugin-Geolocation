@@ -73,7 +73,7 @@
 
 <div class="field">
     <div class="two columns alpha">
-        <label for="geolocation_add_map_to_contribution_form"><?php echo __('Use metric distances'); ?></label>    
+        <label for="geolocation_use_metric_distances"><?php echo __('Use metric distances'); ?></label>    
     </div>    
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('Use metric distances in proximity search.'); ?></p>
