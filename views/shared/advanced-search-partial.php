@@ -12,6 +12,11 @@ if (empty($radius)) {
     $radius = 10; // 10 miles
 }
 
+if (get_option('geolocation_use_metric_distances')) {
+   $distanceLabel =  __('Geographic Radius (kilometers)');
+   } else {
+   $distanceLabel =  __('Geographic Radius (miles)');
+}
 
 ?>
 
@@ -26,7 +31,7 @@ if (empty($radius)) {
 </div>
 
 <div class="field">
-	<?php echo $this->formLabel('geolocation-radius', __('Geographic Radius (miles)')); ?>
+	<?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
 	<div class="inputs">
         <?php echo $this->formText('geolocation-radius', $radius, array('name'=>'geolocation-radius','size' => '40','id'=>'geolocation-radius','class'=>'textinput')); ?>
     </div>
