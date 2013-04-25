@@ -69,7 +69,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $db = get_db();
         $sql = "
-        CREATE TABLE IF NOT EXISTS $db->Location (
+        CREATE TABLE IF NOT EXISTS `$db->Location` (
         `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
         `item_id` BIGINT UNSIGNED NOT NULL ,
         `latitude` DOUBLE NOT NULL ,
@@ -103,7 +103,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         
         // Drop the Location table
         $db = get_db();
-        $db->query("DROP TABLE $db->Location");        
+        $db->query("DROP TABLE IF EXISTS `$db->Location`");        
     }
     
     public function hookConfigForm()
