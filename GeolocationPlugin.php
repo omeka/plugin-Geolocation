@@ -31,7 +31,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'response_contexts',
             'action_contexts',
             'admin_items_form_tabs',
-            'public_navigation_items'            
+            'public_navigation_items',
+            'api_resources',
+            'api_extend_items',
             );
     
     
@@ -145,7 +147,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookDefineAcl($args)
     {   
         $acl = $args['acl'];
-        $acl->allow(null, 'Items', 'modifyPerPage');        
+        $acl->allow(null, 'Items', 'modifyPerPage');
+        $acl->addResource('Locations');
     }
     
     public function hookDefineRoutes($args)
@@ -373,6 +376,43 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         return $navArray;        
     }     
+    
+    /**
+     * Register the geolocations API resource.
+     * 
+     * @param array $apiResources
+     * @return array
+     */
+    public function filterApiResources($apiResources)
+    {
+        $apiResources['geolocations'] = array(
+            'record_type' => 'Location', 
+            'actions' => array('get', 'index', 'post', 'put', 'delete'), 
+        );
+        return $apiResources;
+    }
+    
+    /**
+     * Add geolocations to item API representations.
+     * 
+     * @param array $extend
+     * @param array $args
+     * @return array
+     */
+    public function filterApiExtendItems($extend, $args)
+    {
+        $item = $args['record'];
+        $location = $this->_db->getTable('Location')->findBy(array('item_id' => $item->id));
+        if (!$location) {
+            return $extend;
+        }
+        $locationId = $location[0]['id'];
+        $extend['geolocations'] = array(
+            'id' => $locationId, 
+            'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId"), 
+        );
+        return $extend;
+    }
     
     public function hookContributionTypeForm($args)
     {

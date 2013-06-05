@@ -67,4 +67,21 @@ class Table_Location extends Omeka_Db_Table
         $this->applySearchFilters($select, $params);        
         return $itemTable->fetchObjects($select);
     }
+    
+    /**
+     * Add permission check to location queries.
+     * 
+     * Since all locations belong to an item we can override this method to join 
+     * the items table and add a permission check to the select object.
+     * 
+     * @return Omeka_Db_Select
+     */
+    public function getSelect()
+    {
+        $select = parent::getSelect();
+        $select->join(array('items' => $this->_db->Item), 'items.id = locations.item_id');
+        $permissions = new Omeka_Db_Select_PublicPermissions('Items');
+        $permissions->apply($select, 'items');
+        return $select;
+    }
 }
