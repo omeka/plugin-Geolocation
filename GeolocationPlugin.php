@@ -388,7 +388,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $apiResources['geolocations'] = array(
             'record_type' => 'Location', 
-            'actions' => array('get', 'index', 'post', 'put', 'delete'), 
+            'actions' => array('get', 'index', 'post', 'put', 'delete'),
+            'index_params' => array('item')
         );
         return $apiResources;
     }
@@ -403,15 +404,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function filterApiExtendItems($extend, $args)
     {
         $item = $args['record'];
-        $location = $this->_db->getTable('Location')->findBy(array('item_id' => $item->id));
-        if (!$location) {
-            return $extend;
-        }
+        $locationsCount = $this->_db->getTable('Location')->count(array('item_id' => $item->id));
         $locationId = $location[0]['id'];
         $extend['geolocations'] = array(
-            'id' => $locationId, 
-            'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId"), 
-        );
+                'count' => $locationsCount,
+                'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations?item={$item->id}"),
+                );
         return $extend;
     }
     

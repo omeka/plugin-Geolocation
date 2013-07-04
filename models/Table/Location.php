@@ -1,6 +1,15 @@
 <?php
 class Table_Location extends Omeka_Db_Table
 {
+    
+    public function applySearchFilters($select, $params)
+    {
+        if(isset($params['item'])) {
+            $params['item_id'] = $params['item'];
+        }
+        parent::applySearchFilters($select, $params);
+    }
+    
     /**
      * Returns a location (or array of locations) for an item (or array of items)
      * @param array|Item|int $item An item or item id, or an array of items or item ids
