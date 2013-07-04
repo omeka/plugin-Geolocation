@@ -149,6 +149,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $acl = $args['acl'];
         $acl->allow(null, 'Items', 'modifyPerPage');
         $acl->addResource('Locations');
+        $acl->allow(null, 'Locations');
     }
     
     public function hookDefineRoutes($args)
