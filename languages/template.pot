@@ -1,9 +1,15 @@
+# Translation for the Geolocation plugin for Omeka.
+# Copyright (C) 2011 Roy Rosenzweig Center for History and New Media
+# This file is distributed under the same license as the Omeka package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: Geolocation\n"
-"Report-Msgid-Bugs-To: https://github.com/omeka/plugin-Geolocation/issues\n"
-"POT-Creation-Date: 2013-04-12 21:49-0500\n"
-"PO-Revision-Date: 2013-04-14 12:42+0200\n"
+"Project-Id-Version: SimplePages\n"
+"Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
+"POT-Creation-Date: 2012-01-09 21:49-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -11,12 +17,35 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: GeolocationPlugin.php:334 GeolocationPlugin.php:340
+#: GeolocationPlugin.php:364
+msgid "Map"
+msgstr ""
+
+#: GeolocationPlugin.php:373 views/public/map/browse.php:23
+msgid "Browse Map"
+msgstr ""
+
+#: GeolocationPlugin.php:420
+msgid "Find A Geographic Location For The "
+msgstr ""
+
+#: GeolocationPlugin.php:438
+msgid "Find a Location by Address:"
+msgstr ""
+
+#: GeolocationPlugin.php:476
+msgid "Find"
+msgstr ""
+
 #: config_form.php:3
 msgid "Number of Locations Per Page"
 msgstr ""
 
 #: config_form.php:6
-msgid "The number of locations displayed per page when browsing the map. (Maximum is "
+msgid ""
+"The number of locations displayed per page when browsing the map. (Maximum "
+"is "
 msgstr ""
 
 #: config_form.php:16
@@ -24,7 +53,9 @@ msgid "Default Latitude"
 msgstr ""
 
 #: config_form.php:19
-msgid "Latitude of the map's initial center point, in degrees. Must be between -90 and 90."
+msgid ""
+"Latitude of the map's initial center point, in degrees. Must be between -90 "
+"and 90."
 msgstr ""
 
 #: config_form.php:28
@@ -32,7 +63,9 @@ msgid "Default Longitude"
 msgstr ""
 
 #: config_form.php:31
-msgid "Longitude of the map's initial center point, in degrees. Must be between -180 and 180."
+msgid ""
+"Longitude of the map's initial center point, in degrees. Must be between "
+"-180 and 180."
 msgstr ""
 
 #: config_form.php:40
@@ -40,7 +73,9 @@ msgid "Default Zoom Level"
 msgstr ""
 
 #: config_form.php:43
-msgid "An integer greater than or equal to 0, where 0 represents the most zoomed out scale."
+msgid ""
+"An integer greater than or equal to 0, where 0 represents the most zoomed "
+"out scale."
 msgstr ""
 
 #: config_form.php:52
@@ -48,7 +83,9 @@ msgid "Width for Item Map"
 msgstr ""
 
 #: config_form.php:55
-msgid "The width of the map displayed on your items/show page. If left blank, the default width of 100% will be used."
+msgid ""
+"The width of the map displayed on your items/show page. If left blank, the "
+"default width of 100% will be used."
 msgstr ""
 
 #: config_form.php:64
@@ -56,7 +93,9 @@ msgid "Height for Item Map"
 msgstr ""
 
 #: config_form.php:67
-msgid "The height of the map displayed on your items/show page. If left blank, the default height of 300px will be used."
+msgid ""
+"The height of the map displayed on your items/show page. If left blank, the "
+"default height of 300px will be used."
 msgstr ""
 
 #: config_form.php:76
@@ -80,57 +119,60 @@ msgid "Add Map To Contribution Form"
 msgstr ""
 
 #: config_form.php:106
-msgid "If the Contribution plugin is installed and activated, Geolocation  will add a geolocation map field to the contribution form to associate a location to a contributed item."
-msgstr ""
-
-#: GeolocationPlugin.php:330 GeolocationPlugin.php:336
-msgid "Map"
-msgstr ""
-
-#: GeolocationPlugin.php:369 views/public/map/browse.php:23
-msgid "Browse Map"
-msgstr ""
-
-#: GeolocationPlugin.php:379
-msgid "Find A Geographic Location For The "
-msgstr ""
-
-#: GeolocationPlugin.php:397
-msgid "Find a Location by Address:"
-msgstr ""
-
-#: GeolocationPlugin.php:435
-msgid "Find"
+msgid ""
+"If the Contribution plugin is installed and activated, Geolocation  will add "
+"a geolocation map field to the contribution form to associate a location to "
+"a contributed item."
 msgstr ""
 
 #: helpers/ItemGoogleMap.php:47
 msgid "This item has no location info associated with it."
 msgstr ""
 
-#: models/Location.php:19
-msgid "Location requires an item id."
+#: models/Location.php:22
+msgid "Location requires an item ID."
+msgstr ""
+
+#: models/Location.php:26
+msgid "Location requires a valid item ID."
+msgstr ""
+
+#: models/Location.php:31
+msgid "A location already exists for the provided item."
+msgstr ""
+
+#: models/Location.php:34
+msgid "Location requires a latitude."
+msgstr ""
+
+#: models/Location.php:37
+msgid "Location requires a longitude."
+msgstr ""
+
+#: models/Location.php:40
+msgid "Location requires a zoom level."
+msgstr ""
+
+#: views/admin/map/browse.php:23 views/public/map/browse.php:26
+msgid "Browse Items on the Map"
+msgstr ""
+
+#: views/admin/map/browse.php:23 views/public/map/browse.php:26
+msgid "total"
 msgstr ""
 
 #: views/admin/map/browse.php:39 views/public/map/browse.php:43
 msgid "Find An Item on the Map"
 msgstr ""
 
-#: views/public/map/browse.php:26
-msgid "Browse Items on the Map"
+#: views/shared/advanced-search-partial.php:16
+msgid "Geographic Radius (kilometers)"
 msgstr ""
 
-#: views/public/map/browse.php:26
-msgid "total"
-msgstr ""
-
-#: views/shared/advanced-search-partial.php:19
-msgid "Geographic Address"
-msgstr ""
-
-#: views/shared/advanced-search-partial.php:29
+#: views/shared/advanced-search-partial.php:18
 msgid "Geographic Radius (miles)"
 msgstr ""
 
-#: views/shared/advanced-search-partial.php:29
-msgid "Geographic Radius (kilometers)"
+#: views/shared/advanced-search-partial.php:24
+msgid "Geographic Address"
 msgstr ""
