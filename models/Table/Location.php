@@ -79,7 +79,7 @@ class Table_Location extends Omeka_Db_Table
     public function getSelect()
     {
         $select = parent::getSelect();
-        $select->join(array('items' => $this->_db->Item), 'items.id = locations.item_id');
+        $select->join(array('items' => $this->_db->Item), 'items.id = locations.item_id', array());
         $permissions = new Omeka_Db_Select_PublicPermissions('Items');
         $permissions->apply($select, 'items');
         return $select;
