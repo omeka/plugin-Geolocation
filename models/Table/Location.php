@@ -52,7 +52,12 @@ class Table_Location extends Omeka_Db_Table
         // Return an associative array of locations where the key is the item_id of the location
         // Note: Since each item can only have one location, this makes sense to associate a single location with a single item_id.
         // However, if in the future, an item can have multiple locations, then we cannot just associate a single location with a single item_id;
-        // Instead, in the future, we would have to associate an array of locations with a single item_id.         
+        // Instead, in the future, we would have to associate an array of locations with a single item_id.
+
+        // Doo eet! Doo eet naaahhow!
+        // Not sure what the complex indexing gets us over just returning all the locations
+        // so while in dev just send back locations. If we don't need the indexing, kill it later.
+        return $locations;
         $indexedLocations = array();
         foreach ($locations as $k => $loc) {
             $indexedLocations[$loc['item_id']] = $loc;

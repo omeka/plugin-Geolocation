@@ -27,9 +27,11 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         }
         // An item can only have one location. This assumes that updating an 
         // existing location will never modify the item ID.
+        /*
         if (!$this->exists() && $this->getTable()->findBy(array('item_id' => $this->item_id))) {
             $this->addError('latitude', __('A location already exists for the provided item.'));
         }
+        */
         if (empty($this->latitude)) {
             $this->addError('latitude', __('Location requires a latitude.'));
         }

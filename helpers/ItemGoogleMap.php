@@ -21,10 +21,12 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
         $html .= "</style>";
         
         $divId = "item-map-{$item->id}";
-        $location = get_db()->getTable('Location')->findLocationByItem($item, true);
+        $locations = get_db()->getTable('Location')->findLocationByItem($item, false);
         // Only set the center of the map if this item actually has a location
         // associated with it
-        if ($location) {
+        if (!empty($locations)) {
+            //ends up centering on the last location added. future might involve specifying the center in UI
+            $location = array_pop($locations); 
             $center['latitude']     = $location->latitude;
             $center['longitude']    = $location->longitude;
             $center['zoomLevel']    = $location->zoom_level;
@@ -41,7 +43,11 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $html .= '<div id="' . $divId . '" class="map panel"></div>';
             
             $js = "var " . Inflector::variablize($divId) . ";";
+
             $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
+            foreach($locations as $loc) {
+                $js .= "OmekaMapSingle.addMarker({$loc->latitude}, {$loc->longitude}); \n";
+            }            
             $html .= "<script type='text/javascript'>$js</script>";
         } else {
             $html .= '<p class="map-notification">'.__('This item has no location info associated with it.').'</p>';
