@@ -41,12 +41,12 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $center = js_escape($center);
             $options = js_escape($options);
             $html .= '<div id="' . $divId . '" class="map panel"></div>';
-            
             $js = "var " . Inflector::variablize($divId) . ";";
-
             $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
             foreach($locations as $loc) {
-                $js .= "OmekaMapSingle.addMarker({$loc->latitude}, {$loc->longitude}); \n";
+                $bindHtml = '<div class="' . $markerHtmlClassName . '"><p class="geolocation_marker_title">' . $titleLink . '</p>' . $thumbnailLink . '<p>' . $description . '</p></div>';
+                $bindHtml = js_escape($bindHtml);
+                $js .= "OmekaMapSingle.addMarker({$loc->latitude}, {$loc->longitude}, false, $bindHtml);" ;
             }            
             $html .= "<script type='text/javascript'>$js</script>";
         } else {
