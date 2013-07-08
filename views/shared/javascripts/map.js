@@ -308,19 +308,20 @@ OmekaMapForm.prototype = {
         var that = this;
         
         // Get rid of existing markers.
-        this.clearForm();
+        //this.clearForm();
         
         // Add the marker
         var marker = this.addMarker(point.lat(), point.lng());
         marker.setAnimation(google.maps.Animation.DROP);
-        
+        alert('dropped!');
         // Pan the map to the marker
         that.map.panTo(point);
         
         //  Make the marker clear the form if clicked.
         google.maps.event.addListener(marker, 'click', function (event) {
             if (!that.options.confirmLocationChange || confirm('Are you sure you want to remove the location of the item?')) {
-                that.clearForm();
+                //that.clearForm();
+                alert('clicked the marker');
             }
         });
         
@@ -338,6 +339,7 @@ OmekaMapForm.prototype = {
         if (point) {
             latElement.value = point.lat();
             lngElement.value = point.lng();
+            console.log(lngElement.value);
             zoomElement.value = this.map.getZoom();          
         } else {
             latElement.value = '';

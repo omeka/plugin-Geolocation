@@ -431,15 +431,15 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      * @param int $height
      * @return string
      **/    
-    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
+    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = false,  $post = null)
     {
         $html = '';
         $label = __('Find a Location by Address:');
         $center = $this->_getCenter();
         $center['show'] = false;
         
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
-                
+        $locations = $this->_db->getTable('Location')->findLocationByItem($item, false);
+        $location = $locations[0];
         if ($post === null) {
             $post = $_POST;
         }
