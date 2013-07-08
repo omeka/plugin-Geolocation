@@ -411,6 +411,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $extend['geolocations'] = array(
             'id' => $locationId, 
             'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId"), 
+            'resource' => 'geolocations', 
         );
         return $extend;
     }

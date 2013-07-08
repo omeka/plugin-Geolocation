@@ -30,6 +30,7 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
             'item' => array(
                 'id' => $record->item_id, 
                 'url' => $this->getResourceUrl("/items/{$record->item_id}"), 
+                'resource' => 'items', 
             ), 
         );
         return $representation;
