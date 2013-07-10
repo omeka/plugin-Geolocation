@@ -17,7 +17,6 @@
     width: 100% !important;
     display: inline-block;
     border-radius: 3px;
-    background-color: #303030;
     padding: 5px;
     box-sizing: border-box;
     margin-bottom: 10px;
@@ -31,14 +30,10 @@
     border-bottom: 0 !important;
 }
 
-#map-links li a:link {
-    color: #f7f7f7 !important;
-}
-
 #link_block {
     margin-bottom: 40px;
-    background-color: #4B4B4B;
-    color: white;
+    
+    
 }
 
 #link_block h2:first-child {
@@ -66,9 +61,7 @@ div.map-notification {
         box-sizing: border-box !important;
         height: 436px;
         width: 30%;
-        background-color: #4B4B4B !important;
         float: left;
-        color: white;
         overflow-y: auto;
         margin-bottom: 0 !important;
     }
