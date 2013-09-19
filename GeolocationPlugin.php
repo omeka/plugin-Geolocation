@@ -8,44 +8,37 @@ define('GEOLOCATION_PLUGIN_DIR', PLUGIN_DIR . '/Geolocation');
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
     protected $_hooks = array(
-            'install',
-            'uninstall',
-            'config_form',
-            'config',
-            'define_acl',
-            'define_routes',
-            'after_save_item',
-            'admin_items_show_sidebar',
-            'public_items_show',
-            'admin_items_search',
-            'public_items_search',
-            'items_browse_sql',
-            'public_head',
-            'admin_head',
-            'initialize'          
-            );
+        'install',
+        'uninstall',
+        'config_form',
+        'config',
+        'define_acl',
+        'define_routes',
+        'after_save_item',
+        'admin_items_show_sidebar',
+        'public_items_show',
+        'admin_items_search',
+        'public_items_search',
+        'items_browse_sql',
+        'public_head',
+        'admin_head',
+        'initialize',
+        'exhibit_builder_page_head',
+        'contribution_type_form'
+    );
     
     protected $_filters = array(
-            'admin_navigation_main',
-            'public_navigation_main',
-            'response_contexts',
-            'action_contexts',
-            'admin_items_form_tabs',
-            'public_navigation_items',
-            'api_resources',
-            'api_extend_items',
-            );
+        'admin_navigation_main',
+        'public_navigation_main',
+        'response_contexts',
+        'action_contexts',
+        'admin_items_form_tabs',
+        'public_navigation_items',
+        'api_resources',
+        'api_extend_items',
+        'exhibit_layouts'
+    );
     
-    
-    public function setUp()
-    {
-        if(plugin_is_active('Contribution')) {
-            $this->_hooks[] = 'contribution_type_form';
-            //$this->_hooks[] = 'contribution_save_form';
-        }
-        parent::setUp();
-    }
-        
     public function hookAdminHead($args)
     {
         $view = $args['view'];
@@ -241,6 +234,15 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             queue_js_file('map');
         }        
     }
+
+    public function hookExhibitBuilderPageHead($args)
+    {
+        if (array_key_exists('geolocation-map', $args['layouts'])) {
+            queue_css_file('geolocation-marker');
+            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
+            queue_js_file('map');
+        }
+    }
     
     public function hookPublicItemsShow($args)
     {
@@ -426,7 +428,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         
     }
-    
+
+    public function filterExhibitLayouts($layouts)
+    {
+        $layouts['geolocation-map'] = array(
+            'name' => 'Geolocation Map',
+            'description' => 'A map showing the attached items.'
+        );
+        return $layouts;
+    }
+
     /**
      * Returns the form code for geographically searching for items
      * @param Item $item
