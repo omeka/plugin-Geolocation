@@ -175,7 +175,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function hookAfterSaveItem($args)
     {
-        $post = $_POST;
+        if (!($post = $args['post'])) {
+            return;
+        }
+
         $item = $args['record'];   
         // If we don't have the geolocation form on the page, don't do anything!
         if (!$post['geolocation']) {
