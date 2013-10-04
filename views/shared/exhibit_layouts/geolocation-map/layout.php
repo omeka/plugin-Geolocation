@@ -45,8 +45,11 @@ google.maps.event.addDomListener(window, 'load', function () {
         );
         map_bounds.extend(new google.maps.LatLng(locationData.lat, locationData.lng));
     }
-    console.log(geolocation_map);
-    geolocation_map.map.fitBounds(map_bounds);
+    if (map_locations.length > 1) {
+        geolocation_map.map.fitBounds(map_bounds);
+    } else if (map_locations.length = 1) {
+        geolocation_map.map.setCenter(new google.maps.LatLng(map_locations[0].lat, map_locations[0].lng));
+    }
 });
 </script>
 <div id="<?php echo $divId; ?>" class="exhibit-geolocation-map"></div>
