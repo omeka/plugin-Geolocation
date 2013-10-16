@@ -8,7 +8,6 @@ OmekaMap.prototype = {
     
     map: null,
     mapDivId: null,
-    mapSize: 'small',
     markers: [],
     options: {},
     center: null,
@@ -44,34 +43,35 @@ OmekaMap.prototype = {
     },
     
     initMap: function () {
-        
-        // Build the map.
-        var mapOptions = {
-            zoom: this.center.zoomLevel,
-            center: new google.maps.LatLng(this.center.latitude, this.center.longitude),
-            mapTypeId: google.maps.MapTypeId.ROADMAP,
-            navigationControl: true,
-            mapTypeControl: true
-        };    
-        switch (this.mapSize) {
-        case 'small':
-            mapOptions.navigationControlOptions = {
-                style: google.maps.NavigationControlStyle.SMALL
-            };
-            break;
-        case 'large':
-        default:
-            mapOptions.navigationControlOptions = {
-                style: google.maps.NavigationControlStyle.DEFAULT
-            };
-        }
-
-        this.map = new google.maps.Map(document.getElementById(this.mapDivId), mapOptions); 
-
         if (!this.center) {
             alert('Error: The center of the map has not been set!');
             return;
         }
+
+        // Build the map.
+        var mapOptions = {
+            zoom: this.center.zoomLevel,
+            center: new google.maps.LatLng(this.center.latitude, this.center.longitude),
+        };
+
+        switch (this.options.mapType) {
+        case 'hybrid':
+            mapOptions.mapTypeId = google.maps.MapTypeId.HYBRID;
+            break;
+        case 'satellite':
+            mapOptions.mapTypeId = google.maps.MapTypeId.SATELLITE;
+            break;
+        case 'terrain':
+            mapOptions.mapTypeId = google.maps.MapTypeId.TERRAIN;
+            break;
+        case 'roadmap':
+        default:
+            mapOptions.mapTypeId = google.maps.MapTypeId.ROADMAP;
+        }
+
+        jQuery.extend(mapOptions, this.options.mapOptions);
+
+        this.map = new google.maps.Map(document.getElementById(this.mapDivId), mapOptions); 
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {
@@ -217,9 +217,6 @@ function OmekaMapSingle(mapDivId, center, options) {
     jQuery.extend(true, this, omekaMap);
     this.initMap();
 }
-OmekaMapSingle.prototype = {
-    mapSize: 'small'
-};
 
 function OmekaMapForm(mapDivId, center, options) {
     var that = this;
@@ -274,8 +271,6 @@ function OmekaMapForm(mapDivId, center, options) {
 }
 
 OmekaMapForm.prototype = {
-    mapSize: 'large',
-    
     /* Get the geolocation of the address and add marker. */
     findAddress: function (address) {
         var that = this;

@@ -35,6 +35,7 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
         
         // We are using KML as the output format
         $options['params'] = $params;
+        $options['mapType'] = get_option('geolocation_map_type');
         
         $options = js_escape($options);
         $center = js_escape($center);

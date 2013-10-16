@@ -49,6 +49,26 @@
 
 <div class="field">
     <div class="two columns alpha">
+        <label for="map_type"><?php echo __('Map Type'); ?></label>    
+    </div>    
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('The type of map to display'); ?></p>
+        <div class="input-block">
+            <?php
+            echo get_view()->formSelect('map_type', get_option('geolocation_map_type'), array(), array(
+                'roadmap' => __('Roadmap'),
+                'satellite' => __('Satellite'),
+                'hybrid' =>__('Hybrid'),
+                'terrain' => __('Terrain')
+                )
+            );
+            ?>
+        </div>
+    </div>
+</div>
+
+<div class="field">
+    <div class="two columns alpha">
         <label for="item_map_width"><?php echo __('Width for Item Map'); ?></label>    
     </div>    
     <div class="inputs five columns omega">
