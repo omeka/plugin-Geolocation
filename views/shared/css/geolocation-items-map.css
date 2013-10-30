@@ -1,6 +1,5 @@
-#map-display { 
-    width: 100%; 
-    height: 400px;
+.geolocation-map {
+    line-height: normal;
 }
 
 #map_block {
@@ -32,8 +31,6 @@
 
 #link_block {
     margin-bottom: 40px;
-    
-    
 }
 
 #link_block h2:first-child {

@@ -6,7 +6,7 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
     public function googleMap($divId = 'map', $options = array())
     {
         $ht = '';
-        $ht .= '<div id="' . $divId . '" class="map"></div>';
+        $ht .= '<div id="' . $divId . '" class="map geolocation-map"></div>';
         
         // Load this junk in from the plugin config
         $center = array(

@@ -52,4 +52,4 @@ google.maps.event.addDomListener(window, 'load', function () {
     }
 });
 </script>
-<div id="<?php echo $divId; ?>" class="exhibit-geolocation-map"></div>
+<div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"></div>

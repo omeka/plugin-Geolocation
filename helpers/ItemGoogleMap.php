@@ -38,7 +38,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $options = array();
             $center = js_escape($center);
             $options = js_escape($options);
-            $html .= '<div id="' . $divId . '" class="map panel"></div>';
+            $html .= '<div id="' . $divId . '" class="map panel geolocation-map"></div>';
             
             $js = "var " . Inflector::variablize($divId) . ";";
             $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
