@@ -42,7 +42,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookAdminHead($args)
     {
         $view = $args['view'];
-        $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         $request = Zend_Controller_Front::getInstance()->getRequest();
         $module = $request->getModuleName();
         $controller = $request->getControllerName();
@@ -221,7 +220,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookPublicHead($args)
     {
         $view = $args['view'];
-        $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         $request = Zend_Controller_Front::getInstance()->getRequest();
         $module = $request->getModuleName();
         $controller = $request->getControllerName();
