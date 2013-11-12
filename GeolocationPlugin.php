@@ -267,20 +267,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function hookAdminItemsSearch($args)
     {
-        // Get the request object
-        $request = Zend_Controller_Front::getInstance()->getRequest();
         $view = $args['view'];
-        if ($request->getControllerName() == 'map' && $request->getActionName() == 'browse') {
-            echo $view->partial('advanced-search-partial.php', array('searchFormId'=>'search', 'searchButtonId'=>'submit_search_advanced'));
-        } else if ($request->getControllerName() == 'items' && $request->getActionName() == 'advanced-search') {
-            echo $view->partial('advanced-search-partial.php', array('searchFormId'=>'advanced-search-form', 'searchButtonId'=>'submit_search_advanced'));
-        }
+        echo $view->partial('map/advanced-search-partial.php');
     }
     
     public function hookPublicItemsSearch($args)
     {
         $view = $args['view'];                
-        echo $view->partial('advanced-search-partial.php', array('searchFormId'=>'advanced-search-form', 'searchButtonId'=>'submit_search_advanced'));
+        echo $view->partial('map/advanced-search-partial.php');
     }
     
     public function hookItemsBrowseSql($args)
