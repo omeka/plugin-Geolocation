@@ -22,16 +22,13 @@ queue_css_string($css);
 
 echo head(array('title' => __('Browse Map'),'bodyid'=>'map','bodyclass' => 'browse')); ?>
 
-
 <h1><?php echo __('Browse Items on the Map');?> (<?php echo $totalItems; ?> <?php echo __('total');?>)</h1>
 
 <nav class="items-nav navigation secondary-nav">
     <?php echo public_nav_items(); ?>
 </nav>
 
-<div class="pagination">
-    <?php echo pagination_links(); ?>
-</div><!-- end pagination -->
+<?php echo pagination_links(); ?>
 
 <div id="primary">
 
