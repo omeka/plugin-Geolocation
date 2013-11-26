@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 $request = Zend_Controller_Front::getInstance()->getRequest();
 
@@ -33,9 +33,9 @@ if (get_option('geolocation_use_metric_distances')) {
 
 <div class="field">
     <div class="two columns alpha">
-	    <?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
+        <?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
     </div>
-	<div class="five columns omega inputs">
+    <div class="five columns omega inputs">
         <?php echo $this->formText('geolocation-radius', $radius, array('size' => '40')); ?>
     </div>
 </div>
@@ -50,28 +50,27 @@ if (get_option('geolocation_use_metric_distances')) {
                 return;
             }
 
-            event.preventDefault();
-
             var form = this;
             var address = $('#geolocation-address').val();
             if ($.trim(address).length > 0) {
-                var geocoder = new google.maps.Geocoder();	        
+                event.preventDefault();
+                var geocoder = new google.maps.Geocoder();
                 geocoder.geocode({'address': address}, function(results, status) {
                     // If the point was found, then put the marker on that spot
                     if (status == google.maps.GeocoderStatus.OK) {
-            			var gLatLng = results[0].geometry.location;
-            	        // Set the latitude and longitude hidden inputs
-            	        $('#geolocation-latitude').val(gLatLng.lat());
+                        var gLatLng = results[0].geometry.location;
+                        // Set the latitude and longitude hidden inputs
+                        $('#geolocation-latitude').val(gLatLng.lat());
                         $('#geolocation-longitude').val(gLatLng.lng());
                         pauseForm = false;
                         form.submit();
                     } else {
-            		  	// If no point was found, give us an alert
-            		    alert('Error: "' + address + '" was not found!');
-            		}
+                        // If no point was found, give us an alert
+                        alert('Error: "' + address + '" was not found!');
+                    }
                 });
-            } 
-	    });
+            }
+        });
     });
 })(jQuery);
 </script>
