@@ -17,12 +17,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: GeolocationPlugin.php:334 GeolocationPlugin.php:340
-#: GeolocationPlugin.php:364
+#: GeolocationPlugin.php:333 GeolocationPlugin.php:339
+#: GeolocationPlugin.php:363
 msgid "Map"
 msgstr ""
 
-#: GeolocationPlugin.php:373 views/public/map/browse.php:23
+#: GeolocationPlugin.php:372 views/public/map/browse.php:23
 msgid "Browse Map"
 msgstr ""
 
@@ -30,11 +30,19 @@ msgstr ""
 msgid "Find A Geographic Location For The "
 msgstr ""
 
-#: GeolocationPlugin.php:438
+#: GeolocationPlugin.php:431
+msgid "Geolocation Map"
+msgstr ""
+
+#: GeolocationPlugin.php:432
+msgid "Show attached items on a map"
+msgstr ""
+
+#: GeolocationPlugin.php:447
 msgid "Find a Location by Address:"
 msgstr ""
 
-#: GeolocationPlugin.php:476
+#: GeolocationPlugin.php:485
 msgid "Find"
 msgstr ""
 
@@ -79,54 +87,74 @@ msgid ""
 msgstr ""
 
 #: config_form.php:52
-msgid "Width for Item Map"
+msgid "Map Type"
 msgstr ""
 
 #: config_form.php:55
+msgid "The type of map to display"
+msgstr ""
+
+#: config_form.php:59
+msgid "Roadmap"
+msgstr ""
+
+#: config_form.php:60
+msgid "Satellite"
+msgstr ""
+
+#: config_form.php:61
+msgid "Hybrid"
+msgstr ""
+
+#: config_form.php:62
+msgid "Terrain"
+msgstr ""
+
+#: config_form.php:72
+msgid "Width for Item Map"
+msgstr ""
+
+#: config_form.php:75
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
 msgstr ""
 
-#: config_form.php:64
+#: config_form.php:84
 msgid "Height for Item Map"
 msgstr ""
 
-#: config_form.php:67
+#: config_form.php:87
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
 msgstr ""
 
-#: config_form.php:76
+#: config_form.php:96
 msgid "Use metric distances"
 msgstr ""
 
-#: config_form.php:79
+#: config_form.php:99
 msgid "Use metric distances in proximity search."
 msgstr ""
 
-#: config_form.php:89
+#: config_form.php:109
 msgid "Add Link to Map on Items/Browse Navigation"
 msgstr ""
 
-#: config_form.php:92
+#: config_form.php:112
 msgid "Add a link to the items map on all the items/browse pages."
 msgstr ""
 
-#: config_form.php:103
+#: config_form.php:123
 msgid "Add Map To Contribution Form"
 msgstr ""
 
-#: config_form.php:106
+#: config_form.php:126
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add "
 "a geolocation map field to the contribution form to associate a location to "
 "a contributed item."
-msgstr ""
-
-#: helpers/ItemGoogleMap.php:47
-msgid "This item has no location info associated with it."
 msgstr ""
 
 #: models/Location.php:22
@@ -153,26 +181,30 @@ msgstr ""
 msgid "Location requires a zoom level."
 msgstr ""
 
-#: views/admin/map/browse.php:23 views/public/map/browse.php:26
+#: views/admin/map/browse.php:23 views/public/map/browse.php:25
 msgid "Browse Items on the Map"
 msgstr ""
 
-#: views/admin/map/browse.php:23 views/public/map/browse.php:26
+#: views/admin/map/browse.php:23 views/public/map/browse.php:25
 msgid "total"
 msgstr ""
 
-#: views/admin/map/browse.php:39 views/public/map/browse.php:43
+#: views/admin/map/browse.php:39 views/public/map/browse.php:40
 msgid "Find An Item on the Map"
 msgstr ""
 
-#: views/shared/advanced-search-partial.php:16
+#: views/helpers/ItemGoogleMap.php:47
+msgid "This item has no location info associated with it."
+msgstr ""
+
+#: views/shared/map/advanced-search-partial.php:16
 msgid "Geographic Radius (kilometers)"
 msgstr ""
 
-#: views/shared/advanced-search-partial.php:18
+#: views/shared/map/advanced-search-partial.php:18
 msgid "Geographic Radius (miles)"
 msgstr ""
 
-#: views/shared/advanced-search-partial.php:24
+#: views/shared/map/advanced-search-partial.php:25
 msgid "Geographic Address"
 msgstr ""

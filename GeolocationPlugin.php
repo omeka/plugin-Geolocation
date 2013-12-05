@@ -428,8 +428,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function filterExhibitLayouts($layouts)
     {
         $layouts['geolocation-map'] = array(
-            'name' => 'Geolocation Map',
-            'description' => 'A map showing the attached items.'
+            'name' => __('Geolocation Map'),
+            'description' => __('Show attached items on a map')
         );
         return $layouts;
     }
