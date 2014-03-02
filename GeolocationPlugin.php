@@ -37,7 +37,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'public_navigation_items',
         'api_resources',
         'api_extend_items',
-        'exhibit_layouts'
+        'exhibit_layouts',
+        'front_page_blocks'
     );
 
     public function hookAdminHead($args)
@@ -235,6 +236,31 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
+        }
+        if (($controller == 'index' && $action == 'index')) {
+            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
+            queue_js_file('map');
+            
+            
+            $css = "   #home #primary #geolocation-front div {
+                            overflow: visible;
+                        }
+            
+                        #map_browse {
+                            height: 436px;
+                        }
+                        .balloon {width:400px !important; font-size:1.2em;}
+                        .balloon .title {font-weight:bold;margin-bottom:1.5em;}
+                        .balloon .title, .balloon .description {float:left; width: 220px;margin-bottom:1.5em;}
+                        .balloon img {float:right;display:block;}
+                        .balloon .view-item {display:block; float:left; clear:left; font-weight:bold; text-decoration:none;}
+                        #map-links a {
+                            display:block;
+                        }
+                        #search_block {
+                            clear: both;
+                        }";
+            queue_css_string($css);            
         }
     }
 
@@ -434,7 +460,28 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         );
         return $layouts;
     }
+    
+    public function filterFrontPageBlocks($blocks)
+    {
+        $blocks['Geolocation'] = array('name' => 'Geolocation',
+                                       'heading' => __('Map'),
+                                       'callback' => array('GeolocationPlugin', 'front'),
+                                       'wrap_attributes' => array('id' => 'geolocation-front', 'style' => 'overflow: visible')
+                );
+        return $blocks;
+    }
 
+    public static function front($block, $view)
+    {
+        $html = "<div id='map_block'>";
+        $html .= "<div id='map-links'></div>";
+        $html .= $view->googleMap('map_browse', array('loadKml'=>true, 'list'=>'map-links'));
+        $html .= "</div>";
+        
+        return $html;
+        
+    }
+    
     /**
      * Returns the form code for geographically searching for items
      * @param Item $item
