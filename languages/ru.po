@@ -1,0 +1,179 @@
+# Translation for the Geolocation plugin for Omeka.
+# Copyright (C) 2011 Roy Rosenzweig Center for History and New Media
+# This file is distributed under the same license as the Omeka package.
+# 
+# Translators:
+# Shvar <Shvar@rsl.ru>, 2013
+msgid ""
+msgstr ""
+"Project-Id-Version: Omeka\n"
+"Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
+"POT-Creation-Date: 2012-01-09 21:49-0500\n"
+"PO-Revision-Date: 2013-12-24 14:29+0000\n"
+"Last-Translator: Shvar <Shvar@rsl.ru>\n"
+"Language-Team: Russian (http://www.transifex.com/projects/p/omeka/language/ru/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ru\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#: GeolocationPlugin.php:334 GeolocationPlugin.php:340
+#: GeolocationPlugin.php:364
+msgid "Map"
+msgstr "Карта"
+
+#: GeolocationPlugin.php:373 views/public/map/browse.php:23
+msgid "Browse Map"
+msgstr "Просмотр карты"
+
+#: GeolocationPlugin.php:420
+msgid "Find A Geographic Location For The "
+msgstr "Найдите географическое положение для"
+
+#: GeolocationPlugin.php:438
+msgid "Find a Location by Address:"
+msgstr "Найдите расположение по адресу:"
+
+#: GeolocationPlugin.php:476
+msgid "Find"
+msgstr "Найти"
+
+#: config_form.php:3
+msgid "Number of Locations Per Page"
+msgstr "Количество мест размещения на страницу"
+
+#: config_form.php:6
+msgid ""
+"The number of locations displayed per page when browsing the map. (Maximum "
+"is "
+msgstr "Количество мест размещения отображаемых на странице при просмотре карты (Максимум - "
+
+#: config_form.php:16
+msgid "Default Latitude"
+msgstr "Широта по умолчанию"
+
+#: config_form.php:19
+msgid ""
+"Latitude of the map's initial center point, in degrees. Must be between -90 "
+"and 90."
+msgstr "Широта исходной центральной точки карты в градусах. Должна быть между -90 и 90 градусами."
+
+#: config_form.php:28
+msgid "Default Longitude"
+msgstr "Долгота по умолчанию"
+
+#: config_form.php:31
+msgid ""
+"Longitude of the map's initial center point, in degrees. Must be between "
+"-180 and 180."
+msgstr "Долгота исходной центральной точки карты в градусах. Должна быть между -180 и 180 градусами."
+
+#: config_form.php:40
+msgid "Default Zoom Level"
+msgstr "Уровень масштабирования по умолчанию"
+
+#: config_form.php:43
+msgid ""
+"An integer greater than or equal to 0, where 0 represents the most zoomed "
+"out scale."
+msgstr "Целое число, большее или равное 0, где 0 представляет наименьшую степень уменьшения."
+
+#: config_form.php:52
+msgid "Width for Item Map"
+msgstr "Ширина географической карты"
+
+#: config_form.php:55
+msgid ""
+"The width of the map displayed on your items/show page. If left blank, the "
+"default width of 100% will be used."
+msgstr "Ширина географической карты отображённой на странице документа. Если страница останется незаполненной, то по умолчанию ширина будет равна 100%."
+
+#: config_form.php:64
+msgid "Height for Item Map"
+msgstr "Высота географической карты"
+
+#: config_form.php:67
+msgid ""
+"The height of the map displayed on your items/show page. If left blank, the "
+"default height of 300px will be used."
+msgstr "Высота географической карты отображённой на странице документа. Если страница останется незаполненной, то по умолчанию высота будет равна 300 пикселей."
+
+#: config_form.php:76
+msgid "Use metric distances"
+msgstr "Используйте метрическую систему мер"
+
+#: config_form.php:79
+msgid "Use metric distances in proximity search."
+msgstr "Используйте метрическую систему мер при доступном поиске."
+
+#: config_form.php:89
+msgid "Add Link to Map on Items/Browse Navigation"
+msgstr "Добавьте на карту ссылку на странице просмотра"
+
+#: config_form.php:92
+msgid "Add a link to the items map on all the items/browse pages."
+msgstr "Добавьте на карту ссылку на всех страницах просмотра."
+
+#: config_form.php:103
+msgid "Add Map To Contribution Form"
+msgstr "Добавьте карту на форме Contribution"
+
+#: config_form.php:106
+msgid ""
+"If the Contribution plugin is installed and activated, Geolocation  will add"
+" a geolocation map field to the contribution form to associate a location to"
+" a contributed item."
+msgstr "Если плагин Contribution установлен и активирован, то Геопозиционирование добавит область карты геолокации к форме Contribution, чтобы связать месторасположение с вносимым элементом."
+
+#: helpers/ItemGoogleMap.php:47
+msgid "This item has no location info associated with it."
+msgstr "У этого элемента нет информации по месторасположению."
+
+#: models/Location.php:22
+msgid "Location requires an item ID."
+msgstr "Для определения месторасположения требуется ID элемента."
+
+#: models/Location.php:26
+msgid "Location requires a valid item ID."
+msgstr "Для определения месторасположения требуется правильный ID элемента."
+
+#: models/Location.php:31
+msgid "A location already exists for the provided item."
+msgstr "Для предоставленного элемента уже существует месторасположение."
+
+#: models/Location.php:34
+msgid "Location requires a latitude."
+msgstr "Для определения месторасположения требуется широта."
+
+#: models/Location.php:37
+msgid "Location requires a longitude."
+msgstr "Для определения месторасположения требуется долгота."
+
+#: models/Location.php:40
+msgid "Location requires a zoom level."
+msgstr "Месторасположение требует увеличения масштаба."
+
+#: views/admin/map/browse.php:23 views/public/map/browse.php:26
+msgid "Browse Items on the Map"
+msgstr "Просмотр элементов на карте"
+
+#: views/admin/map/browse.php:23 views/public/map/browse.php:26
+msgid "total"
+msgstr "общий итог"
+
+#: views/admin/map/browse.php:39 views/public/map/browse.php:43
+msgid "Find An Item on the Map"
+msgstr "Найдите элемент на карте"
+
+#: views/shared/advanced-search-partial.php:16
+msgid "Geographic Radius (kilometers)"
+msgstr "Географический охват (в километрах)"
+
+#: views/shared/advanced-search-partial.php:18
+msgid "Geographic Radius (miles)"
+msgstr "Географический охват (в милях)"
+
+#: views/shared/advanced-search-partial.php:24
+msgid "Geographic Address"
+msgstr "Географический адрес"

@@ -3,177 +3,177 @@
 # This file is distributed under the same license as the Omeka package.
 # 
 # Translators:
-# Matti Lassila <matti.lassila@gmail.com>, 2013
+# rubenalcaraz <rubenalcarazmartinez@gmail.com>, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2013-06-09 08:34+0000\n"
-"Last-Translator: Matti Lassila <matti.lassila@gmail.com>\n"
-"Language-Team: Finnish (Finland) (http://www.transifex.com/projects/p/omeka/language/fi_FI/)\n"
+"PO-Revision-Date: 2013-09-05 09:52+0000\n"
+"Last-Translator: sergimontes <sergi.blanes@gmail.com>\n"
+"Language-Team: Catalan (Spain) (http://www.transifex.com/projects/p/omeka/language/ca_ES/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fi_FI\n"
+"Language: ca_ES\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: GeolocationPlugin.php:334 GeolocationPlugin.php:340
 #: GeolocationPlugin.php:364
 msgid "Map"
-msgstr "Kartta"
+msgstr "Mapa"
 
 #: GeolocationPlugin.php:373 views/public/map/browse.php:23
 msgid "Browse Map"
-msgstr "Selaa karttaa"
+msgstr "Navega pel mapa"
 
 #: GeolocationPlugin.php:420
 msgid "Find A Geographic Location For The "
-msgstr "Hae maantieteellinen sijainti"
+msgstr "Troba una localització geogràfica per"
 
 #: GeolocationPlugin.php:438
 msgid "Find a Location by Address:"
-msgstr "Hae paikka osoitteen tai paikan nimen mukaan:"
+msgstr "Troba una localització per l'adreça:"
 
 #: GeolocationPlugin.php:476
 msgid "Find"
-msgstr "Hae"
+msgstr "Troba"
 
 #: config_form.php:3
 msgid "Number of Locations Per Page"
-msgstr "Sijainteja sivua kohti"
+msgstr "Nombre de localitzacions per pàgina"
 
 #: config_form.php:6
 msgid ""
 "The number of locations displayed per page when browsing the map. (Maximum "
 "is "
-msgstr "Kerralla näytettyjen sijaintien määrä karttaselausnäkymässä. (Enimmäismäärä "
+msgstr "El nombre de localitzacions mostrades per pàgina quan es navega pel mapa. (El màxim és"
 
 #: config_form.php:16
 msgid "Default Latitude"
-msgstr "Pohjoiskoordinaatti"
+msgstr "Latitud per defecte"
 
 #: config_form.php:19
 msgid ""
 "Latitude of the map's initial center point, in degrees. Must be between -90 "
 "and 90."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -90 ja 90."
+msgstr "La latitud del punt central inicial del mapa, en graus. Ha d'estar entre -90 i 90."
 
 #: config_form.php:28
 msgid "Default Longitude"
-msgstr "Itäkoordinaatti"
+msgstr "Longitud per defecte"
 
 #: config_form.php:31
 msgid ""
 "Longitude of the map's initial center point, in degrees. Must be between "
 "-180 and 180."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -180 ja 180."
+msgstr "La longitud del punt central inicial del mapa, en graus. Ha d'estar entre -180 i 180."
 
 #: config_form.php:40
 msgid "Default Zoom Level"
-msgstr "Zoomausaste"
+msgstr "Nivell de zoom per defecte"
 
 #: config_form.php:43
 msgid ""
 "An integer greater than or equal to 0, where 0 represents the most zoomed "
 "out scale."
-msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu kauimpaan asetukseensa."
+msgstr "Un nombre enter més gran o igual que 0, on 0 representa l'escala més ampla."
 
 #: config_form.php:52
 msgid "Width for Item Map"
-msgstr "Aineistonäkymän kartan leveys"
+msgstr "Ample del mapa"
 
 #: config_form.php:55
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
-msgstr "Karttanäkymän leveys aineistosivulla. Oletuksena kartta näytetään sivupohjan suhteen täysleveänä (100%)."
+msgstr "L'amplada del mapa mostrat a la pàgina de cada ítem. Si es deixa en blanc, s'utilitzarà un 100%."
 
 #: config_form.php:64
 msgid "Height for Item Map"
-msgstr "Aineistonäkymän kartan korkeus"
+msgstr "Altura del mapa"
 
 #: config_form.php:67
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
-msgstr "Karttanäkymän korkeus aineistolivulla. Oletuskorkeus on 300 pikseliä."
+msgstr "L'alçada del mapa mostrat a la pàgina de cada ítem. Si es deixa en blanc, s'utilitzarà una alçada de 300px."
 
 #: config_form.php:76
 msgid "Use metric distances"
-msgstr "Käytä mittayksikkönä kilometrejä"
+msgstr "Utilitza distàncies mètriques"
 
 #: config_form.php:79
 msgid "Use metric distances in proximity search."
-msgstr "Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena mittayksikkö on maili."
+msgstr "Utilitza distàncies mètriques en cerques per proximitat."
 
 #: config_form.php:89
 msgid "Add Link to Map on Items/Browse Navigation"
-msgstr "Lisää linkki karttaan aineistojen selausnäkymiin"
+msgstr "Afegeix un enllaç des de la pàgina de navegació i d'ítems cap al mapa"
 
 #: config_form.php:92
 msgid "Add a link to the items map on all the items/browse pages."
-msgstr "Lisää karttalinkki selausnäkymiin."
+msgstr "Afegeix un enllaç des del mapa cap a la pàgina de navegació i d'ítems."
 
 #: config_form.php:103
 msgid "Add Map To Contribution Form"
-msgstr "Lisää kartta julkiselle tallennuslomakkeelle"
+msgstr "Afegeix el mapa al formulari de contribució"
 
 #: config_form.php:106
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add"
 " a geolocation map field to the contribution form to associate a location to"
 " a contributed item."
-msgstr "Jos Contribution-lisäosa on asennettuna, julkisella tallennuslomakkeella voidaan näyttää karttanäkymä sijaintitietoa varten."
+msgstr "Si el "
 
 #: helpers/ItemGoogleMap.php:47
 msgid "This item has no location info associated with it."
-msgstr "Aineistoon ei liity sijaintitietoja."
+msgstr "Aquest ítem no té informació d'ubicació associada."
 
 #: models/Location.php:22
 msgid "Location requires an item ID."
-msgstr "Sijainti vaatii aineiston ID:n"
+msgstr "La localització requereix un ID d'ítem."
 
 #: models/Location.php:26
 msgid "Location requires a valid item ID."
-msgstr "Sijainti vaatii oikeellisen aineisto-ID:n."
+msgstr "La localització requereix un ID d'ítem vàlid."
 
 #: models/Location.php:31
 msgid "A location already exists for the provided item."
-msgstr "Aineistoon on jo liitetty sijaintitieto."
+msgstr "Ja existeix una localització per aquest ítem."
 
 #: models/Location.php:34
 msgid "Location requires a latitude."
-msgstr "Leveyspiiritieto puuttuu."
+msgstr "La localització requereix una latitud."
 
 #: models/Location.php:37
 msgid "Location requires a longitude."
-msgstr "Pituuspiiritieto puuttuu."
+msgstr "La localització requereix una longitud."
 
 #: models/Location.php:40
 msgid "Location requires a zoom level."
-msgstr "Zoomausasetus puuttuu."
+msgstr "La localització requereix un nivell de zoom."
 
 #: views/admin/map/browse.php:23 views/public/map/browse.php:26
 msgid "Browse Items on the Map"
-msgstr "Selaa aineistoja kartalla"
+msgstr "Navega pels ítems del mapa"
 
 #: views/admin/map/browse.php:23 views/public/map/browse.php:26
 msgid "total"
-msgstr "yhteensä"
+msgstr "total"
 
 #: views/admin/map/browse.php:39 views/public/map/browse.php:43
 msgid "Find An Item on the Map"
-msgstr "Aineistot kartalla"
+msgstr "Troba un ítem al mapa"
 
 #: views/shared/advanced-search-partial.php:16
 msgid "Geographic Radius (kilometers)"
-msgstr "Enimmäisetäisyys paikasta (kilometrejä)"
+msgstr "Geographic Radius (quilòmetres)"
 
 #: views/shared/advanced-search-partial.php:18
 msgid "Geographic Radius (miles)"
-msgstr "Enimmäisetäisyys paikasta (maileja)"
+msgstr "Geographic Radius (milles)"
 
 #: views/shared/advanced-search-partial.php:24
 msgid "Geographic Address"
-msgstr "Paikan nimi tai osoite"
+msgstr "Adreça geogràfica"

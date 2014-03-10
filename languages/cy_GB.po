@@ -3,177 +3,177 @@
 # This file is distributed under the same license as the Omeka package.
 # 
 # Translators:
-# Matti Lassila <matti.lassila@gmail.com>, 2013
+# sionengland <sne@llgc.org.uk>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2013-06-09 08:34+0000\n"
-"Last-Translator: Matti Lassila <matti.lassila@gmail.com>\n"
-"Language-Team: Finnish (Finland) (http://www.transifex.com/projects/p/omeka/language/fi_FI/)\n"
+"PO-Revision-Date: 2014-01-16 09:04+0000\n"
+"Last-Translator: sionengland <sne@llgc.org.uk>\n"
+"Language-Team: Welsh (United Kingdom) (http://www.transifex.com/projects/p/omeka/language/cy_GB/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fi_FI\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: cy_GB\n"
+"Plural-Forms: nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;\n"
 
 #: GeolocationPlugin.php:334 GeolocationPlugin.php:340
 #: GeolocationPlugin.php:364
 msgid "Map"
-msgstr "Kartta"
+msgstr "Map"
 
 #: GeolocationPlugin.php:373 views/public/map/browse.php:23
 msgid "Browse Map"
-msgstr "Selaa karttaa"
+msgstr "Pori'r map"
 
 #: GeolocationPlugin.php:420
 msgid "Find A Geographic Location For The "
-msgstr "Hae maantieteellinen sijainti"
+msgstr "Darganfod Lleoliad Ar Gyfer Y"
 
 #: GeolocationPlugin.php:438
 msgid "Find a Location by Address:"
-msgstr "Hae paikka osoitteen tai paikan nimen mukaan:"
+msgstr "Darganfod Lleoliad yn ôl Cyfeiriad:"
 
 #: GeolocationPlugin.php:476
 msgid "Find"
-msgstr "Hae"
+msgstr "Darganfod"
 
 #: config_form.php:3
 msgid "Number of Locations Per Page"
-msgstr "Sijainteja sivua kohti"
+msgstr "Nifer o Leoliadau Fesul Tudalen"
 
 #: config_form.php:6
 msgid ""
 "The number of locations displayed per page when browsing the map. (Maximum "
 "is "
-msgstr "Kerralla näytettyjen sijaintien määrä karttaselausnäkymässä. (Enimmäismäärä "
+msgstr "Y nifer o leoliadau fesul tudalen sy'n dangos tra'n pori'r map (Uchafswm o"
 
 #: config_form.php:16
 msgid "Default Latitude"
-msgstr "Pohjoiskoordinaatti"
+msgstr "Lledred Rhagosodedig"
 
 #: config_form.php:19
 msgid ""
 "Latitude of the map's initial center point, in degrees. Must be between -90 "
 "and 90."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -90 ja 90."
+msgstr "Lledred pwynt canol cychwynnol y map, mewn graddau. Rhaid bod rhwng -90 a 90."
 
 #: config_form.php:28
 msgid "Default Longitude"
-msgstr "Itäkoordinaatti"
+msgstr "Hydred Rhagosodedig"
 
 #: config_form.php:31
 msgid ""
 "Longitude of the map's initial center point, in degrees. Must be between "
 "-180 and 180."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -180 ja 180."
+msgstr "Hydred pwynt canol cychwynnol y map, mewn graddau. Rhaid bod rhwng -180 a 180."
 
 #: config_form.php:40
 msgid "Default Zoom Level"
-msgstr "Zoomausaste"
+msgstr "Lefel Chwyddo Rhagosodedig"
 
 #: config_form.php:43
 msgid ""
 "An integer greater than or equal to 0, where 0 represents the most zoomed "
 "out scale."
-msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu kauimpaan asetukseensa."
+msgstr "Cyfanrif sy'n fwy na neu'n hafal â 0, pan fo 0 yn cynrhycholi'r raddfa chwyddo mwya llydan."
 
 #: config_form.php:52
 msgid "Width for Item Map"
-msgstr "Aineistonäkymän kartan leveys"
+msgstr "Lled ar gyfer Map Eitem"
 
 #: config_form.php:55
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
-msgstr "Karttanäkymän leveys aineistosivulla. Oletuksena kartta näytetään sivupohjan suhteen täysleveänä (100%)."
+msgstr "Lled y map ar eich tudalen eitemau/dangos. Os yw'n wag, bydd lled rhagosodedig o 100% yn cael ei ddefnyddio."
 
 #: config_form.php:64
 msgid "Height for Item Map"
-msgstr "Aineistonäkymän kartan korkeus"
+msgstr "Uchder ar gyfer Map Eitem"
 
 #: config_form.php:67
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
-msgstr "Karttanäkymän korkeus aineistolivulla. Oletuskorkeus on 300 pikseliä."
+msgstr "Uchder y map ar eich tudalen eitemau/dangos. Os yw'n wag, bydd uchder rhagosodedig o 300px yn cael ei ddefnyddio."
 
 #: config_form.php:76
 msgid "Use metric distances"
-msgstr "Käytä mittayksikkönä kilometrejä"
+msgstr "Defnyddio pellteroedd metrig"
 
 #: config_form.php:79
 msgid "Use metric distances in proximity search."
-msgstr "Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena mittayksikkö on maili."
+msgstr "Defnyddio pellteroedd metrig mewn chwiliadau agosrwydd."
 
 #: config_form.php:89
 msgid "Add Link to Map on Items/Browse Navigation"
-msgstr "Lisää linkki karttaan aineistojen selausnäkymiin"
+msgstr "Ychwanegu Dolen i'r Map ar y Rhyngwyneb Eitemau/Pori"
 
 #: config_form.php:92
 msgid "Add a link to the items map on all the items/browse pages."
-msgstr "Lisää karttalinkki selausnäkymiin."
+msgstr "Ychwanegu dolen i'r map eitemau ar yr holl dudalennau eitemau/pori."
 
 #: config_form.php:103
 msgid "Add Map To Contribution Form"
-msgstr "Lisää kartta julkiselle tallennuslomakkeelle"
+msgstr "Ychwanegu Map I'r Ffurflen Cyfrannu"
 
 #: config_form.php:106
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add"
 " a geolocation map field to the contribution form to associate a location to"
 " a contributed item."
-msgstr "Jos Contribution-lisäosa on asennettuna, julkisella tallennuslomakkeella voidaan näyttää karttanäkymä sijaintitietoa varten."
+msgstr "Os yw'r ategyn Cyfrannu wedi ei osod a'i gychwyn, bydd Daearleoli yn ychwanegu maes map daear-leoli i'r ffurflen gyfrannu er mwyn cysylltu lleoliad gydag eitem."
 
 #: helpers/ItemGoogleMap.php:47
 msgid "This item has no location info associated with it."
-msgstr "Aineistoon ei liity sijaintitietoja."
+msgstr "Does dim gwybodaeth lleoliad yn gysylltiol a'r eitem hon."
 
 #: models/Location.php:22
 msgid "Location requires an item ID."
-msgstr "Sijainti vaatii aineiston ID:n"
+msgstr "Mae'r lleoliad angen ID eitem."
 
 #: models/Location.php:26
 msgid "Location requires a valid item ID."
-msgstr "Sijainti vaatii oikeellisen aineisto-ID:n."
+msgstr "Mae'r lleoliad angen ID eitem dilys."
 
 #: models/Location.php:31
 msgid "A location already exists for the provided item."
-msgstr "Aineistoon on jo liitetty sijaintitieto."
+msgstr "Mae lleoliad eisoes yn bodoli i'r eitem."
 
 #: models/Location.php:34
 msgid "Location requires a latitude."
-msgstr "Leveyspiiritieto puuttuu."
+msgstr "Mae'r lleoliad angen lledred."
 
 #: models/Location.php:37
 msgid "Location requires a longitude."
-msgstr "Pituuspiiritieto puuttuu."
+msgstr "Mae'r lleoliad angen hydred."
 
 #: models/Location.php:40
 msgid "Location requires a zoom level."
-msgstr "Zoomausasetus puuttuu."
+msgstr "Mae'r lleoliad angen llefel chwyddo."
 
 #: views/admin/map/browse.php:23 views/public/map/browse.php:26
 msgid "Browse Items on the Map"
-msgstr "Selaa aineistoja kartalla"
+msgstr "Pori Eitemau ar y Map."
 
 #: views/admin/map/browse.php:23 views/public/map/browse.php:26
 msgid "total"
-msgstr "yhteensä"
+msgstr "cyfanswm"
 
 #: views/admin/map/browse.php:39 views/public/map/browse.php:43
 msgid "Find An Item on the Map"
-msgstr "Aineistot kartalla"
+msgstr "Dod o hyd i Eitem ar y Map"
 
 #: views/shared/advanced-search-partial.php:16
 msgid "Geographic Radius (kilometers)"
-msgstr "Enimmäisetäisyys paikasta (kilometrejä)"
+msgstr "Radiws Daearyddol (cilometrau)"
 
 #: views/shared/advanced-search-partial.php:18
 msgid "Geographic Radius (miles)"
-msgstr "Enimmäisetäisyys paikasta (maileja)"
+msgstr "Radiws Daearyddol (milltiroedd)"
 
 #: views/shared/advanced-search-partial.php:24
 msgid "Geographic Address"
-msgstr "Paikan nimi tai osoite"
+msgstr "Cyfeiriad Daearyddol"

@@ -3,177 +3,177 @@
 # This file is distributed under the same license as the Omeka package.
 # 
 # Translators:
-# Matti Lassila <matti.lassila@gmail.com>, 2013
+# あこたかゆき <ta_niiyan@me.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2013-06-09 08:34+0000\n"
-"Last-Translator: Matti Lassila <matti.lassila@gmail.com>\n"
-"Language-Team: Finnish (Finland) (http://www.transifex.com/projects/p/omeka/language/fi_FI/)\n"
+"PO-Revision-Date: 2014-02-25 07:45+0000\n"
+"Last-Translator: あこたかゆき <ta_niiyan@me.com>\n"
+"Language-Team: Japanese (http://www.transifex.com/projects/p/omeka/language/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fi_FI\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: ja\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: GeolocationPlugin.php:334 GeolocationPlugin.php:340
 #: GeolocationPlugin.php:364
 msgid "Map"
-msgstr "Kartta"
+msgstr "地図"
 
 #: GeolocationPlugin.php:373 views/public/map/browse.php:23
 msgid "Browse Map"
-msgstr "Selaa karttaa"
+msgstr "地図"
 
 #: GeolocationPlugin.php:420
 msgid "Find A Geographic Location For The "
-msgstr "Hae maantieteellinen sijainti"
+msgstr ""
 
 #: GeolocationPlugin.php:438
 msgid "Find a Location by Address:"
-msgstr "Hae paikka osoitteen tai paikan nimen mukaan:"
+msgstr "住所で場所を検索"
 
 #: GeolocationPlugin.php:476
 msgid "Find"
-msgstr "Hae"
+msgstr "検索"
 
 #: config_form.php:3
 msgid "Number of Locations Per Page"
-msgstr "Sijainteja sivua kohti"
+msgstr "1ページあたりの場所数"
 
 #: config_form.php:6
 msgid ""
 "The number of locations displayed per page when browsing the map. (Maximum "
 "is "
-msgstr "Kerralla näytettyjen sijaintien määrä karttaselausnäkymässä. (Enimmäismäärä "
+msgstr "地図を閲覧時の1ページあたりの表示場所数（最大数"
 
 #: config_form.php:16
 msgid "Default Latitude"
-msgstr "Pohjoiskoordinaatti"
+msgstr "緯度 初期値"
 
 #: config_form.php:19
 msgid ""
 "Latitude of the map's initial center point, in degrees. Must be between -90 "
 "and 90."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -90 ja 90."
+msgstr "地図の初期中心緯度。-90°〜90°の範囲で。"
 
 #: config_form.php:28
 msgid "Default Longitude"
-msgstr "Itäkoordinaatti"
+msgstr "経度 初期値"
 
 #: config_form.php:31
 msgid ""
 "Longitude of the map's initial center point, in degrees. Must be between "
 "-180 and 180."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -180 ja 180."
+msgstr "地図の初期中心経度。-180°〜180°の範囲で。"
 
 #: config_form.php:40
 msgid "Default Zoom Level"
-msgstr "Zoomausaste"
+msgstr "初期ズームレベル"
 
 #: config_form.php:43
 msgid ""
 "An integer greater than or equal to 0, where 0 represents the most zoomed "
 "out scale."
-msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu kauimpaan asetukseensa."
+msgstr ""
 
 #: config_form.php:52
 msgid "Width for Item Map"
-msgstr "Aineistonäkymän kartan leveys"
+msgstr "アイテム地図の幅"
 
 #: config_form.php:55
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
-msgstr "Karttanäkymän leveys aineistosivulla. Oletuksena kartta näytetään sivupohjan suhteen täysleveänä (100%)."
+msgstr ""
 
 #: config_form.php:64
 msgid "Height for Item Map"
-msgstr "Aineistonäkymän kartan korkeus"
+msgstr "アイテム地図の高さ"
 
 #: config_form.php:67
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
-msgstr "Karttanäkymän korkeus aineistolivulla. Oletuskorkeus on 300 pikseliä."
+msgstr ""
 
 #: config_form.php:76
 msgid "Use metric distances"
-msgstr "Käytä mittayksikkönä kilometrejä"
+msgstr "メートルを利用"
 
 #: config_form.php:79
 msgid "Use metric distances in proximity search."
-msgstr "Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena mittayksikkö on maili."
+msgstr "近傍検索でメートルを利用"
 
 #: config_form.php:89
 msgid "Add Link to Map on Items/Browse Navigation"
-msgstr "Lisää linkki karttaan aineistojen selausnäkymiin"
+msgstr ""
 
 #: config_form.php:92
 msgid "Add a link to the items map on all the items/browse pages."
-msgstr "Lisää karttalinkki selausnäkymiin."
+msgstr ""
 
 #: config_form.php:103
 msgid "Add Map To Contribution Form"
-msgstr "Lisää kartta julkiselle tallennuslomakkeelle"
+msgstr ""
 
 #: config_form.php:106
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add"
 " a geolocation map field to the contribution form to associate a location to"
 " a contributed item."
-msgstr "Jos Contribution-lisäosa on asennettuna, julkisella tallennuslomakkeella voidaan näyttää karttanäkymä sijaintitietoa varten."
+msgstr ""
 
 #: helpers/ItemGoogleMap.php:47
 msgid "This item has no location info associated with it."
-msgstr "Aineistoon ei liity sijaintitietoja."
+msgstr ""
 
 #: models/Location.php:22
 msgid "Location requires an item ID."
-msgstr "Sijainti vaatii aineiston ID:n"
+msgstr "場所にはアイテムIDが必要です"
 
 #: models/Location.php:26
 msgid "Location requires a valid item ID."
-msgstr "Sijainti vaatii oikeellisen aineisto-ID:n."
+msgstr "場所には有効なアイテムIDが必要です"
 
 #: models/Location.php:31
 msgid "A location already exists for the provided item."
-msgstr "Aineistoon on jo liitetty sijaintitieto."
+msgstr ""
 
 #: models/Location.php:34
 msgid "Location requires a latitude."
-msgstr "Leveyspiiritieto puuttuu."
+msgstr "場所には緯度が必要です"
 
 #: models/Location.php:37
 msgid "Location requires a longitude."
-msgstr "Pituuspiiritieto puuttuu."
+msgstr "場所には経度が必要です"
 
 #: models/Location.php:40
 msgid "Location requires a zoom level."
-msgstr "Zoomausasetus puuttuu."
+msgstr "場所にはズームレベルが必要です"
 
 #: views/admin/map/browse.php:23 views/public/map/browse.php:26
 msgid "Browse Items on the Map"
-msgstr "Selaa aineistoja kartalla"
+msgstr "地図上でアイテムを見る"
 
 #: views/admin/map/browse.php:23 views/public/map/browse.php:26
 msgid "total"
-msgstr "yhteensä"
+msgstr ""
 
 #: views/admin/map/browse.php:39 views/public/map/browse.php:43
 msgid "Find An Item on the Map"
-msgstr "Aineistot kartalla"
+msgstr "地図上でアイテムを検索"
 
 #: views/shared/advanced-search-partial.php:16
 msgid "Geographic Radius (kilometers)"
-msgstr "Enimmäisetäisyys paikasta (kilometrejä)"
+msgstr "地理半径（キロメートル）"
 
 #: views/shared/advanced-search-partial.php:18
 msgid "Geographic Radius (miles)"
-msgstr "Enimmäisetäisyys paikasta (maileja)"
+msgstr "地理半径（マイル）"
 
 #: views/shared/advanced-search-partial.php:24
 msgid "Geographic Address"
-msgstr "Paikan nimi tai osoite"
+msgstr ""
