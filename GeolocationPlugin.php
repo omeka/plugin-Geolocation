@@ -37,7 +37,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'public_navigation_items',
         'api_resources',
         'api_extend_items',
-        'exhibit_layouts'
+        'exhibit_layouts',
+        'api_import_omeka_adapters'
     );
 
     public function hookAdminHead($args)
@@ -433,6 +434,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'description' => __('Show attached items on a map')
         );
         return $layouts;
+    }
+    
+    public function filterApiImportOmekaAdapters($adapters, $args)
+    {
+        $geolocationAdapter = new ApiImport_ResponseAdapter_Omeka_GenericAdapter(null, $args['endpointUri'], 'Location');
+        $geolocationAdapter->setResourceProperties(array('item' => 'Item'));
+        $adapters['geolocations'] = $geolocationAdapter;
+        return $adapters;
     }
 
     /**
