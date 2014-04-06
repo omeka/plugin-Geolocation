@@ -81,6 +81,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
         set_option('geolocation_add_map_to_contribution_form', '1');
         set_option('geolocation_use_metric_distances', '1');
+        set_option('geolocation_default_loc_set', 'Dublin Core');
+        set_option('geolocation_default_loc_field', 'Coverage');
+        set_option('geolocation_use_in_import','0');
+        set_option('geolocation_use_coordinates','0');
     }
 
     public function hookUninstall()
@@ -92,9 +96,17 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_per_page');
         delete_option('geolocation_add_map_to_contribution_form');
         delete_option('geolocation_use_metric_distances');
+        delete_option('geolocation_use_coordinates');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
+
+        // CSV import Geolocation support
+
+        delete_option('geolocation_default_loc_set');
+        delete_option('geolocation_default_loc_field');
+        delete_option('geolocation_use_in_import');
+
 
         // Drop the Location table
         $db = get_db();
@@ -136,6 +148,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
         set_option('geolocation_map_type', $_POST['map_type']);
+        set_option('geolocation_default_loc_set', $_POST['geolocation_default_loc_set']);
+        set_option('geolocation_default_loc_field', $_POST['geolocation_default_loc_field']);
+        set_option('geolocation_use_in_import', $_POST['geolocation_use_in_import']);
+        set_option('geolocation_use_coordinates',$_POST['geolocation_use_coordinates']);
+
     }
 
     public function hookDefineAcl($args)
@@ -169,13 +186,31 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookAfterSaveItem($args)
     {
-        if (!($post = $args['post'])) {
-            return;
+        // Let's check if there's CSV import process going on and are we willing to use
+        // Geolocation in current import
+        $db = Zend_Registry::get('bootstrap')->getResource('db');
+        $table = $db->getTable('CsvImport_Import');
+        $sql = $table->getSelectForCount()->where('`status` = ?');
+        $importInProgress = $db->fetchOne($sql, 'in_progress');
+        $useCoords = get_option('geolocation_use_in_import');
+        debug('CSV-testi');
+        if ($importInProgress && $useCoords ) {
+                $geolocation_with_csv = true;
+                ChromePHP::log('Geolocation with CSV');
+                $item = $args['record'];
+                $coordinates_or_address = metadata($item, array(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field')));
+                debug(array(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field')));
+
+            }
+
+        if (!($post = $args['post']) && !($geolocation_with_csv)) {
+                return;
+            
         }
 
         $item = $args['record'];
         // If we don't have the geolocation form on the page, don't do anything!
-        if (!$post['geolocation']) {
+        if (!$post['geolocation'] && !($geolocation_with_csv)) {
             return;
         }
 
@@ -194,9 +229,66 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
             $location->setPostData($geolocationPost);
             $location->save();
-            // If the form is empty, then we want to delete whatever location is
-            // currently stored
-        } else {
+            
+        } elseif ($geolocation_with_csv){
+            $coordinates_or_address = metadata($item, array(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field')));
+            if (get_option('geolocation_use_coordinates')) {
+                $rawCoordinates = explode(',', $coordinates_or_address);
+                $latitude = substr($rawCoordinates[0],4);
+                $longitude = substr($rawCoordinates[1],0,-1);
+                $location = new Location; // Create new location object for this new item
+                $location->item_id = $item->id;
+                $location->latitude = $latitude;
+                $location->longitude = $longitude;
+                $location->address = $latitude .'.'.$longitude;
+                $location->zoom_level = get_option('geolocation_default_zoom_level'); // use the default zoom level
+                $location->map_type = "Google Maps v".GOOGLE_MAPS_API_VERSION;
+                $location->save(); 
+            } 
+            else {
+                try {
+                // Get the value of the default location element of this item.
+                $address = metadata($item, array(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field')));
+
+                    if ($address != "") {
+                        // Make a request to the Google Geocoding API
+                        $client = new Zend_Http_Client('http://maps.googleapis.com/maps/api/geocode/xml?address='.urlencode($address).'&sensor=false');
+                        $response = $client->request();
+
+                        if ($response->isSuccessful()) {
+                            $body = $response->getBody();       
+                            $data = simplexml_load_string($body);
+            
+                            if ($data->status == "OK") {
+                                $lat = $data->result->geometry->location->lat;
+                                $lng = $data->result->geometry->location->lng;
+                                // Get lat and lng from XML results
+
+                                $location = new Location; // Create new location object for this new item
+                                $location->item_id = $item->id;
+                                $location->latitude = $lat;
+                                $location->longitude = $lng;
+                                $location->address = $address;
+                                $location->zoom_level = get_option('geolocation_default_zoom_level'); // use the default zoom level
+                                $location->map_type = "Google Maps v".GOOGLE_MAPS_API_VERSION;
+
+                                $location->save();
+                            }
+                        }
+                    }
+                } catch (Exception $e) {
+                // Invalid field for this item, or some other issue. So, just don't do anything.
+                }
+
+            }
+
+        }
+
+
+        // If the form is empty, then we want to delete whatever location is
+        // currently stored
+
+        else {
             if ($location) {
                 $location->delete();
             }
