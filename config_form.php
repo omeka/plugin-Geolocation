@@ -160,7 +160,6 @@
     </select>
 
     <input type="text" class="textinput"  name="geolocation_default_loc_field" size="30" value="<?php echo get_option('geolocation_default_loc_field'); ?>" id="geolocation_default_loc_field" />
-    <p class="explanation">The location of new items will automatically be set to the position in this field.</p>        
         </div>
     </div>
 </div>
