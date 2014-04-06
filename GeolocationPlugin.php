@@ -193,10 +193,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $sql = $table->getSelectForCount()->where('`status` = ?');
         $importInProgress = $db->fetchOne($sql, 'in_progress');
         $useCoords = get_option('geolocation_use_in_import');
-        debug('CSV-testi');
         if ($importInProgress && $useCoords ) {
                 $geolocation_with_csv = true;
-                ChromePHP::log('Geolocation with CSV');
                 $item = $args['record'];
                 $coordinates_or_address = metadata($item, array(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field')));
                 debug(array(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field')));
@@ -205,7 +203,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         if (!($post = $args['post']) && !($geolocation_with_csv)) {
                 return;
-            
         }
 
         $item = $args['record'];
