@@ -458,8 +458,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $content = $css;
         $content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
         $content .= js_tag('map'); 
-        $content .= get_view()->googleMap('map_browse', array('loadKml'=>true, 'list'=>'map-links'));
-        $content .= '<div id="map-links"><h2>Find An Item on the Map</h2></div>';
+        $content .= get_view()->googleMap('map_browse',
+            array('loadKml' => true, 'list' => null));
         return $content;
     }
 

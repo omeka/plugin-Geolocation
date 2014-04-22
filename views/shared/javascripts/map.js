@@ -95,6 +95,9 @@ function OmekaMapBrowse(mapDivId, center, options) {
 OmekaMapBrowse.prototype = {
     
     afterLoadItems: function () {
+        if (!this.options.list) {
+            return;
+        }
         var listDiv = jQuery('#' + this.options.list);
 
         if (!listDiv.size()) {
