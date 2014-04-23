@@ -12,7 +12,6 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         $this->_setParam('only_map_items', true);
         $this->_setParam('use_map_per_page', true);
         
-        $this->view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         $table = $this->_helper->db->getTable();
         
         $params = $this->getAllParams();
