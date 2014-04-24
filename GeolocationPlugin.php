@@ -42,7 +42,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookAdminHead($args)
     {
-        $view = $args['view'];
+        queue_css_file('geolocation-marker');
         $request = Zend_Controller_Front::getInstance()->getRequest();
         $module = $request->getModuleName();
         $controller = $request->getControllerName();
@@ -53,7 +53,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                         && $action == 'contribute'
                         && get_option('geolocation_add_map_to_contribution_form') == '1')
                      || ($controller == 'items') )  {
-            queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
         }
@@ -217,7 +216,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookPublicHead($args)
     {
-        $view = $args['view'];
+        queue_css_file('geolocation-marker');
+
         $request = Zend_Controller_Front::getInstance()->getRequest();
         $module = $request->getModuleName();
         $controller = $request->getControllerName();
@@ -228,8 +228,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                             && $action == 'contribute'
                             && get_option('geolocation_add_map_to_contribution_form') == '1')
                          || ($controller == 'items') )  {
-            queue_css_file('geolocation-items-map');
-            queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
         }
@@ -238,7 +236,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookExhibitBuilderPageHead($args)
     {
         if (array_key_exists('geolocation-map', $args['layouts'])) {
-            queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
         }
