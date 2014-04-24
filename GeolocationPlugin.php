@@ -149,12 +149,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookDefineRoutes($args)
     {
         $router = $args['router'];
-        $mapRoute = new Zend_Controller_Router_Route('items/map/:page',
+        $mapRoute = new Zend_Controller_Router_Route('items/map',
                         array('controller' => 'map',
                                 'action'     => 'browse',
-                                'module'     => 'geolocation',
-                                'page'       => '1'),
-                        array('page' => '\d+'));
+                                'module'     => 'geolocation'));
         $router->addRoute('items_map', $mapRoute);
 
         // Trying to make the route look like a KML file so google will eat it.
