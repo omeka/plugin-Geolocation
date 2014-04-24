@@ -3,7 +3,7 @@
 class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
 {    
     
-    public function itemGoogleMap($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = true, $markerHtmlClassName = 'geolocation_balloon')
+    public function itemGoogleMap($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = false, $markerHtmlClassName = 'geolocation_balloon')
     {
         $html = "<style type='text/css'>";
         $html .= "div.map-notification {
