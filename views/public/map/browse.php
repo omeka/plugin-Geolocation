@@ -33,7 +33,11 @@ echo head(array('title' => __('Browse Map'),'bodyid'=>'map','bodyclass' => 'brow
 <div id="primary">
 
 <div id="map_block">
-    <?php echo $this->googleMap('map_browse', array('loadKml'=>true, 'list'=>'map-links'));?>
+    <?php
+    echo $this->googleMap('map_browse',
+        array('loadKml' => true, 'list' => 'map-links', 'params' => $params)
+    );
+    ?>
 </div><!-- end map_block -->
 
 <div id="link_block">

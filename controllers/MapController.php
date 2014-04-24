@@ -24,14 +24,15 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         $this->view->items = $items;
         $this->view->locations = $locationTable->findLocationByItem($items);
         $this->view->totalItems = $table->count($params);
+        $this->view->params = $params;
         
-        $params = array('page'  => $currentPage,
-                'per_page'      => $limit,
-                'total_results' => $this->view->totalItems);
-        
-        Zend_Registry::set('map_params', $params);
-        
+        $pagination = array(
+            'page'  => $currentPage,
+            'per_page'      => $limit,
+            'total_results' => $this->view->totalItems
+        );
+
         // Make the pagination values accessible from pagination_links().
-        Zend_Registry::set('pagination', $params);
+        Zend_Registry::set('pagination', $pagination);
     }
 }
