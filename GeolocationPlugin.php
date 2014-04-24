@@ -53,7 +53,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                         && $action == 'contribute'
                         && get_option('geolocation_add_map_to_contribution_form') == '1')
                      || ($controller == 'items') )  {
-            queue_css_file('geolocation-items-map');
             queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
@@ -436,27 +435,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function geolocationShortcode($args)
     {
-        $css = "
-            <style>
-            #map_browse {
-                height: 436px;
-            }
-            .balloon {width:400px !important; font-size:1.2em;}
-            .balloon .title {font-weight:bold;margin-bottom:1.5em;}
-            .balloon .title, .balloon .description {float:left; width: 220px;margin-bottom:1.5em;}
-            .balloon img {float:right;display:block;}
-            .balloon .view-item {display:block; float:left; clear:left; font-weight:bold; text-decoration:none;}
-            #map-links a {
-                display:block;
-            }
-            #search_block {
-                clear: both;
-            }
-            </style>";
-        $content = $css;
+        $content = '<style>#geolocation-shortcode { height: 436px; }</style>';
         $content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
         $content .= js_tag('map'); 
-        $content .= get_view()->googleMap('map_browse',
+        $content .= get_view()->googleMap('geolocation-shortcode',
             array('loadKml' => true, 'list' => null));
         return $content;
     }

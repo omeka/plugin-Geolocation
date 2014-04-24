@@ -2,8 +2,14 @@
     line-height: normal;
 }
 
-#map_block {
-    overflow: auto;
+#geolocation-browse {
+    clear: both;
+    overflow: hidden;
+    margin-bottom: 1em;
+}
+
+#map_browse {
+    height: 436px; 
 }
 
 #map-links ul {
@@ -21,7 +27,9 @@
     margin-bottom: 10px;
 }
     
-#map-links { padding: 10px !important; }
+#map-links {
+    padding: 10px 0 10px 0;
+}
 
 #map-links li a {
     display:block;
@@ -29,11 +37,7 @@
     border-bottom: 0 !important;
 }
 
-#link_block {
-    margin-bottom: 40px;
-}
-
-#link_block h2:first-child {
+#map-links h2:first-child {
     margin-top: 0 !important;
 }
 
@@ -54,7 +58,8 @@ div.map-notification {
 
 @media screen and (min-width:768px) {
 
-    #link_block {
+    #map-links {
+        padding: 0 10px 10px 10px;
         box-sizing: border-box !important;
         height: 436px;
         width: 30%;
@@ -72,17 +77,9 @@ div.map-notification {
         overflow: hidden;
     }
 
-    #map_block { 
+    #map_browse { 
         float:left;
         width:70%;
         margin-bottom: 0 !important;
     }
-
-    #search_block {
-        clear: both;
-        margin: auto;
-        display: block;
-        width: -webkit-min-content;
-    }
-
 }

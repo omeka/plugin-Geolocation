@@ -22,8 +22,8 @@ foreach ($attachments as $attachment):
             $body = $this->exhibitAttachmentCaption($attachment);
         endif;
 
-        $html = '<div class="geolocation-balloon">'
-              . '<p class="geolocation_marker_title">' . $titleLink . '</p>'
+        $html = '<div class="geolocation_balloon">'
+              . '<div class="geolocation_balloon_title">' . $titleLink . '</div>'
               . $body
               . '</div>';
         $locations[] = array(

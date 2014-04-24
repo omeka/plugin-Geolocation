@@ -8,8 +8,8 @@
                 <text><![CDATA[
                     <div class="geolocation_balloon">
                         <div class="geolocation_balloon_title">$[namewithlink]</div>
-                        <div class="body">$[description]</div>
-                        <div class="geolocation_balloon_description">$[Snippet]</div>
+                        <div class="geolocation_balloon_thumbnail">$[description]</div>
+                        <p class="geolocation_balloon_description">$[Snippet]</p>
                     </div>
                 ]]></text>
             </BalloonStyle>
