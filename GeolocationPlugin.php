@@ -435,8 +435,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $content = '<style>#geolocation-shortcode { height: 436px; }</style>';
         $content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
         $content .= js_tag('map'); 
-        $content .= get_view()->googleMap('geolocation-shortcode',
-            array('loadKml' => true, 'list' => null));
+        $content .= get_view()->googleMap('geolocation-shortcode');
         return $content;
     }
 
