@@ -9,15 +9,12 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
     
     public function browseAction()
     {
-        $this->_setParam('only_map_items', true);
-        $this->_setParam('use_map_per_page', true);
-        
         $table = $this->_helper->db->getTable();
         $locationTable = $this->_helper->db->getTable('Location');
         
         $params = $this->getAllParams();
         $currentPage = $this->getParam('page', 1);
-        $limit = (int)get_option('geolocation_per_page');
+        $limit = (int) get_option('geolocation_per_page');
         $params['only_map_items'] = true;
 
         $items = $table->findBy($params, $limit, $currentPage);
