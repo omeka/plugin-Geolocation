@@ -15,13 +15,8 @@ echo head(array('title' => __('Browse Map'),'bodyid'=>'map','bodyclass' => 'brow
 <div id="primary">
 
 <div id="geolocation-browse">
-<?php
-echo $this->googleMap('map_browse',
-    array('loadKml' => true, 'list' => 'map-links', 'params' => $params)
-);
-?>
-
-<div id="map-links"><h2><?php echo __('Find An Item on the Map'); ?></h2></div><!-- Used by JavaScript -->
+    <?php echo $this->googleMap('map_browse', array('list' => 'map-links', 'params' => $params)); ?>
+    <div id="map-links"><h2><?php echo __('Find An Item on the Map'); ?></h2></div>
 </div>
 
 </div><!-- end primary -->
