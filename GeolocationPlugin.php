@@ -432,10 +432,56 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function geolocationShortcode($args)
     {
-        $content = '<style>#geolocation-shortcode { height: 436px; }</style>';
+        if (isset($args['lat'])) {
+            $latitude = $args['lat'];
+        } else {
+            $latitude  = get_option('geolocation_default_latitude');
+        }
+
+        if (isset($args['lon'])) {
+            $longitude = $args['lon'];
+        } else {
+            $longitude = get_option('geolocation_default_longitude');
+        }
+
+        if (isset($args['zoom'])) {
+            $zoomLevel = $args['zoom'];
+        } else {
+            $zoomLevel = get_option('geolocation_default_zoom_level');
+        }
+
+        $center = array('latitude' => (double) $latitude, 'longitude' => (double) $longitude, 'zoomLevel' => (double) $zoomLevel);
+
+        $options = array();
+
+        if (isset($args['type'])) {
+            $options['mapType'] = $args['type'];
+        }
+
+        if (isset($args['collection'])) {
+            $options['params']['collection'] = $args['collection'];
+        }
+
+        if (isset($args['tags'])) {
+            $options['params']['tags'] = $args['tags'];
+        }        
+
+        if (isset($args['height'])) {
+            $height = $args['height'];
+        } else {
+            $height = '436px';
+        }
+
+        if (isset($args['width'])) {
+            $width= $args['width'];
+        } else {
+            $width = '100%';
+        }
+
+        $content = '<style>#geolocation-shortcode { height:' . $height . '; width:' . $width . '}</style>';
         $content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
         $content .= js_tag('map'); 
-        $content .= get_view()->googleMap('geolocation-shortcode');
+        $content .= get_view()->googleMap('geolocation-shortcode', $options, $center);
         return $content;
     }
 
