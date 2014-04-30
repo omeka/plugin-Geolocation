@@ -11,6 +11,7 @@ OmekaMap.prototype = {
     markers: [],
     options: {},
     center: null,
+    markerBounds: null,
     
     addMarker: function (lat, lng, options, bindHtml)
     {        
@@ -39,7 +40,16 @@ OmekaMap.prototype = {
         }
                
         this.markers.push(marker);
+        this.markerBounds.extend(options.position);
         return marker;
+    },
+
+    fitMarkers: function () {
+        if (this.markers.length == 1) {
+            this.map.setCenter(this.markers[0].getPosition());
+        } else {
+            this.map.fitBounds(this.markerBounds);
+        }
     },
     
     initMap: function () {
@@ -71,7 +81,8 @@ OmekaMap.prototype = {
 
         jQuery.extend(mapOptions, this.options.mapOptions);
 
-        this.map = new google.maps.Map(document.getElementById(this.mapDivId), mapOptions); 
+        this.map = new google.maps.Map(document.getElementById(this.mapDivId), mapOptions);
+        this.markerBounds = new google.maps.LatLngBounds();
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {
@@ -105,6 +116,10 @@ OmekaMapBrowse.prototype = {
         } else {
             //Create HTML links for each of the markers
             this.buildListLinks(listDiv);
+        }
+
+        if (this.options.fitMarkers) {
+            this.fitMarkers();
         }
     },
     
@@ -147,7 +162,7 @@ OmekaMapBrowse.prototype = {
                     return false;
                 }            
             }
-        });        
+        });
     },
     
     getBalloonStyling: function (xml) {
