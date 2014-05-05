@@ -454,6 +454,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         $options = array();
 
+        if (isset($args['fit'])) {
+            $options['fitMarkers'] = $args['fit'];
+        }
+
         if (isset($args['type'])) {
             $options['mapType'] = $args['type'];
         }
