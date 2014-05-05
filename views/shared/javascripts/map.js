@@ -106,6 +106,10 @@ function OmekaMapBrowse(mapDivId, center, options) {
 OmekaMapBrowse.prototype = {
     
     afterLoadItems: function () {
+        if (this.options.fitMarkers) {
+            this.fitMarkers();
+        }
+
         if (!this.options.list) {
             return;
         }
@@ -116,10 +120,6 @@ OmekaMapBrowse.prototype = {
         } else {
             //Create HTML links for each of the markers
             this.buildListLinks(listDiv);
-        }
-
-        if (this.options.fitMarkers) {
-            this.fitMarkers();
         }
     },
     
