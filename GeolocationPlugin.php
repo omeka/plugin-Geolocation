@@ -36,7 +36,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'public_navigation_items',
         'api_resources',
         'api_extend_items',
-        'exhibit_layouts'
+        'exhibit_layouts',
+        'item_search_filters'
     );
 
     public function hookAdminHead($args)
@@ -310,6 +311,31 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                     array());
         }
 
+    }
+
+    /**
+     * Add geolocation search options to filter output.
+     *
+     * @param array $displayArray
+     * @param array $args
+     * @return array
+     */
+    public function filterItemSearchFilters($displayArray, $args)
+    {
+        $requestArray = $args['request_array'];
+        if (!empty($requestArray['geolocation-address']) && !empty($requestArray['geolocation-radius'])) {
+            if (get_option('geolocation_use_metric_distances')) {
+                $unit = __('kilometers');
+            } else {
+                $unit = __('miles');
+            }
+            $displayArray['location'] = __('within %1$s %2$s of "%3$s"',
+                $requestArray['geolocation-radius'],
+                $unit,
+                $requestArray['geolocation-address']
+            );
+        }
+        return $displayArray;
     }
 
     /**
