@@ -1,7 +1,6 @@
 <?php
 
 define('GOOGLE_MAPS_API_VERSION', '3.x');
-define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 50);
 define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 10);
 define('GEOLOCATION_PLUGIN_DIR', PLUGIN_DIR . '/Geolocation');
 
@@ -126,8 +125,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $perPage = (int)$_POST['per_page'];
         if ($perPage <= 0) {
             $perPage = GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE;
-        } else if ($perPage > GEOLOCATION_MAX_LOCATIONS_PER_PAGE) {
-            $perPage = GEOLOCATION_MAX_LOCATIONS_PER_PAGE;
         }
         set_option('geolocation_per_page', $perPage);
         set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);

@@ -3,7 +3,7 @@
         <label for="per_page"><?php echo __('Number of Locations Per Page'); ?></label>    
     </div>    
     <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('The number of locations displayed per page when browsing the map. (Maximum is '); ?><?php echo GEOLOCATION_MAX_LOCATIONS_PER_PAGE; ?>).</p>
+        <p class="explanation"><?php echo __('The number of locations displayed per page when browsing the map.'); ?></p>
         <div class="input-block">        
         <input type="text" class="textinput"  name="per_page" size="4" value="<?php echo get_option('geolocation_per_page'); ?>" id="per_page" />        
         </div>
