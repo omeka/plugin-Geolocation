@@ -432,6 +432,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function geolocationShortcode($args)
     {
+        $booleanFilter = new Omeka_Filter_Boolean;
+
         if (isset($args['lat'])) {
             $latitude = $args['lat'];
         } else {
@@ -455,7 +457,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $options = array();
 
         if (isset($args['fit'])) {
-            $options['fitMarkers'] = $args['fit'];
+            $options['fitMarkers'] = $booleanFilter->filter($args['fit']);
+        } else {
+            $options['fitMarkers'] = '1';
         }
 
         if (isset($args['type'])) {
