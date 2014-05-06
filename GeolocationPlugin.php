@@ -1,7 +1,6 @@
 <?php
 
 define('GOOGLE_MAPS_API_VERSION', '3.x');
-define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 50);
 define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 10);
 define('GEOLOCATION_PLUGIN_DIR', PLUGIN_DIR . '/Geolocation');
 
@@ -37,7 +36,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'public_navigation_items',
         'api_resources',
         'api_extend_items',
-        'exhibit_layouts'
+        'exhibit_layouts',
+        'item_search_filters'
     );
 
     public function hookAdminHead($args)
@@ -126,8 +126,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $perPage = (int)$_POST['per_page'];
         if ($perPage <= 0) {
             $perPage = GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE;
-        } else if ($perPage > GEOLOCATION_MAX_LOCATIONS_PER_PAGE) {
-            $perPage = GEOLOCATION_MAX_LOCATIONS_PER_PAGE;
         }
         set_option('geolocation_per_page', $perPage);
         set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
@@ -313,6 +311,31 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                     array());
         }
 
+    }
+
+    /**
+     * Add geolocation search options to filter output.
+     *
+     * @param array $displayArray
+     * @param array $args
+     * @return array
+     */
+    public function filterItemSearchFilters($displayArray, $args)
+    {
+        $requestArray = $args['request_array'];
+        if (!empty($requestArray['geolocation-address']) && !empty($requestArray['geolocation-radius'])) {
+            if (get_option('geolocation_use_metric_distances')) {
+                $unit = __('kilometers');
+            } else {
+                $unit = __('miles');
+            }
+            $displayArray['location'] = __('within %1$s %2$s of "%3$s"',
+                $requestArray['geolocation-radius'],
+                $unit,
+                $requestArray['geolocation-address']
+            );
+        }
+        return $displayArray;
     }
 
     /**
