@@ -50,24 +50,7 @@ class Table_Location extends Omeka_Db_Table
         }
         return $indexedLocations;
     }
-    
-    public function countItemsBy($params)
-    {
-        $itemTable = $this->_db->getTable('Item');
-        $select = $itemTable->getSelectForCount($params);
-        $this->applySearchFilters($select, $params);
-        return $itemTable->fetchOne($select);
-    }
-    
-    public function findItemsBy($params = array(), $limit = null, $page = null)
-    {
-        $itemTable = $this->_db->getTable('Item'); 
-        $select = $itemTable->getSelectForFindBy($params);
-        $itemTable->applyPagination($select, $limit, $page);
-        $this->applySearchFilters($select, $params);        
-        return $itemTable->fetchObjects($select);
-    }
-    
+
     /**
      * Add permission check to location queries.
      * 

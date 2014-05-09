@@ -1,7 +1,6 @@
 <?php
 
 define('GOOGLE_MAPS_API_VERSION', '3.x');
-define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 50);
 define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 10);
 define('GEOLOCATION_PLUGIN_DIR', PLUGIN_DIR . '/Geolocation');
 
@@ -38,12 +37,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'api_resources',
         'api_extend_items',
         'exhibit_layouts',
-        'api_import_omeka_adapters'
+        'api_import_omeka_adapters',
+        'item_search_filters'
     );
 
     public function hookAdminHead($args)
     {
-        $view = $args['view'];
+        queue_css_file('geolocation-marker');
         $request = Zend_Controller_Front::getInstance()->getRequest();
         $module = $request->getModuleName();
         $controller = $request->getControllerName();
@@ -54,8 +54,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                         && $action == 'contribute'
                         && get_option('geolocation_add_map_to_contribution_form') == '1')
                      || ($controller == 'items') )  {
-            queue_css_file('geolocation-items-map');
-            queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
         }
@@ -129,8 +127,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $perPage = (int)$_POST['per_page'];
         if ($perPage <= 0) {
             $perPage = GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE;
-        } else if ($perPage > GEOLOCATION_MAX_LOCATIONS_PER_PAGE) {
-            $perPage = GEOLOCATION_MAX_LOCATIONS_PER_PAGE;
         }
         set_option('geolocation_per_page', $perPage);
         set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
@@ -150,12 +146,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookDefineRoutes($args)
     {
         $router = $args['router'];
-        $mapRoute = new Zend_Controller_Router_Route('items/map/:page',
+        $mapRoute = new Zend_Controller_Router_Route('items/map',
                         array('controller' => 'map',
                                 'action'     => 'browse',
-                                'module'     => 'geolocation',
-                                'page'       => '1'),
-                        array('page' => '\d+'));
+                                'module'     => 'geolocation'));
         $router->addRoute('items_map', $mapRoute);
 
         // Trying to make the route look like a KML file so google will eat it.
@@ -221,7 +215,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookPublicHead($args)
     {
-        $view = $args['view'];
+        queue_css_file('geolocation-marker');
+
         $request = Zend_Controller_Front::getInstance()->getRequest();
         $module = $request->getModuleName();
         $controller = $request->getControllerName();
@@ -232,8 +227,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                             && $action == 'contribute'
                             && get_option('geolocation_add_map_to_contribution_form') == '1')
                          || ($controller == 'items') )  {
-            queue_css_file('geolocation-items-map');
-            queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
         }
@@ -242,7 +235,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookExhibitBuilderPageHead($args)
     {
         if (array_key_exists('geolocation-map', $args['layouts'])) {
-            queue_css_file('geolocation-marker');
             queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
             queue_js_file('map');
         }
@@ -323,11 +315,37 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     /**
+     * Add geolocation search options to filter output.
+     *
+     * @param array $displayArray
+     * @param array $args
+     * @return array
+     */
+    public function filterItemSearchFilters($displayArray, $args)
+    {
+        $requestArray = $args['request_array'];
+        if (!empty($requestArray['geolocation-address']) && !empty($requestArray['geolocation-radius'])) {
+            if (get_option('geolocation_use_metric_distances')) {
+                $unit = __('kilometers');
+            } else {
+                $unit = __('miles');
+            }
+            $displayArray['location'] = __('within %1$s %2$s of "%3$s"',
+                $requestArray['geolocation-radius'],
+                $unit,
+                $requestArray['geolocation-address']
+            );
+        }
+        return $displayArray;
+    }
+
+    /**
      * Add the translations.
      */
     public function hookInitialize()
     {
         add_translation_source(dirname(__FILE__) . '/languages');
+        add_shortcode( 'geolocation', array($this, 'geolocationShortcode'));
     }
 
     public function filterAdminNavigationMain($navArray)
@@ -442,6 +460,69 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $geolocationAdapter->setResourceProperties(array('item' => 'Item'));
         $adapters['geolocations'] = $geolocationAdapter;
         return $adapters;
+    }
+
+    public function geolocationShortcode($args)
+    {
+        $booleanFilter = new Omeka_Filter_Boolean;
+
+        if (isset($args['lat'])) {
+            $latitude = $args['lat'];
+        } else {
+            $latitude  = get_option('geolocation_default_latitude');
+        }
+
+        if (isset($args['lon'])) {
+            $longitude = $args['lon'];
+        } else {
+            $longitude = get_option('geolocation_default_longitude');
+        }
+
+        if (isset($args['zoom'])) {
+            $zoomLevel = $args['zoom'];
+        } else {
+            $zoomLevel = get_option('geolocation_default_zoom_level');
+        }
+
+        $center = array('latitude' => (double) $latitude, 'longitude' => (double) $longitude, 'zoomLevel' => (double) $zoomLevel);
+
+        $options = array();
+
+        if (isset($args['fit'])) {
+            $options['fitMarkers'] = $booleanFilter->filter($args['fit']);
+        } else {
+            $options['fitMarkers'] = '1';
+        }
+
+        if (isset($args['type'])) {
+            $options['mapType'] = $args['type'];
+        }
+
+        if (isset($args['collection'])) {
+            $options['params']['collection'] = $args['collection'];
+        }
+
+        if (isset($args['tags'])) {
+            $options['params']['tags'] = $args['tags'];
+        }        
+
+        if (isset($args['height'])) {
+            $height = $args['height'];
+        } else {
+            $height = '436px';
+        }
+
+        if (isset($args['width'])) {
+            $width= $args['width'];
+        } else {
+            $width = '100%';
+        }
+
+        $content = '<style>#geolocation-shortcode { height:' . $height . '; width:' . $width . '}</style>';
+        $content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
+        $content .= js_tag('map'); 
+        $content .= get_view()->googleMap('geolocation-shortcode', $options, $center);
+        return $content;
     }
 
     /**
