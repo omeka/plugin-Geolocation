@@ -227,7 +227,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $location->setPostData($geolocationPost);
             $location->save();
             
-        } elseif ($geolocation_with_csv){
+        } elseif ($geolocation_with_csv && !empty($coordinates_or_address)){
             $coordinates_or_address = metadata($item, array(get_option('geolocation_default_loc_set'), get_option('geolocation_default_loc_field')));
             if (get_option('geolocation_use_coordinates')) {
                 $rawCoordinates = explode(',', $coordinates_or_address);
