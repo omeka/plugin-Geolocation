@@ -22,7 +22,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'public_head',
         'admin_head',
         'initialize',
-        'exhibit_builder_page_head',
         'contribution_type_form',
         'contribution_save_form'
     );
@@ -44,19 +43,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookAdminHead($args)
     {
         queue_css_file('geolocation-marker');
-        $request = Zend_Controller_Front::getInstance()->getRequest();
-        $module = $request->getModuleName();
-        $controller = $request->getControllerName();
-        $action = $request->getActionName();
-        if ( ($module == 'geolocation' && $controller == 'map')
-                    || ($module == 'contribution'
-                        && $controller == 'contribution'
-                        && $action == 'contribute'
-                        && get_option('geolocation_add_map_to_contribution_form') == '1')
-                     || ($controller == 'items') )  {
-            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
-            queue_js_file('map');
-        }
+        queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
+        queue_js_file('map');
     }
 
     public function hookInstall()
@@ -216,28 +204,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookPublicHead($args)
     {
         queue_css_file('geolocation-marker');
-
-        $request = Zend_Controller_Front::getInstance()->getRequest();
-        $module = $request->getModuleName();
-        $controller = $request->getControllerName();
-        $action = $request->getActionName();
-        if ( ($module == 'geolocation' && $controller == 'map')
-                        || ($module == 'contribution'
-                            && $controller == 'contribution'
-                            && $action == 'contribute'
-                            && get_option('geolocation_add_map_to_contribution_form') == '1')
-                         || ($controller == 'items') )  {
-            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
-            queue_js_file('map');
-        }
-    }
-
-    public function hookExhibitBuilderPageHead($args)
-    {
-        if (array_key_exists('geolocation-map', $args['layouts'])) {
-            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
-            queue_js_file('map');
-        }
+        queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
+        queue_js_file('map');
     }
 
     public function hookPublicItemsShow($args)
@@ -464,6 +432,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function geolocationShortcode($args)
     {
+        static $index = 0;
+        $index++;
+
         $booleanFilter = new Omeka_Filter_Boolean;
 
         if (isset($args['lat'])) {
@@ -518,11 +489,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $width = '100%';
         }
 
-        $content = '<style>#geolocation-shortcode { height:' . $height . '; width:' . $width . '}</style>';
-        $content .= '<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>';
-        $content .= js_tag('map'); 
-        $content .= get_view()->googleMap('geolocation-shortcode', $options, $center);
-        return $content;
+        $attrs = array('style' => "height:$height;width:$width");
+        return get_view()->googleMap("geolocation-shortcode-$index", $options, $attrs, $center);
     }
 
     /**

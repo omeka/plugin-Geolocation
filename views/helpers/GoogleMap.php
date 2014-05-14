@@ -2,7 +2,7 @@
 
 class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
 {
-    public function googleMap($divId = 'map', $options = array(), $center = array())
+    public function googleMap($divId = 'map', $options = array(), $attrs = array(), $center = array())
     {
         if (!$center) {
             $center = array(
@@ -25,12 +25,21 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
         if (!array_key_exists('mapType', $options)) {
             $options['mapType'] = get_option('geolocation_map_type');
         }
-        
+
+        $class = 'map geolocation-map';
+        if (isset($attrs['class'])) {
+            $class .= ' ' . $attrs['class'];
+        }
+
         $options = js_escape($options);
         $center = js_escape($center);
         $varDivId = Inflector::variablize($divId);
+        $divAttrs = array_merge($attrs, array(
+            'id' => $divId,
+            'class' => $class
+        ));
 
-        $html = '<div id="' . $divId . '" class="map geolocation-map"></div>';
+        $html = '<div ' . tag_attributes($divAttrs) . '></div>';
         $js = "var $varDivId" . "OmekaMapBrowse = new OmekaMapBrowse(" . js_escape($divId) .", $center, $options); ";
         $html .= "<script type='text/javascript'>$js</script>";
         return $html;
