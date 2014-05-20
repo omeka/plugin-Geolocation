@@ -477,14 +477,32 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $options['params']['tags'] = $args['tags'];
         }        
 
+        $pattern = '#^[0-9]*(px|%)$#';
+
         if (isset($args['height'])) {
-            $height = $args['height'];
+            $user_height = $args['height'];
+        }
+
+        if ($user_height){
+            if (preg_match($pattern, $user_height)) {
+                $height = $user_height;
+            } else {
+                $height = '436px';
+            }
         } else {
             $height = '436px';
         }
 
         if (isset($args['width'])) {
-            $width= $args['width'];
+            $user_width= $args['width'];
+        }
+
+        if ($user_width) {
+            if (preg_match($pattern, $user_width)) {
+                $width = $user_width;
+            } else {
+                $width = '100%';
+            }
         } else {
             $width = '100%';
         }
