@@ -1,7 +1,7 @@
 # Translation for the Geolocation plugin for Omeka.
 # Copyright (C) 2011 Roy Rosenzweig Center for History and New Media
 # This file is distributed under the same license as the Omeka package.
-# 
+#
 # Translators:
 # Matti Lassila <matti.lassila@gmail.com>, 2013
 msgid ""
@@ -9,14 +9,16 @@ msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2013-06-09 08:34+0000\n"
+"PO-Revision-Date: 2014-04-06 12:07+0200\n"
 "Last-Translator: Matti Lassila <matti.lassila@gmail.com>\n"
-"Language-Team: Finnish (Finland) (http://www.transifex.com/projects/p/omeka/language/fi_FI/)\n"
+"Language-Team: Finnish (Finland) (http://www.transifex.com/projects/p/omeka/"
+"language/fi_FI/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fi_FI\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.5.7\n"
 
 #: GeolocationPlugin.php:334 GeolocationPlugin.php:340
 #: GeolocationPlugin.php:364
@@ -47,7 +49,8 @@ msgstr "Sijainteja sivua kohti"
 msgid ""
 "The number of locations displayed per page when browsing the map. (Maximum "
 "is "
-msgstr "Kerralla näytettyjen sijaintien määrä karttaselausnäkymässä. (Enimmäismäärä "
+msgstr ""
+"Kerralla näytettyjen sijaintien määrä karttaselausnäkymässä. (Enimmäismäärä "
 
 #: config_form.php:16
 msgid "Default Latitude"
@@ -57,7 +60,9 @@ msgstr "Pohjoiskoordinaatti"
 msgid ""
 "Latitude of the map's initial center point, in degrees. Must be between -90 "
 "and 90."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -90 ja 90."
+msgstr ""
+"Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla "
+"välillä -90 ja 90."
 
 #: config_form.php:28
 msgid "Default Longitude"
@@ -67,7 +72,9 @@ msgstr "Itäkoordinaatti"
 msgid ""
 "Longitude of the map's initial center point, in degrees. Must be between "
 "-180 and 180."
-msgstr "Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla välillä -180 ja 180."
+msgstr ""
+"Kartan aloitusnäkymän koordinaattikeskipiste asteina. Arvon tulee olla "
+"välillä -180 ja 180."
 
 #: config_form.php:40
 msgid "Default Zoom Level"
@@ -77,17 +84,46 @@ msgstr "Zoomausaste"
 msgid ""
 "An integer greater than or equal to 0, where 0 represents the most zoomed "
 "out scale."
-msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi kokonaisluku. Arvolla nolla kartta on zoomattu kauimpaan asetukseensa."
+msgstr ""
+"Aloitusnäkymän zoomausaste. Arvon tulee olla välillä 0-18. Arvolla nolla "
+"kartta on zoomattu kauimpaan asetukseensa. Mitä suurempi luku, sen "
+"yksityiskohtaisempi kartta näytetään."
 
 #: config_form.php:52
 msgid "Width for Item Map"
 msgstr "Aineistonäkymän kartan leveys"
 
+#: config_form.php:52
+msgid "Map Type"
+msgstr "Kartan tyyppi"
+
+#: config_form.php:52
+msgid "The type of map to display"
+msgstr "Karttanäkymän karttatyyppi"
+
+#: config_form.php:52
+msgid "Roadmap"
+msgstr "Maantiekartta"
+
+#: config_form.php:52
+msgid "Satellite"
+msgstr "Ilmakuva"
+
+#: config_form.php:52
+msgid "Hybrid"
+msgstr "Yhdistelmä"
+
+#: config_form.php:52
+msgid "Terrain"
+msgstr "Maasto"
+
 #: config_form.php:55
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
-msgstr "Karttanäkymän leveys aineistosivulla. Oletuksena kartta näytetään sivupohjan suhteen täysleveänä (100%)."
+msgstr ""
+"Karttanäkymän leveys aineistosivulla. Oletuksena kartta näytetään sivupohjan "
+"suhteen täysleveänä (100%)."
 
 #: config_form.php:64
 msgid "Height for Item Map"
@@ -105,7 +141,9 @@ msgstr "Käytä mittayksikkönä kilometrejä"
 
 #: config_form.php:79
 msgid "Use metric distances in proximity search."
-msgstr "Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena mittayksikkö on maili."
+msgstr ""
+"Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena "
+"mittayksikkö on maili."
 
 #: config_form.php:89
 msgid "Add Link to Map on Items/Browse Navigation"
@@ -121,10 +159,46 @@ msgstr "Lisää kartta julkiselle tallennuslomakkeelle"
 
 #: config_form.php:106
 msgid ""
-"If the Contribution plugin is installed and activated, Geolocation  will add"
-" a geolocation map field to the contribution form to associate a location to"
-" a contributed item."
-msgstr "Jos Contribution-lisäosa on asennettuna, julkisella tallennuslomakkeella voidaan näyttää karttanäkymä sijaintitietoa varten."
+"If the Contribution plugin is installed and activated, Geolocation  will add "
+"a geolocation map field to the contribution form to associate a location to "
+"a contributed item."
+msgstr ""
+"Jos Contribution-lisäosa on asennettuna, julkisella tallennuslomakkeella "
+"voidaan näyttää karttanäkymä sijaintitietoa varten."
+
+#: config_form.php:136
+msgid "Use Geolocation in CSV import"
+msgstr "Käytä sijaintitietoja CSV-tuonnissa"
+
+#: config_form.php:139
+msgid "Geolocate items during CSV import."
+msgstr ""
+"Lisää aineistoihin sijaintitiedot CSV-taulukkoon tallennetun paikan nimen "
+"tai koordinaatin perusteella."
+
+#: config_form.php:149
+msgid "Location field"
+msgstr "Sijaintitietokenttä"
+
+#: config_form.php:163
+msgid ""
+"The location of new items will automatically be set to the position in this "
+"field."
+msgstr ""
+"Aineistojen sijainniksi määritetään kentässä annettu koordinaattipiste tai "
+"paikannimi."
+
+#: config_form.php:169
+msgid "Use WGS84 coordinates"
+msgstr "Käytä WGS84 koordinaatteja"
+
+#: config_form.php:172
+msgid ""
+"Instead of address or place name, the location field contains WGS84-"
+"coordinates saved in format POS(68.073611,29.315278)."
+msgstr ""
+"Sijaintitietokenttä sisältää WGS84-koordinaatin tallennettuna muodossa POS"
+"(68.073611,29.315278)."
 
 #: helpers/ItemGoogleMap.php:47
 msgid "This item has no location info associated with it."

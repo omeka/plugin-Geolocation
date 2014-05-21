@@ -130,3 +130,49 @@
         </div>
     </div>
 </div>
+
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_link_to_nav"><?php echo __('Use Geolocation in CSV import'); ?></label>    
+    </div>    
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Geolocate items during CSV import.'); ?></p>
+        <div class="input-block">        
+        <?php echo get_view()->formCheckbox('geolocation_use_in_import', true, 
+         array('checked'=>(boolean)get_option('geolocation_use_in_import'))); ?>        
+        </div>
+    </div>
+</div>
+
+<div class="field">
+    <div class="two columns alpha">
+        <label for="default_location"><?php echo __('Location field'); ?></label>    
+    </div>    
+    <div class="inputs five columns omega">
+        <div class="input-block">
+        <select class="textinput" name="geolocation_default_loc_set" id="geolocation_default_loc_set">
+        <option value="Dublin Core"
+            <?php if (get_option('geolocation_default_loc_set') == "Dublin Core") echo "selected='selected'"; ?>
+                 >Dublin Core</option>
+        <option value="Item Type Metadata"
+            <?php if (get_option('geolocation_default_loc_set') == "Item Type Metadata") echo "selected='selected'"; ?>
+                 ><?php echo __('Item Type Metadata');?></option>
+    </select>
+
+    <input type="text" class="textinput"  name="geolocation_default_loc_field" size="30" value="<?php echo get_option('geolocation_default_loc_field'); ?>" id="geolocation_default_loc_field" />
+        </div>
+    </div>
+</div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_link_to_nav"><?php echo __('Use WGS84 coordinates'); ?></label>    
+    </div>    
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Instead of address or place name, the location field contains WGS84-coordinates saved in format POS(68.073611,29.315278).'); ?></p>
+        <div class="input-block">        
+        <?php echo get_view()->formCheckbox('geolocation_use_coordinates', true, 
+         array('checked'=>(boolean)get_option('geolocation_use_coordinates'))); ?>        
+        </div>
+    </div>
+</div>
+
