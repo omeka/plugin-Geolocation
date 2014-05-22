@@ -40,13 +40,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'item_search_filters'
     );
 
-    public function hookAdminHead($args)
-    {
-        queue_css_file('geolocation-marker');
-        queue_js_url("//maps.google.com/maps/api/js?sensor=false");
-        queue_js_file('map');
-    }
-
     public function hookInstall()
     {
         $db = get_db();
@@ -156,6 +149,20 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $router->addRoute('map_kml', $kmlRoute);
     }
 
+    public function hookAdminHead($args)
+    {
+        queue_css_file('geolocation-marker');
+        queue_js_url("//maps.google.com/maps/api/js?sensor=false");
+        queue_js_file('map');
+    }
+
+    public function hookPublicHead($args)
+    {
+        queue_css_file('geolocation-marker');
+        queue_js_url("//maps.google.com/maps/api/js?sensor=false");
+        queue_js_file('map');
+    }
+
     public function hookAfterSaveItem($args)
     {
         if (!($post = $args['post'])) {
@@ -164,28 +171,28 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         $item = $args['record'];
         // If we don't have the geolocation form on the page, don't do anything!
-        if (!$post['geolocation']) {
+        if (!isset($post['geolocation'])) {
             return;
         }
 
         // Find the location object for the item
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
-
         // If we have filled out info for the geolocation, then submit to the db
         $geolocationPost = $post['geolocation'];
-        if (!empty($geolocationPost) &&
-                        (((string)$geolocationPost['latitude']) != '') &&
-                        (((string)$geolocationPost['longitude']) != '')) {
+        if (!empty($geolocationPost)
+            && $geolocationPost['latitude'] != ''
+            && $geolocationPost['longitude'] != ''
+        ) {
             if (!$location) {
                 $location = new Location;
                 $location->item_id = $item->id;
             }
             $location->setPostData($geolocationPost);
             $location->save();
+        } else {
             // If the form is empty, then we want to delete whatever location is
             // currently stored
-        } else {
             if ($location) {
                 $location->delete();
             }
@@ -205,13 +212,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $html .= "</div>";
             echo $html;
         }
-    }
-
-    public function hookPublicHead($args)
-    {
-        queue_css_file('geolocation-marker');
-        queue_js_url("//maps.google.com/maps/api/js?sensor=false");
-        queue_js_file('map');
     }
 
     public function hookPublicItemsShow($args)
@@ -386,9 +386,9 @@ SQL
     {
         if (get_option('geolocation_link_to_nav')) {
             $navArray['Browse Map'] = array(
-                                            'label'=>__('Browse Map'),
-                                            'uri' => url('items/map')
-                                            );
+                'label'=>__('Browse Map'),
+                'uri' => url('items/map')
+            );
         }
         return $navArray;
     }
@@ -607,9 +607,9 @@ SQL
     protected function _getCenter()
     {
         return array(
-                'latitude'=>  (double) get_option('geolocation_default_latitude'),
-                'longitude'=> (double) get_option('geolocation_default_longitude'),
-                'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'));
-
+            'latitude'=>  (double) get_option('geolocation_default_latitude'),
+            'longitude'=> (double) get_option('geolocation_default_longitude'),
+            'zoomLevel'=> (double) get_option('geolocation_default_zoom_level')
+        );
     }
 }
