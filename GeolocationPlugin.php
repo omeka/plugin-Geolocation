@@ -248,44 +248,67 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $db = $this->_db;
         $select = $args['select'];
         $alias = $this->_db->getTable('Location')->getTableAlias();
-        if(isset($args['params']['geolocation-address'])) {
-
-
+        if (!empty($args['params']['only_map_items'])
+            || !empty($args['params']['geolocation-address'])
+        ) {
+            $select->joinInner(
+                array($alias => $db->Location),
+                "$alias.item_id = items.id",
+                array()
+            );
+        }
+        if (!empty($args['params']['geolocation-address'])) {
             // Get the address, latitude, longitude, and the radius from parameters
             $address = trim($args['params']['geolocation-address']);
-            $currentLat = trim($args['params']['geolocation-latitude']);
-            $currentLng = trim($args['params']['geolocation-longitude']);
+            $lat = trim($args['params']['geolocation-latitude']);
+            $lng = trim($args['params']['geolocation-longitude']);
             $radius = trim($args['params']['geolocation-radius']);
-
-
-            if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
-                //INNER JOIN the locations table
-
-                $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
-                            array('latitude', 'longitude', 'address'));
-            }
             // Limit items to those that exist within a geographic radius if an address and radius are provided
-            if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
+            if ($address != ''
+                && is_numeric($lat)
+                && is_numeric($lng)
+                && is_numeric($radius)
+            ) {
                 // SELECT distance based upon haversine forumula
-                $select->columns('3956 * 2 * ASIN(SQRT(  POWER(SIN(('.$currentLat.' - locations.latitude) * pi()/180 / 2), 2) + COS('.$currentLat.' * pi()/180) *  COS(locations.latitude * pi()/180) *  POWER(SIN(('.$currentLng.' -locations.longitude) * pi()/180 / 2), 2)  )) as distance');
-                // WHERE the distance is within radius miles/kilometers of the specified lat & long
                 if (get_option('geolocation_use_metric_distances')) {
                     $denominator = 111;
+                    $earthRadius = 6371;
                 } else {
                     $denominator = 69;
+                    $earthRadius = 3959;
                 }
 
-                $select->where('(latitude BETWEEN '.$currentLat.' - ' . $radius . '/'.$denominator.' AND ' . $currentLat . ' + ' . $radius .  '/'.$denominator.')
-             AND (longitude BETWEEN ' . $currentLng . ' - ' . $radius . '/'.$denominator.' AND ' . $currentLng  . ' + ' . $radius .  '/'.$denominator.')');
+                $radius = $db->quote($radius, Zend_Db::FLOAT_TYPE);
+                $lat = $db->quote($lat, Zend_Db::FLOAT_TYPE);
+                $lng = $db->quote($lng, Zend_Db::FLOAT_TYPE);
+
+                $select->columns(<<<SQL
+$earthRadius * ACOS(
+    COS(RADIANS($lat)) *
+    COS(RADIANS(locations.latitude)) *
+    COS(RADIANS($lng) - RADIANS(locations.longitude))
+    +
+    SIN(RADIANS($lat)) *
+    SIN(RADIANS(locations.latitude))
+) AS distance
+SQL
+                );
+
+                // WHERE the distance is within radius miles/kilometers of the specified lat & long
+                $select->where(<<<SQL
+(locations.latitude BETWEEN $lat - $radius / $denominator AND $lat + $radius / $denominator)
+AND
+(locations.longitude BETWEEN $lng - $radius / $denominator AND $lng + $radius / $denominator)
+SQL
+                );
+
+                // Actually use distance calculation.
+                //$select->having('distance < radius');
+
                 //ORDER by the closest distances
                 $select->order('distance');
             }
-        } else if( isset($args['params']['only_map_items'])) {
-
-            $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
-                    array());
         }
-
     }
 
     /**
