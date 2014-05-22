@@ -9,6 +9,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_hooks = array(
         'install',
         'uninstall',
+        'upgrade',
         'config_form',
         'config',
         'define_acl',
@@ -88,19 +89,25 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $db->query("DROP TABLE IF EXISTS `$db->Location`");
     }
 
+    public function hookUpgrade($args)
+    {
+        if (version_compare($args['old_version'], '1.1', '<')) {
+            // If necessary, upgrade the plugin options
+            // Check for old plugin options, and if necessary, transfer to new options
+            $options = array('default_latitude', 'default_longitude', 'default_zoom_level', 'per_page');
+            foreach($options as $option) {
+                $oldOptionValue = get_option('geo_' . $option);
+                if ($oldOptionValue != '') {
+                    set_option('geolocation_' . $option, $oldOptionValue);
+                    delete_option('geo_' . $option);
+                }
+            }
+            delete_option('geo_gmaps_key');
+        }
+    }
+
     public function hookConfigForm()
     {
-        // If necessary, upgrade the plugin options
-        // Check for old plugin options, and if necessary, transfer to new options
-        $options = array('default_latitude', 'default_longitude', 'default_zoom_level', 'per_page');
-        foreach($options as $option) {
-            $oldOptionValue = get_option('geo_' . $option);
-            if ($oldOptionValue != '') {
-                set_option('geolocation_' . $option, $oldOptionValue);
-                delete_option('geo_' . $option);
-            }
-        }
-        delete_option('geo_gmaps_key');
         include 'config_form.php';
     }
 
