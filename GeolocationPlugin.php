@@ -1,11 +1,10 @@
 <?php
 
-define('GOOGLE_MAPS_API_VERSION', '3.x');
-define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 10);
-define('GEOLOCATION_PLUGIN_DIR', PLUGIN_DIR . '/Geolocation');
-
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
+    const GOOGLE_MAPS_API_VERSION = '3.x';
+    const DEFAULT_LOCATIONS_PER_PAGE = 10;
+
     protected $_hooks = array(
         'install',
         'uninstall',
@@ -66,7 +65,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_default_latitude', '38');
         set_option('geolocation_default_longitude', '-77');
         set_option('geolocation_default_zoom_level', '5');
-        set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
+        set_option('geolocation_per_page', self::DEFAULT_LOCATIONS_PER_PAGE);
         set_option('geolocation_add_map_to_contribution_form', '1');
         set_option('geolocation_use_metric_distances', '1');
     }
@@ -121,7 +120,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_item_map_height', $_POST['item_map_height']);
         $perPage = (int)$_POST['per_page'];
         if ($perPage <= 0) {
-            $perPage = GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE;
+            $perPage = self::DEFAULT_LOCATIONS_PER_PAGE;
         }
         set_option('geolocation_per_page', $perPage);
         set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
@@ -544,7 +543,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $html .=         '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
         $html .=         '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
         $html .=         '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
-        $html .=         '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . GOOGLE_MAPS_API_VERSION . '" />';
+        $html .=         '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . self::GOOGLE_MAPS_API_VERSION . '" />';
         $html .=         '<label>' . html_escape($label) . '</label>';
         $html .=     '</div>';
         $html .=     '<div class="inputs five columns omega">';
