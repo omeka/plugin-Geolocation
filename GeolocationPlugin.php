@@ -121,6 +121,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
         set_option('geolocation_map_type', $_POST['map_type']);
+        set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
     }
 
     public function hookDefineAcl($args)

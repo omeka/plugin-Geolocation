@@ -26,6 +26,10 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
             $options['mapType'] = get_option('geolocation_map_type');
         }
 
+        if (!array_key_exists('fitMarkers', $options)) {
+            $options['fitMarkers'] = (bool) get_option('geolocation_auto_fit_browse');
+        }
+
         $class = 'map geolocation-map';
         if (isset($attrs['class'])) {
             $class .= ' ' . $attrs['class'];
