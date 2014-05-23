@@ -207,8 +207,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         if ($location) {
             $html = '';
-            $html .= "<div id='geolocation' class='info-panel panel'>";
-            $html .= $view->itemGoogleMap($item, '224px', '270px' );
+            $html .= '<div class="geolocation panel">';
+            $html .= '<h4>' . __('Geolocation') . '</h4>';
+            $html .= $view->itemGoogleMap($item, '100%', '270px' );
             $html .= "</div>";
             echo $html;
         }

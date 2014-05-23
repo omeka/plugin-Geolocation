@@ -2,24 +2,8 @@
 
 class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
 {    
-    
     public function itemGoogleMap($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = false, $markerHtmlClassName = 'geolocation_balloon')
     {
-        $html = "<style type='text/css'>";
-        $html .= "div.map-notification {
-            width: $width;
-            height: $height; 
-        }";
-        
-        $divId = "item-map-{$item->id}";
-        $html .= "
-            #$divId {
-                width: $width;
-                height: $height;
-            }";
-        
-        $html .= "</style>";
-        
         $divId = "item-map-{$item->id}";
         $location = get_db()->getTable('Location')->findLocationByItem($item, true);
         // Only set the center of the map if this item actually has a location
@@ -41,13 +25,14 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $options = array();
             $center = js_escape($center);
             $options = js_escape($options);
-            $html .= '<div id="' . $divId . '" class="map panel geolocation-map"></div>';
+            $style = "width: $width; height: $height";
+            $html = '<div id="' . $divId . '" class="map panel geolocation-map" style="' . $style . '"></div>';
             
             $js = "var " . Inflector::variablize($divId) . ";";
             $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
             $html .= "<script type='text/javascript'>$js</script>";
         } else {
-            $html .= '<p class="map-notification">'.__('This item has no location info associated with it.').'</p>';
+            $html = '<p class="map-notification">'.__('This item has no location info associated with it.').'</p>';
         }
          return $html;   
     }    
