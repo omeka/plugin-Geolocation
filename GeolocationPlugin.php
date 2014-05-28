@@ -206,11 +206,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
         if ($location) {
-            $html = '';
-            $html .= '<div class="geolocation panel">';
-            $html .= '<h4>' . __('Geolocation') . '</h4>';
-            $html .= $view->itemGoogleMap($item, '100%', '270px' );
-            $html .= "</div>";
+            $html = ''
+                  . '<div class="geolocation panel">'
+                  . '<h4>' . __('Geolocation') . '</h4>'
+                  . '<div style="margin: 14px 0">'
+                  . $view->itemGoogleMap($item, '100%', '270px' )
+                  . '</div></div>';
             echo $html;
         }
     }
