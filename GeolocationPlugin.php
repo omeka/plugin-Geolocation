@@ -379,7 +379,7 @@ SQL
     {
         // insert the map tab before the Miscellaneous tab
         $item = $args['item'];
-        $tabs[__('Map')] = $this->_mapForm($item);
+        $tabs['Map'] = $this->_mapForm($item);
 
         return $tabs;
     }
