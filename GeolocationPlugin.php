@@ -238,12 +238,22 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
     }
 
+    /**
+     * Hook to include a form in the admin items search form.
+     *
+     * @internal Themed partial should go to "my_theme/map".
+     */
     public function hookAdminItemsSearch($args)
     {
         $view = $args['view'];
         echo $view->partial('map/advanced-search-partial.php');
     }
 
+    /**
+     * Hook to include a form in the admin items search form.
+     *
+     * @internal Themed partial should go to "my_theme/map".
+     */
     public function hookPublicItemsSearch($args)
     {
         $view = $args['view'];
@@ -438,11 +448,17 @@ SQL
         return $extend;
     }
 
+    /**
+     * Hook to include a form in a contribution type form.
+     *
+     * @internal Themed partial should go to "my_theme/contribution/map".
+     */
     public function hookContributionTypeForm($args)
     {
         if (get_option('geolocation_add_map_to_contribution_form')) {
             $contributionType = $args['type'];
-            echo $this->_mapForm(null, __('Find A Geographic Location For The ') . $contributionType->display_name . ':', false );
+            $view = $args['view'];
+            echo $this->_mapForm(null, __('Find A Geographic Location For The %s:', $contributionType->display_name), false, $view, null);
         }
     }
 
@@ -459,7 +475,7 @@ SQL
         );
         return $layouts;
     }
-    
+
     public function filterApiImportOmekaAdapters($adapters, $args)
     {
         $geolocationAdapter = new ApiImport_ResponseAdapter_Omeka_GenericAdapter(null, $args['endpointUri'], 'Location');
@@ -513,7 +529,7 @@ SQL
 
         if (isset($args['tags'])) {
             $options['params']['tags'] = $args['tags'];
-        }        
+        }
 
         $pattern = '#^[0-9]*(px|%)$#';
 
@@ -534,63 +550,58 @@ SQL
     }
 
     /**
-     * Returns the form code for geographically searching for items
+     * Returns the form code for geographically searching for items.
+     *
      * @param Item $item
-     * @param int $width
-     * @param int $height
-     * @return string
-     **/
-    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
+     * @param string $label if empty string, a default string will be used. Set
+     * null if you don't want a label.
+     * @param boolean $confirmLocationChange
+     * @param Omeka_View $view
+     * @param array $post
+     * @return string Html string.
+     */
+    protected function _mapForm($item, $label = '', $confirmLocationChange = true, $view = null, $post = null)
     {
         $html = '';
-        $label = __('Find a Location by Address:');
+
+        if (is_null($view)) {
+            $view = get_view();
+        }
+
+        // Need to be translated.
+        if ($label == '') {
+            $label = __('Find a Location by Address:');
+        }
         $center = $this->_getCenter();
         $center['show'] = false;
 
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
-        if ($post === null) {
+        if (is_null($post)) {
             $post = $_POST;
         }
 
-        $usePost = !empty($post) 
+        $usePost = !empty($post)
                     && !empty($post['geolocation'])
                     && $post['geolocation']['longitude'] != ''
                     && $post['geolocation']['latitude'] != '';
         if ($usePost) {
-            $lng = (double) $post['geolocation']['longitude'];
-            $lat = (double) $post['geolocation']['latitude'];
-            $zoom = (int) $post['geolocation']['zoom_level'];
-            $addr = html_escape($post['geolocation']['address']);
+            $lng  = empty($post['geolocation']['longitude']) ? '' : (double) $post['geolocation']['longitude'];
+            $lat  = empty($post['geolocation']['latitude']) ? '' : (double) $post['geolocation']['latitude'];
+            $zoom = empty($post['geolocation']['zoom']) ? '' : (int) $post['geolocation']['zoom'];
+            $address = html_escape($post['geolocation']['address']);
         } else {
             if ($location) {
                 $lng  = (double) $location['longitude'];
                 $lat  = (double) $location['latitude'];
                 $zoom = (int) $location['zoom_level'];
-                $addr = html_escape($location['address']);
+                $address = html_escape($location['address']);
             } else {
-                $lng = $lat = $zoom = $addr = '';
+                $lng = $lat = $zoom = $address = '';
             }
         }
 
-        $html .= '<div class="field">';
-        $html .=     '<div id="location_form" class="two columns alpha">';
-        $html .=         '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
-        $html .=         '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
-        $html .=         '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
-        $html .=         '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . self::GOOGLE_MAPS_API_VERSION . '" />';
-        $html .=         '<label>' . html_escape($label) . '</label>';
-        $html .=     '</div>';
-        $html .=     '<div class="inputs five columns omega">';
-        $html .=          '<div class="input-block">';
-        $html .=            '<input type="text" name="geolocation[address]" id="geolocation_address" value="' . $addr . '" class="textinput"/>';
-        $html .=            '<button type="button" style="float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">'.__('Find').'</button>';
-        $html .=          '</div>';
-        $html .=     '</div>';
-        $html .= '</div>';
-        $html .= '<div  id="omeka-map-form" style="width: 100%; height: 300px"></div>';
-
-
+        // Prepare javascript.
         $options = array();
         $options['form'] = array('id' => 'location_form',
                 'posted' => $usePost);
@@ -599,7 +610,6 @@ SQL
                     'longitude' => $lng,
                     'zoomLevel' => $zoom);
         }
-
         $options['confirmLocationChange'] = $confirmLocationChange;
 
         $center = js_escape($center);
@@ -612,7 +622,18 @@ SQL
             });
         ";
 
+        $html .= '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
+        $html .= '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
+        $html .= '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
+        $html .= '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . self::GOOGLE_MAPS_API_VERSION . '" />';
+
+        $html .= $view->partial('map/input-partial.php', array(
+            'label' => $label,
+            'address' => $address,
+        ));
+
         $html .= "<script type='text/javascript'>" . $js . "</script>";
+
         return $html;
     }
 
@@ -621,7 +642,7 @@ SQL
         return array(
             'latitude'=>  (double) get_option('geolocation_default_latitude'),
             'longitude'=> (double) get_option('geolocation_default_longitude'),
-            'zoomLevel'=> (double) get_option('geolocation_default_zoom_level')
+            'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'),
         );
     }
 }
