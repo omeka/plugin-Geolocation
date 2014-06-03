@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2014-04-06 12:07+0200\n"
+"PO-Revision-Date: 2014-06-03 21:08+0200\n"
 "Last-Translator: Matti Lassila <matti.lassila@gmail.com>\n"
 "Language-Team: Finnish (Finland) (http://www.transifex.com/projects/p/omeka/"
 "language/fi_FI/)\n"
@@ -23,6 +23,10 @@ msgstr ""
 #: GeolocationPlugin.php:334 GeolocationPlugin.php:340
 #: GeolocationPlugin.php:364
 msgid "Map"
+msgstr "Kartta"
+
+#: GeolocationPlugin.php:349
+msgid "Geolocation"
 msgstr "Kartta"
 
 #: GeolocationPlugin.php:373 views/public/map/browse.php:23
