@@ -60,6 +60,7 @@ div.map-notification {
 
     #map-links {
         padding: 0 10px 10px 10px;
+        -moz-box-sizing: border-box !important;
         box-sizing: border-box !important;
         height: 436px;
         width: 30%;

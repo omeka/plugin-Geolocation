@@ -52,7 +52,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         `zoom_level` INT NOT NULL ,
         `map_type` VARCHAR( 255 ) NOT NULL ,
         `address` TEXT NOT NULL ,
-        INDEX (`item_id`)) ENGINE = MYISAM";
+        INDEX (`item_id`)) ENGINE = InnoDB";
         $db->query($sql);
 
         set_option('geolocation_default_latitude', '38');
@@ -379,7 +379,7 @@ SQL
     {
         // insert the map tab before the Miscellaneous tab
         $item = $args['item'];
-        $tabs[__('Map')] = $this->_mapForm($item);
+        $tabs['Map'] = $this->_mapForm($item);
 
         return $tabs;
     }
