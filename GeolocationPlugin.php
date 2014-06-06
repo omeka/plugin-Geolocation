@@ -59,8 +59,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_default_longitude', '-77');
         set_option('geolocation_default_zoom_level', '5');
         set_option('geolocation_per_page', self::DEFAULT_LOCATIONS_PER_PAGE);
-        set_option('geolocation_add_map_to_contribution_form', '1');
-        set_option('geolocation_use_metric_distances', '1');
+        set_option('geolocation_add_map_to_contribution_form', false);
+        set_option('geolocation_use_metric_distances', false);
     }
 
     public function hookUninstall()
