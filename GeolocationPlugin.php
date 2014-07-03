@@ -548,9 +548,9 @@ SQL
 
         $usePost = !empty($post) && !empty($post['geolocation']);
         if ($usePost) {
-            $lng  = (double) @$post['geolocation']['longitude'];
-            $lat  = (double) @$post['geolocation']['latitude'];
-            $zoom = (int) @$post['geolocation']['zoom_level'];
+            $lng  = empty($post['geolocation']['longitude']) ? '' : $post['geolocation']['longitude'];
+            $lat  = empty($post['geolocation']['latitude']) ? '' : $post['geolocation']['latitude'];
+            $zoom = empty($post['geolocation']['zoom']) ? '' : $post['geolocation']['zoom'];
             $addr = @$post['geolocation']['address'];
         } else {
             if ($location) {
