@@ -546,14 +546,14 @@ SQL
             $post = $_POST;
         }
 
-        $usePost = !empty($post) && !empty($post['geolocation']);
-        if ($usePost
-            && $post['geolocation']['longitude'] != ''
-            && $post['geolocation']['latitude'] != ''
-        ) {
+        $usePost = !empty($post) 
+                    && !empty($post['geolocation'])
+                    && $post['geolocation']['longitude'] != ''
+                    && $post['geolocation']['latitude'] != '';
+        if ($usePost) {
             $lng = (double) $post['geolocation']['longitude'];
             $lat = (double) $post['geolocation']['latitude'];
-            $zoom = (int) $post['geolocation']['zoom'];
+            $zoom = (int) $post['geolocation']['zoom_level'];
             $addr = html_escape($post['geolocation']['address']);
         } else {
             if ($location) {
