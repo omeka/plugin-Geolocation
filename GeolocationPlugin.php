@@ -435,8 +435,10 @@ SQL
 
     public function hookContributionTypeForm($args)
     {
-        $contributionType = $args['type'];
-        echo $this->_mapForm(null, __('Find A Geographic Location For The ') . $contributionType->display_name . ':', false );
+        if (get_option('geolocation_add_map_to_contribution_form')) {
+            $contributionType = $args['type'];
+            echo $this->_mapForm(null, __('Find A Geographic Location For The ') . $contributionType->display_name . ':', false );
+        }
     }
 
     public function hookContributionSaveForm($args)
