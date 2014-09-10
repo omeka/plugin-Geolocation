@@ -31,15 +31,16 @@ class Table_Location extends Omeka_Db_Table
             $itemId = (int)(($item instanceof Item) ? $item->id : $item);
             $select->where("$alias.item_id = ?", $itemId);
         }
-        
-        // Get the locations
-        $locations = $this->fetchObjects($select);
-        
+
         // If only a single location is request, return the first one found.
         if ($findOnlyOne) {
-            return current($locations);
+            $location = $this->fetchObject($select);
+            return $location;
         }
-        
+
+        // Get the locations.
+        $locations = $this->fetchObjects($select);
+
         // Return an associative array of locations where the key is the item_id of the location
         // Note: Since each item can only have one location, this makes sense to associate a single location with a single item_id.
         // However, if in the future, an item can have multiple locations, then we cannot just associate a single location with a single item_id;
