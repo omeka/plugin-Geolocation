@@ -81,6 +81,15 @@
 </div>
 <div class="field">
     <div class="two columns alpha">
+        <label for="per_page"><?php echo __('Default Radius'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('The size of the default radius in proximity search.'); ?></p>
+        <?php echo $view->formText('geolocation_default_radius', get_option('geolocation_default_radius')); ?>
+    </div>
+</div>
+<div class="field">
+    <div class="two columns alpha">
         <label for="geolocation_use_metric_distances"><?php echo __('Use metric distances'); ?></label>
     </div>
     <div class="inputs five columns omega">

@@ -60,6 +60,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_default_zoom_level', '5');
         set_option('geolocation_per_page', self::DEFAULT_LOCATIONS_PER_PAGE);
         set_option('geolocation_add_map_to_contribution_form', '0');
+        set_option('geolocation_default_radius', 10);
         set_option('geolocation_use_metric_distances', '0');
     }
 
@@ -118,6 +119,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_per_page', $perPage);
         set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
         set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
+        set_option('geolocation_default_radius', $_POST['geolocation_default_radius']);
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
         set_option('geolocation_map_type', $_POST['map_type']);
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
