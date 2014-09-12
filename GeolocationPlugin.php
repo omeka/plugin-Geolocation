@@ -135,19 +135,47 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookDefineRoutes($args)
     {
         $router = $args['router'];
-        $mapRoute = new Zend_Controller_Router_Route('items/map',
-                        array('controller' => 'map',
-                                'action'     => 'browse',
-                                'module'     => 'geolocation'));
-        $router->addRoute('items_map', $mapRoute);
+
+        // Map based on an item to get all other items around.
+        $mapRoute = new Zend_Controller_Router_Route(
+            'items/map/:item_id/:page',
+            array(
+                'module' => 'geolocation',
+                'controller' => 'map',
+                'action' => 'browse',
+                'page' => 1,
+            ),
+            array(
+                'item_id' => '\d+',
+                'page' => '\d+',
+        ));
+        $router->addRoute('items_map_item', $mapRoute);
+
+        $mapRoute = new Zend_Controller_Router_Route(
+            'items/map/:pager/:page',
+            array(
+                'module' => 'geolocation',
+                'controller' => 'map',
+                'action' => 'browse',
+                'pager' => 'page',
+                'page' => 1,
+            ),
+            array(
+                'pager' => 'page',
+                'page' => '\d+',
+        ));
+        $router->addRoute('items_map_page', $mapRoute);
 
         // Trying to make the route look like a KML file so google will eat it.
         // @todo Include page parameter if this works.
-        $kmlRoute = new Zend_Controller_Router_Route_Regex('geolocation/map\.kml',
-                        array('controller' => 'map',
-                                'action' => 'browse',
-                                'module' => 'geolocation',
-                                'output' => 'kml'));
+        $kmlRoute = new Zend_Controller_Router_Route_Regex(
+            'geolocation/map\.kml',
+            array(
+                'module' => 'geolocation',
+                'controller' => 'map',
+                'action' => 'browse',
+                'output' => 'kml',
+        ));
         $router->addRoute('map_kml', $kmlRoute);
     }
 
@@ -251,9 +279,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $db = $this->_db;
         $select = $args['select'];
+        $params = $args['params'];
+
         $alias = $this->_db->getTable('Location')->getTableAlias();
-        if (!empty($args['params']['only_map_items'])
-            || !empty($args['params']['geolocation-address'])
+        if (!empty($params['only_map_items'])
+            || !empty($params['item_id'])
+            || !empty($params['geolocation-address'])
         ) {
             $select->joinInner(
                 array($alias => $db->Location),
@@ -261,32 +292,60 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 array()
             );
         }
-        if (!empty($args['params']['geolocation-address'])) {
+
+        // Select all items around the selected one.
+        if (!empty($params['item_id'])) {
+            // TODO Use a sub-query?
+            $location = $db->getTable('Location')->findLocationByItem($params['item_id'], true);
+            if ($location) {
+                $params['geolocation-address'] = $location->address;
+                $params['geolocation-latitude'] = $location->latitude;
+                $params['geolocation-longitude'] = $location->longitude;
+                $params['geolocation-radius'] = isset($params['geolocation-radius'])
+                    ? $params['geolocation-radius']
+                    : get_option('geolocation_default_radius');
+                $this->_selectItemsBrowseSql($select, $params);
+            }
+        }
+
+        elseif (!empty($params['geolocation-address'])) {
             // Get the address, latitude, longitude, and the radius from parameters
-            $address = trim($args['params']['geolocation-address']);
-            $lat = trim($args['params']['geolocation-latitude']);
-            $lng = trim($args['params']['geolocation-longitude']);
-            $radius = trim($args['params']['geolocation-radius']);
+            $params['geolocation-address'] = trim($params['geolocation-address']);
+            $params['geolocation-latitude'] = trim($params['geolocation-latitude']);
+            $params['geolocation-longitude'] = trim($params['geolocation-longitude']);
+            $params['geolocation-radius'] = trim($params['geolocation-radius']);
             // Limit items to those that exist within a geographic radius if an address and radius are provided
-            if ($address != ''
-                && is_numeric($lat)
-                && is_numeric($lng)
-                && is_numeric($radius)
+            if ($params['geolocation-address'] != ''
+                && is_numeric($params['geolocation-latitude'])
+                && is_numeric($params['geolocation-longitude'])
+                && is_numeric($params['geolocation-radius'])
             ) {
-                // SELECT distance based upon haversine forumula
-                if (get_option('geolocation_use_metric_distances')) {
-                    $denominator = 111;
-                    $earthRadius = 6371;
-                } else {
-                    $denominator = 69;
-                    $earthRadius = 3959;
-                }
+                $this->_selectItemsBrowseSql($select, $params);
+            }
+        }
+    }
 
-                $radius = $db->quote($radius, Zend_Db::FLOAT_TYPE);
-                $lat = $db->quote($lat, Zend_Db::FLOAT_TYPE);
-                $lng = $db->quote($lng, Zend_Db::FLOAT_TYPE);
+    /**
+     * Helper for hookItemsBrowseSql().
+     */
+    private function _selectItemsBrowseSql($select, $params)
+    {
+        $db = $this->_db;
 
-                $select->columns(<<<SQL
+        // Select distance based upon haversine forumula.
+        if (get_option('geolocation_use_metric_distances')) {
+            $denominator = 111;
+            $earthRadius = 6371;
+        } else {
+            $denominator = 69;
+            $earthRadius = 3959;
+        }
+
+        $lat = $db->quote($params['geolocation-latitude'], Zend_Db::FLOAT_TYPE);
+        $lng = $db->quote($params['geolocation-longitude'], Zend_Db::FLOAT_TYPE);
+        $radius = $db->quote($params['geolocation-radius'], Zend_Db::FLOAT_TYPE);
+
+        $select->columns(<<<SQL
 $earthRadius * ACOS(
     COS(RADIANS($lat)) *
     COS(RADIANS(locations.latitude)) *
@@ -296,23 +355,21 @@ $earthRadius * ACOS(
     SIN(RADIANS(locations.latitude))
 ) AS distance
 SQL
-                );
+        );
 
-                // WHERE the distance is within radius miles/kilometers of the specified lat & long
-                $select->where(<<<SQL
+        // WHERE the distance is within radius miles/kilometers of the specified lat & long
+        $select->where(<<<SQL
 (locations.latitude BETWEEN $lat - $radius / $denominator AND $lat + $radius / $denominator)
 AND
 (locations.longitude BETWEEN $lng - $radius / $denominator AND $lng + $radius / $denominator)
 SQL
-                );
+        );
 
-                // Actually use distance calculation.
-                //$select->having('distance < radius');
+        // Actually use distance calculation.
+        //$select->having('distance < radius');
 
-                //ORDER by the closest distances
-                $select->order('distance');
-            }
-        }
+        //ORDER by the closest distances
+        $select->order('distance');
     }
 
     /**
@@ -456,7 +513,7 @@ SQL
         );
         return $layouts;
     }
-    
+
     public function filterApiImportOmekaAdapters($adapters, $args)
     {
         $geolocationAdapter = new ApiImport_ResponseAdapter_Omeka_GenericAdapter(null, $args['endpointUri'], 'Location');
@@ -510,7 +567,7 @@ SQL
 
         if (isset($args['tags'])) {
             $options['params']['tags'] = $args['tags'];
-        }        
+        }
 
         $pattern = '#^[0-9]*(px|%)$#';
 
@@ -550,7 +607,7 @@ SQL
             $post = $_POST;
         }
 
-        $usePost = !empty($post) 
+        $usePost = !empty($post)
                     && !empty($post['geolocation'])
                     && $post['geolocation']['longitude'] != ''
                     && $post['geolocation']['latitude'] != '';
