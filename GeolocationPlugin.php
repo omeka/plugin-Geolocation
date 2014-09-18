@@ -102,11 +102,20 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
     }
 
-    public function hookConfigForm()
+    /**
+     * Shows plugin configuration page.
+     */
+    public function hookConfigForm($args)
     {
+        $view = $args['view'];
         include 'config_form.php';
     }
 
+    /**
+     * Saves plugin configuration page.
+     *
+     * @param array Options set in the config form.
+     */
     public function hookConfig($args)
     {
         // Use the form to set a bunch of default options in the db
@@ -588,7 +597,7 @@ SQL
         if ($usePost) {
             $lng  = empty($post['geolocation']['longitude']) ? '' : (double) $post['geolocation']['longitude'];
             $lat  = empty($post['geolocation']['latitude']) ? '' : (double) $post['geolocation']['latitude'];
-            $zoom = empty($post['geolocation']['zoom']) ? '' : (int) $post['geolocation']['zoom'];
+            $zoom = empty($post['geolocation']['zoom_level']) ? '' : (int) $post['geolocation']['zoom_level'];
             $address = html_escape($post['geolocation']['address']);
         } else {
             if ($location) {
