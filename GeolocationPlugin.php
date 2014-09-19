@@ -524,7 +524,9 @@ SQL
         if (get_option('geolocation_add_map_to_contribution_form')) {
             $contributionType = $args['type'];
             $view = $args['view'];
-            echo $this->_mapForm(null, __('Find A Geographic Location For The %s:', $contributionType->display_name), false, $view, null);
+            // Item is used only to get original location, if not changed.
+            $item = (empty($_POST) && isset($view->item)) ? $view->item : null;
+            echo $this->_mapForm($item, __('Find A Geographic Location For The %s:', $contributionType->display_name), null, $view, null);
         }
     }
 
@@ -621,12 +623,13 @@ SQL
      * @param Item $item
      * @param string $label if empty string, a default string will be used. Set
      * null if you don't want a label.
-     * @param boolean $confirmLocationChange
+     * @param boolean|null $confirmLocationChange If null, autodetermine it:
+     * confirm when there is a saved location, else not.
      * @param Omeka_View $view
      * @param array $post
      * @return string Html string.
      */
-    protected function _mapForm($item, $label = '', $confirmLocationChange = true, $view = null, $post = null)
+    protected function _mapForm($item, $label = '', $confirmLocationChange = null, $view = null, $post = null)
     {
         $html = '';
 
@@ -665,6 +668,10 @@ SQL
             } else {
                 $lng = $lat = $zoom = $address = '';
             }
+        }
+
+        if (is_null($confirmLocationChange)) {
+            $confirmLocationChange = empty($location) ? false : $item->exists();
         }
 
         // Prepare javascript.
