@@ -23,7 +23,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'admin_head',
         'initialize',
         'contribution_type_form',
-        'contribution_save_form'
     );
 
     protected $_filters = array(
@@ -211,11 +210,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             return;
         }
 
-        $item = $args['record'];
         // If we don't have the geolocation form on the page, don't do anything!
         if (!isset($post['geolocation'])) {
             return;
         }
+
+        $item = $args['record'];
 
         // Find the location object for the item
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
@@ -528,11 +528,6 @@ SQL
             $item = (empty($_POST) && isset($view->item)) ? $view->item : null;
             echo $this->_mapForm($item, __('Find A Geographic Location For The %s:', $contributionType->display_name), null, $view, null);
         }
-    }
-
-    public function hookContributionSaveForm($args)
-    {
-        $this->hookAfterSaveItem($args);
     }
 
     public function filterExhibitLayouts($layouts)
