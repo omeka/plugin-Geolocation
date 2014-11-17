@@ -84,7 +84,7 @@
         <label for="per_page"><?php echo __('Default Radius'); ?></label>
     </div>
     <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('The size of the default radius in proximity search.'); ?></p>
+        <p class="explanation"><?php echo __('The size of the default radius to use on the items advanced search page. See below for whether to measure in miles or kilometers.'); ?></p>
         <?php echo $view->formText('geolocation_default_radius', get_option('geolocation_default_radius')); ?>
     </div>
 </div>

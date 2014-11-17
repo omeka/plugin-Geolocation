@@ -97,6 +97,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
             delete_option('geo_gmaps_key');
         }
+        if (version_compare($args['old_version'], '2.2.3', '<')) {
+            set_option('geolocation_default_radius', 10);
+        }
     }
 
     public function hookConfigForm()
