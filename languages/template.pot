@@ -17,45 +17,48 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: GeolocationPlugin.php:298
+#: GeolocationPlugin.php:216
+msgid "Geolocation"
+msgstr ""
+
+#: GeolocationPlugin.php:333
 msgid "kilometers"
 msgstr ""
 
-#: GeolocationPlugin.php:300
+#: GeolocationPlugin.php:335
 msgid "miles"
 msgstr ""
 
-#: GeolocationPlugin.php:302
+#: GeolocationPlugin.php:337
 #, php-format
 msgid "within %1$s %2$s of \"%3$s\""
 msgstr ""
 
-#: GeolocationPlugin.php:322 GeolocationPlugin.php:328
-#: GeolocationPlugin.php:352
+#: GeolocationPlugin.php:357 GeolocationPlugin.php:363
 msgid "Map"
 msgstr ""
 
-#: GeolocationPlugin.php:361
+#: GeolocationPlugin.php:396
 msgid "Browse Map"
 msgstr ""
 
-#: GeolocationPlugin.php:409
+#: GeolocationPlugin.php:445
 msgid "Find A Geographic Location For The "
 msgstr ""
 
-#: GeolocationPlugin.php:420
+#: GeolocationPlugin.php:457
 msgid "Geolocation Map"
 msgstr ""
 
-#: GeolocationPlugin.php:421
+#: GeolocationPlugin.php:458
 msgid "Show attached items on a map"
 msgstr ""
 
-#: GeolocationPlugin.php:509
+#: GeolocationPlugin.php:546
 msgid "Find a Location by Address:"
 msgstr ""
 
-#: GeolocationPlugin.php:547
+#: GeolocationPlugin.php:587
 msgid "Find"
 msgstr ""
 
@@ -141,54 +144,64 @@ msgid ""
 msgstr ""
 
 #: config_form.php:84
-msgid "Use metric distances"
+msgid "Default Radius"
 msgstr ""
 
 #: config_form.php:87
+msgid ""
+"The size of the default radius to use on the items advanced search page. See "
+"below for whether to measure in miles or kilometers."
+msgstr ""
+
+#: config_form.php:93
+msgid "Use metric distances"
+msgstr ""
+
+#: config_form.php:96
 msgid "Use metric distances in proximity search."
 msgstr ""
 
-#: config_form.php:97
+#: config_form.php:106
 msgid "Item Map Settings"
 msgstr ""
 
-#: config_form.php:100
+#: config_form.php:109
 msgid "Width for Item Map"
 msgstr ""
 
-#: config_form.php:103
+#: config_form.php:112
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
 msgstr ""
 
-#: config_form.php:110
+#: config_form.php:119
 msgid "Height for Item Map"
 msgstr ""
 
-#: config_form.php:113
+#: config_form.php:122
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
 msgstr ""
 
-#: config_form.php:120
+#: config_form.php:129
 msgid "Map Integration"
 msgstr ""
 
-#: config_form.php:123
+#: config_form.php:132
 msgid "Add Link to Map on Items/Browse Navigation"
 msgstr ""
 
-#: config_form.php:126
+#: config_form.php:135
 msgid "Add a link to the items map on all the items/browse pages."
 msgstr ""
 
-#: config_form.php:136
+#: config_form.php:145
 msgid "Add Map To Contribution Form"
 msgstr ""
 
-#: config_form.php:139
+#: config_form.php:148
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add "
 "a geolocation map field to the contribution form to associate a location to "
@@ -231,7 +244,7 @@ msgstr ""
 msgid "Find An Item on the Map"
 msgstr ""
 
-#: views/helpers/ItemGoogleMap.php:50
+#: views/helpers/ItemGoogleMap.php:36
 msgid "This item has no location info associated with it."
 msgstr ""
 
