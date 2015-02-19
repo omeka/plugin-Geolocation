@@ -19,6 +19,10 @@ msgstr ""
 "Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#: GeolocationPlugin.php:234
+msgid "Geolocation"
+msgstr "Géolocalisation"
+
 #: GeolocationPlugin.php:298
 msgid "kilometers"
 msgstr ""
