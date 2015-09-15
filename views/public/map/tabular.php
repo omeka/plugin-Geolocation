@@ -11,11 +11,6 @@ echo head(array('title' => $title, 'bodyclass' => 'map browse_tabular'));
     <?php echo public_nav_items(); ?>
 </nav>
 
-<?php
-echo item_search_filters();
-echo pagination_links();
-?>
-
 <div id="geolocation-tabular">
     <table>
         <tr>
@@ -35,8 +30,8 @@ echo pagination_links();
         </tr>    
         <?php endforeach ?>
     </table>
-    <p><?php 
-        $map_url = absolute_url('geolocation/map/browse');
+    <p><?php
+        $map_url = absolute_url('items/map');
         echo "<a href='{$map_url}'>View as a map</a>"; 
     ?></p>
 </div>

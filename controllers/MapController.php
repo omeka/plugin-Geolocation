@@ -38,15 +38,13 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
 
     public function tabularAction()
     {
-        
         $table = $this->_helper->db->getTable();
         $locationTable = $this->_helper->db->getTable('Location');
         
         $params = $this->getAllParams();
         $params['only_map_items'] = true;
 
-        // Only get pagination data for the "normal" page, only get
-        // item/location data for the KML output.
+        //Add location data to the item objects
         $this->view->totalItems = $table->count($params);
         $this->view->params = $params;
         $items = $table->findAll();
@@ -58,8 +56,7 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
                 $item->address = $location[$item->id]->address;
             }
         }
-        $this->view->items = $items;
-       
-    }
 
+        $this->view->items = $items;
+    }
 }
