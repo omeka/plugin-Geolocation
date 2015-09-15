@@ -155,6 +155,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                                 'module' => 'geolocation',
                                 'output' => 'kml'));
         $router->addRoute('map_kml', $kmlRoute);
+
+        $tabularRoute = new Zend_Controller_Router_Route('items/map/tabular',
+                        array('controller' => 'map',
+                                'action'     => 'tabular',
+                                'module'     => 'geolocation'));
+        $router->addRoute('items_map_tabular', $tabularRoute);
+
     }
 
     public function hookAdminHead($args)

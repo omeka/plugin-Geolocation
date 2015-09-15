@@ -35,4 +35,31 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
             Zend_Registry::set('pagination', $pagination);
         }
     }
+
+    public function tabularAction()
+    {
+        
+        $table = $this->_helper->db->getTable();
+        $locationTable = $this->_helper->db->getTable('Location');
+        
+        $params = $this->getAllParams();
+        $params['only_map_items'] = true;
+
+        // Only get pagination data for the "normal" page, only get
+        // item/location data for the KML output.
+        $this->view->totalItems = $table->count($params);
+        $this->view->params = $params;
+        $items = $table->findAll();
+        foreach($items as &$item) {
+            $location = $locationTable->findLocationByItem($item);
+            if(!empty($location)) {
+                $item->latitude = $location[$item->id]->latitude;
+                $item->longitude = $location[$item->id]->longitude;
+                $item->address = $location[$item->id]->address;
+            }
+        }
+        $this->view->items = $items;
+       
+    }
+
 }

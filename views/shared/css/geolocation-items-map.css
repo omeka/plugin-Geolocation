@@ -8,8 +8,17 @@
     margin-bottom: 1em;
 }
 
+#geolocation-browse .element-invisible {
+    position: absolute !important;
+    clip: rect(1px 1px 1px 1px);
+    clip: rect(1px,1px,1px,1px);
+    overflow: hidden;
+    height: 1px;
+}
+
+
 #map_browse {
-    height: 436px; 
+    height: 436px;
 }
 
 #map-links ul {
@@ -18,7 +27,7 @@
 }
 
 #map-links li {
-    overflow:hidden; 
+    overflow:hidden;
     width: 100% !important;
     display: inline-block;
     border-radius: 3px;
@@ -26,14 +35,14 @@
     box-sizing: border-box;
     margin-bottom: 10px;
 }
-    
+
 #map-links {
     padding: 10px 0 10px 0;
 }
 
 #map-links li a {
     display:block;
-    text-decoration:none; 
+    text-decoration:none;
     border-bottom: 0 !important;
 }
 
@@ -78,7 +87,7 @@ div.map-notification {
         overflow: hidden;
     }
 
-    #map_browse { 
+    #map_browse {
         float:left;
         width:70%;
         margin-bottom: 0 !important;
