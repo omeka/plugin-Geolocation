@@ -8,15 +8,6 @@
     margin-bottom: 1em;
 }
 
-#geolocation-browse .element-invisible {
-    position: absolute !important;
-    clip: rect(1px 1px 1px 1px);
-    clip: rect(1px,1px,1px,1px);
-    overflow: hidden;
-    height: 1px;
-}
-
-
 #map_browse {
     height: 436px;
 }
