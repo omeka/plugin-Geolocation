@@ -61,6 +61,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_add_map_to_contribution_form', '0');
         set_option('geolocation_default_radius', 10);
         set_option('geolocation_use_metric_distances', '0');
+        set_option('geolocation_accessible_markup', '0');
     }
 
     public function hookUninstall()
@@ -72,6 +73,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_per_page');
         delete_option('geolocation_add_map_to_contribution_form');
         delete_option('geolocation_use_metric_distances');
+        delete_option('geolocation_accessible_markup');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
@@ -134,6 +136,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
         set_option('geolocation_map_type', $_POST['map_type']);
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
+        set_option('geolocation_accessible_markup', $_POST['geolocation_accessible_markup']);
     }
 
     public function hookDefineAcl($args)
@@ -188,6 +191,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 'output' => 'kml',
         ));
         $router->addRoute('map_kml', $kmlRoute);
+
+        $tabularRoute = new Zend_Controller_Router_Route('items/map/tabular',
+                        array('controller' => 'map',
+                                'action'     => 'tabular',
+                                'module'     => 'geolocation'));
+        $router->addRoute('items_map_tabular', $tabularRoute);
+
     }
 
     public function hookAdminHead($args)
