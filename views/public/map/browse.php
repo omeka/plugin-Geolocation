@@ -46,6 +46,12 @@ echo pagination_links();
     </figcaption>
     </figure>
     <?php endif; ?>
+
+    <?php if (get_option('geolocation_browse_append_search')): ?>
+    <div id="search_block">
+        <?php echo items_search_form(array('id'=>'search'), $_SERVER['REQUEST_URI']); ?>
+    </div>
+    <?php endif; ?>
 </div>
 
 <?php echo foot();

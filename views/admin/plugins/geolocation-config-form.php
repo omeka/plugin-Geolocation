@@ -90,6 +90,22 @@
             ?>
         </div>
     </div>
+
+    <div class="field">
+        <div class="two columns alpha">
+            <?php echo $this->formLabel('geolocation_browse_append_search',
+                __('Append Search to Map')); ?>
+        </div>
+        <div class="inputs five columns omega">
+            <p class="explanation">
+                <?php echo __('If checked, the block advanced search will be appended to the view "map/browse", like in the admin interface.'); ?>
+            </p>
+            <?php
+            echo $this->formCheckbox('geolocation_browse_append_search', true,
+                array('checked' => (boolean) get_option('geolocation_browse_append_search')));
+            ?>
+        </div>
+    </div>
     <div class="field">
         <div class="two columns alpha">
             <?php echo $this->formLabel('geolocation_default_radius',

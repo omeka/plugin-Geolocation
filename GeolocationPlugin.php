@@ -60,6 +60,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'geolocation_default_map_type' => 'roadmap',
         'geolocation_per_page' => 10,
         'geolocation_auto_fit_browse' => false,
+        'geolocation_browse_append_search' => false,
         'geolocation_default_radius' => 10,
         'geolocation_use_metric_distances' => false,
         'geolocation_item_map_width' => '',
