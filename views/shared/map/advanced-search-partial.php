@@ -4,6 +4,7 @@ $request = Zend_Controller_Front::getInstance()->getRequest();
 
 // Get the address, latitude, longitude, and the radius from parameters
 $address = trim($request->getParam('geolocation-address'));
+$description = trim($request->getParam('geolocation-description'));
 $currentLat = trim($request->getParam('geolocation-latitude'));
 $currentLng = trim($request->getParam('geolocation-longitude'));
 $radius = trim($request->getParam('geolocation-radius'));
@@ -26,6 +27,7 @@ if (get_option('geolocation_use_metric_distances')) {
     </div>
     <div class="five columns omega inputs">
         <?php echo $this->formText('geolocation-address',  $address, array('size' => '40')); ?>
+        <?php // echo $this->formText('geolocation-description', $description, array('size' => '40')); ?>
         <?php echo $this->formHidden('geolocation-latitude', $currentLat); ?>
         <?php echo $this->formHidden('geolocation-longitude', $currentLng); ?>
     </div>

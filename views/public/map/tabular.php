@@ -19,6 +19,7 @@ echo head(array('title' => $title, 'bodyclass' => 'map browse_tabular'));
                 <th scope="col"><?php echo __('Longitude'); ?></th>
                 <th scope="col"><?php echo __('Latitude'); ?></th>
                 <th scope="col"><?php echo __('Address'); ?></th>
+                <th scope="col"><?php echo __('Description'); ?></th>
             </tr>
         </thead>
         <tbody>
@@ -36,6 +37,7 @@ echo head(array('title' => $title, 'bodyclass' => 'map browse_tabular'));
                 <td><?php echo $location->longitude; ?></td>
                 <td><?php echo $location->latitude; ?></td>
                 <td><?php echo $location->address; ?></td>
+                <td><?php echo $location->description; ?></td>
             </tr>
                 <?php endforeach; ?>
             <?php endforeach ?>

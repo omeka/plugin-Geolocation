@@ -12,10 +12,16 @@ if (empty($byFolder)):
         echo __('[Point %d/%d]', $indexLocation, $countLocations) . ' ';
     endif;
     echo metadata($item, array('Dublin Core', 'Description'), array('snippet' => 150));
+    if (!empty($location['description'])): ?>
+        <em><?php echo $location['description']; ?></em>
+    <?php endif;
 else:
     if (isset($indexLocation) && $countLocations > 1):
         echo __('[Point %d/%d]', $indexLocation, $countLocations) . ' ';
         echo metadata($item, array('Dublin Core', 'Description'), array('snippet' => 150));
+        if (!empty($location['description'])): ?>
+            <em><?php echo $location['description']; ?></em>
+        <?php endif;
     endif;
 endif;
     ?>]]></Snippet>

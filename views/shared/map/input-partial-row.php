@@ -7,6 +7,7 @@ if (empty($location)) {
     $zoom_level = get_option('geolocation_default_zoom_level');
     $map_type = get_option('geolocation_default_map_type');
     $address = '';
+    $description = '';
 }
 // Existing location.
 else {
@@ -16,6 +17,7 @@ else {
     $zoom_level = $location->zoom_level;
     $map_type = $location->map_type;
     $address = $location->address;
+    $description = $location->description;
 }
 
 $baseField = 'locations[' . $id . ']';
@@ -32,15 +34,9 @@ $zoomLevels = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
         <button type="button" class="geolocation-display button small green" id="locations-<?php echo $id; ?>-display" name="<?php echo $baseField; ?>[display]" title="<?php echo __('Display this location'); ?>">O</button>
         <button type="button" class="geolocation-remove button small red" id="locations-<?php echo $id; ?>-remove" name="<?php echo $baseField; ?>[remove]" title="<?php echo __('Remove this location'); ?>">X</button>
     </td>
-    <td><?php
-        echo $this->formText($baseField . '[address]',
-            $address,
-            array(
-                'placeholder' => __('Address'),
-                'class' => 'geolocation-address',
-            ));
-    ?></td>
-    <td><?php
+    <td colspan="4">
+    <div>
+        <span><?php
         echo $this->formText($baseField . '[latitude]',
             $latitude,
             array(
@@ -48,8 +44,8 @@ $zoomLevels = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
                 'maxlength' => '15',
                 'class' => 'geolocation-latitude',
             ));
-    ?></td>
-    <td><?php
+        ?></span>
+        <span><?php
         echo $this->formText($baseField . '[longitude]',
             $longitude,
             array(
@@ -57,17 +53,37 @@ $zoomLevels = array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17
                 'maxlength' => '15',
                 'class' => 'geolocation-longitude',
             ));
-    ?></td>
-    <td><?php
+        ?></span>
+        <span><?php
         echo $this->formSelect($baseField . '[zoom_level]',
             $zoom_level,
             array('class' => 'geolocation-zoom-level'),
             $zoomLevels);
-    ?></td>
-    <td><?php
+        ?></span>
+        <span><?php
         echo $this->formSelect($baseField . '[map_type]',
             $map_type,
             array('class' => 'geolocation-map-type'),
             $mapTypes);
-    ?></td>
+        ?></span>
+    </div>
+    <div>
+        <span><?php
+        echo $this->formText($baseField . '[address]',
+            $address,
+            array(
+                'placeholder' => __('Address'),
+                'class' => 'geolocation-address',
+            ));
+        ?></span>
+        <span><?php
+        echo $this->formText($baseField . '[description]',
+            $description,
+            array(
+                'placeholder' => __('Description'),
+                'class' => 'geolocation-description',
+            ));
+        ?></span>
+    </div>
+    </td>
 </tr>

@@ -57,6 +57,12 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
 
         $options = array();
         $options['mapType'] = $location->map_type;
+        // Here is the styling for the balloon that appears on the map. Values
+        // "$[x]" will be replaced via javascript.
+        $options['balloon'] = '<div class="geolocation_balloon">'
+            . '<div class="geolocation_balloon_address">$[address]</div>'
+            . '<div class="geolocation_balloon_description">$[description]</div>'
+            . '</div>';
 
         // Only set the center of the map if this item actually has a location
         // associated with it.
@@ -66,6 +72,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $point['address'] = $location->address;
             $point['latitude'] = $location->latitude;
             $point['longitude'] = $location->longitude;
+            $point['description'] = $location->description;
             $points[] = $point;
         }
 
@@ -79,6 +86,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
                 $figcaption = sprintf('<div class="geolocation-latitude accessible">%s}</div>', __('Latitude: %s', $point['latitude']));
                 $figcaption .= sprintf('<div class="geolocation-longitude accessible">%s</div>', __('Longitude: %s', $point['longitude']));
                 if (!empty($point['address'])) $figcaption .= sprintf('<div class="geolocation-address accessible">%s</div>', __('Address: %s', $point['address']));
+                if (!empty($point['description'])) $figcaption .= sprintf('<div class="geolocation-description accessible">%s</div>', __('Description: %s', $point['description']));
                 $html .= '<figcaption class="element-invisible">' . $figcaption . '</figcaption>';
             }
             else {
@@ -87,6 +95,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
                     $figcaption .= sprintf('<div class="geolocation-latitude accessible">%s</div>', __('Latitude: %s', $point['latitude']));
                     $figcaption .= sprintf('<div class="geolocation-longitude accessible">%s</div>', __('Longitude: %s', $point['longitude']));
                     if (!empty($point['address'])) $figcaption .= sprintf('<div class="geolocation-address accessible">%s</div>', __('Address: %s', $point['address']));
+                    if (!empty($point['description'])) $figcaption .= sprintf('<div class="geolocation-description accessible">%s</div>', __('Description: %s', $point['description']));
                     $html .= '<figcaption class="element-invisible">' . $figcaption . '</figcaption>';
                 }
             }

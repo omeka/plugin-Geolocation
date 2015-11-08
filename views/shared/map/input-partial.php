@@ -1,6 +1,7 @@
 <div class="geolocation-list seven columns alpha omega">
     <h3><?php echo __('List of locations'); ?></h3>
     <table id="geolocation-locations-<?php echo $item->id; ?>" class="geolocation-locations" cellspacing="0" cellpadding="0">
+        <colgroup><col /></colgroup>
         <thead>
             <tr>
                 <th>
@@ -8,7 +9,6 @@
                         <?php echo __('All'); ?>
                     </button>
                 </th>
-                <th><?php echo __('Address'); ?></th>
                 <th><?php echo __('Latitude'); ?></th>
                 <th><?php echo __('Longitude'); ?></th>
                 <th><?php echo __('Zoom Level'); ?></th>
@@ -20,7 +20,7 @@
             if (empty($locations)):
                 $key = 0;?>
                 <tr id="geolocation-empty">
-                    <td colspan="6"><?php echo __('No location defined.'); ?></td>
+                    <td colspan="5"><?php echo __('No location defined.'); ?></td>
                 </tr>
             <?php else:
                 foreach ($locations as $key => $location):

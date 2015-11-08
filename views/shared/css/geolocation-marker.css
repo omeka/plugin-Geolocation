@@ -46,8 +46,49 @@ div#geolocation {
 .geolocation-list {
     margin-top: 12px;
 }
+
+table.geolocation-locations col {
+    width: 48px;
+}
+table.geolocation-locations div {
+    padding-bottom: 14px;
+}
 input.geolocation-address,
 input.geolocation-latitude,
 input.geolocation-longitude {
-    width: 80px;
+    width: 150px;
+}
+input.geolocation-description {
+    width: 296px;
+}
+
+@media screen and (max-width:960px) {
+    input.geolocation-address,
+    input.geolocation-latitude,
+    input.geolocation-longitude {
+        width: 96px;
+    }
+    input.geolocation-description {
+        width: 240px;
+    }
+}
+@media screen and (max-width:767px) {
+    input.geolocation-address,
+    input.geolocation-latitude,
+    input.geolocation-longitude {
+        width: 90px;
+    }
+    input.geolocation-description {
+        width: 236px;
+    }
+}
+@media screen and (max-width:480px) {
+    input.geolocation-address,
+    input.geolocation-latitude,
+    input.geolocation-longitude {
+        width: 120px;
+    input.geolocation-description {
+    }
+        width: 120px;
+    }
 }

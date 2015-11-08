@@ -12,6 +12,7 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
     public $zoom_level;
     public $map_type;
     public $address;
+    public $description;
 
     /**
      * Executes before the record is saved.
@@ -23,6 +24,9 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         }
         if (is_null($this->address)) {
             $this->address = '';
+        }
+        if (is_null($this->description)) {
+            $this->description = '';
         }
     }
 
@@ -46,6 +50,9 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         }
         if (empty($this->zoom_level)) {
             $this->addError('zoom_level', __('Location requires a zoom level.'));
+        }
+        if (!empty($this->map_type) && !in_array($this->map_type, array('roadmap', 'satellite', 'hybrid', 'terrain'))) {
+            $this->addError('map_type', __('Map type should be "roadmap", "satellite", "hybrid" or "terrain".'));
         }
     }
 

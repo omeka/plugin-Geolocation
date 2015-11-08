@@ -2,6 +2,18 @@
 class Table_Location extends Omeka_Db_Table
 {
     /**
+     * Count locations for an item.
+     *
+     * @param array|Item|integer $item An item or item id, or an array of items
+     * or item ids.
+     * @return integer The total of location for the item or list of items.
+     */
+    public function countLocationsForItem($item)
+    {
+        return $this->count(array('item' => $item));
+    }
+
+    /**
      * Returns a location or an array of locations for an item or an array of
      * items.
      *

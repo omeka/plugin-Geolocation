@@ -84,17 +84,20 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      */
     public function hookInstall()
     {
-        $db = get_db();
+        $db = $this->_db;
         $sql = "
         CREATE TABLE IF NOT EXISTS `$db->Location` (
-        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-        `item_id` BIGINT UNSIGNED NOT NULL ,
-        `latitude` DOUBLE NOT NULL ,
-        `longitude` DOUBLE NOT NULL ,
-        `zoom_level` INT NOT NULL ,
-        `map_type` VARCHAR( 255 ) NOT NULL ,
-        `address` TEXT NOT NULL ,
-        INDEX (`item_id`)) ENGINE = InnoDB";
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `item_id` int(10) unsigned NOT NULL,
+            `latitude` DOUBLE NOT NULL,
+            `longitude` DOUBLE NOT NULL,
+            `zoom_level` tinyint unsigned NOT NULL,
+            `map_type` VARCHAR( 255 ) NOT NULL DEFAULT '',
+            `address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+            `description` mediumtext COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+            PRIMARY KEY (`id`),
+            INDEX (`item_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
         $db->query($sql);
 
         $this->_installOptions();
@@ -102,6 +105,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookUpgrade($args)
     {
+        $oldVersion = $args['old_version'];
+        $newVersion = $args['new_version'];
+        $db = $this->_db;
+
         if (version_compare($args['old_version'], '1.1', '<')) {
             // If necessary, upgrade the plugin options
             // Check for old plugin options, and if necessary, transfer to new options
@@ -123,6 +130,33 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         if (version_compare($args['old_version'], '2.2.3', '<')) {
             set_option('geolocation_default_radius', 10);
+        }
+
+        if (version_compare($oldVersion, '2.3', '<')) {
+            // All the table is normalized to Omeka standards and the field
+            // "description" is added.
+            $sql = "
+                ALTER TABLE `{$db->Location}`
+                CHANGE `id` `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                CHANGE `item_id` `item_id` int(10) unsigned NOT NULL,
+                CHANGE `latitude` `latitude` DOUBLE NOT NULL,
+                CHANGE `longitude` `longitude` DOUBLE NOT NULL,
+                CHANGE `zoom_level` `zoom_level` tinyint unsigned NOT NULL,
+                CHANGE `map_type` `map_type` VARCHAR( 255 ) NOT NULL DEFAULT '',
+                CHANGE `address` `address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+                ADD `description` mediumtext COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+                ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+            ";
+            $db->query($sql);
+
+            // All wrong map types are reset to empty (the"Google Maps v3.x" is
+            // useless).
+            $sql = "
+                UPDATE `{$db->Location}`
+                SET `map_type` = ''
+                WHERE `map_type` NOT IN ('roadmap', 'satellite', 'hybrid', 'terrain');
+            ";
+            $db->query($sql);
         }
     }
 
@@ -316,9 +350,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
-        if ($location) {
+        $totalLocations = $this->_db->getTable('Location')->countLocationsForItem($item);
+        if ($totalLocations) {
             $html = ''
                 . '<div class="geolocation panel">'
                 . '<h4>' . __('Geolocation') . '</h4>'
@@ -332,9 +366,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
-        if ($location) {
+        $totalLocations = $this->_db->getTable('Location')->countLocationsForItem($item);
+        if ($totalLocations) {
             $width = get_option('geolocation_item_map_width') ?: '';
             $height = get_option('geolocation_item_map_height') ?: '300px';
             $html = '<div id="geolocation">';

@@ -101,10 +101,17 @@ function OmekaMapSingle(mapDivId, center, options, points) {
     // Display all current geolocation points.
     if (points) {
         var that = this;
+
+        that.itemBalloon = options.balloon;
+
         points.forEach(function (pointValue, index) {
             if (pointValue.latitude.length != 0 && pointValue.longitude.length != 0) {
-                var point = new google.maps.LatLng(pointValue.latitude, pointValue.longitude);
-                var marker = that.addMarker(point.lat(), point.lng());
+                var balloon = '';
+                if (pointValue.address.length != 0 || pointValue.description.length != 0) {
+                    balloon = that.itemBalloon;
+                    balloon = balloon.replace('$[address]', pointValue.address).replace('$[description]', pointValue.description);
+                }
+                var marker = that.addMarker(pointValue.latitude, pointValue.longitude, {title: pointValue.description}, balloon);
             }
         });
         this.fitMarkers();
@@ -516,18 +523,33 @@ OmekaMapForm.prototype = {
         row += '<button type="button" class="geolocation-display button small green" id="locations-' + newRowId + '-display" name="locations[' + newRowId + '][display]" title="Display this location">O</button>';
         row += '<button type="button" class="geolocation-remove button small red" id="locations-' + newRowId + '-remove" name="locations[' + newRowId + '][remove]" title="Remove this location">X</button>';
         row += '</td>';
-        row += '<td><input type="text" class="geolocation-address" placeholder="Address" value="" id="locations-' + newRowId + '-address" name="locations[' + newRowId + '][address]"></td>';
-        row += '<td><input type="text" class="geolocation-latitude" maxlength="15" placeholder="Latitude" value="" id="locations-' + newRowId + '-latitude" name="locations[' + newRowId + '][latitude]"></td>';
-        row += '<td><input type="text" class="geolocation-longitude" maxlength="15" placeholder="Longitude" value="" id="locations-' + newRowId + '-longitude" name="locations[' + newRowId + '][longitude]"></td>';
-        row += '<td><select class="geolocation-zoom-level" id="locations-' + newRowId + '-zoom_level" name="locations[' + newRowId + '][zoom_level]">';
+        row += '<td colspan="4">';
+        row += '<div>';
+        row += '<span>';
+        row += '<input type="text" name="locations[' + newRowId + '][latitude]" id="locations-' + newRowId + '-latitude" value="" placeholder="Latitude" maxlength="15" class="geolocation-latitude">';
+        row += '</span>';
+        row += '<span>';
+        row += '<input type="text" name="locations[' + newRowId + '][longitude]" id="locations-' + newRowId + '-longitude" value="" placeholder="Longitude" maxlength="15" class="geolocation-longitude">';
+        row += '</span>';
+        row += '<span>';
+        row += '<select name="locations[' + newRowId + '][zoom_level]" id="locations-' + newRowId + '-zoom_level" class="geolocation-zoom-level">';
         row += '<option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>';
         row += '<option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option>';
         row += '<option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option>';
         row += '<option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option>';
-        row += '</select></td>';
-        row += '<td><select class="geolocation-map-type" id="locations-' + newRowId + '-map_type" name="locations[' + newRowId + '][map_type]">';
+        row += '</select>';
+        row += '</span>';
+        row += '<span>';
+        row += '<select name="locations[' + newRowId + '][map_type]" id="locations-' + newRowId + '-map_type" class="geolocation-map-type">';
         row += '<option value="roadmap">Roadmap</option><option value="satellite">Satellite</option><option value="hybrid">Hybrid</option><option value="terrain">Terrain</option>';
-        row += '</select></td>';
+        row += '</select>';
+        row += '</span>';
+        row += '</div>';
+        row += '<div>';
+        row += '<span><input type="text" name="locations[' + newRowId + '][address]" id="locations-' + newRowId + '-address" value="" placeholder="Address" class="geolocation-address"></span>';
+        row += '<span><input type="text" name="locations[' + newRowId + '][description]" id="locations-' + newRowId + '-description" value="" placeholder="Description" class="geolocation-description"></span>';
+        row += '</div>';
+        row += '</td>';
         row += '</tr>';
 
         jQuery('table.geolocation-locations tr:last').after(row);
@@ -545,7 +567,7 @@ OmekaMapForm.prototype = {
         // Add the empty location if none.
         var locations = jQuery('table.geolocation-locations tbody tr');
         if (locations.length == 0) {
-            var row = '<tr id="geolocation-empty"><td colspan="6">No location defined.</td></tr>';
+            var row = '<tr id="geolocation-empty"><td colspan="5">No location defined.</td></tr>';
             jQuery('table.geolocation-locations tbody').innerHTML(row);
         }
     },
@@ -553,16 +575,16 @@ OmekaMapForm.prototype = {
     /* Display the current geolocation from the list. */
     displayLocation: function (location) {
         var that = this;
-        var latitude = location.find('td input.geolocation-latitude').val();
-        var longitude = location.find('td input.geolocation-longitude').val();
+        var latitude = location.find('input.geolocation-latitude').val();
+        var longitude = location.find('input.geolocation-longitude').val();
         if (latitude.length == 0 || longitude.length == 0) {
             alert('Error: This location has no latitude or longitude!');
             return;
         }
         var point = new google.maps.LatLng(latitude, longitude);
-        var address = location.find('td input.geolocation-address').val();
-        var zoomLevel = +location.find('td select.geolocation-zoom-level').val();
-        var mapType = location.find('td select.geolocation-map-type').val();
+        var address = location.find('input.geolocation-address').val();
+        var zoomLevel = +location.find('select.geolocation-zoom-level').val();
+        var mapType = location.find('select.geolocation-map-type').val();
 
         jQuery('#geolocation_address').val(address);
         // TODO This hack avoids a recursion for newly created locations.
@@ -587,15 +609,15 @@ OmekaMapForm.prototype = {
 
         jQuery.each(locations, function (index, location) {
             location = jQuery(location);
-            var latitude = location.find('td input.geolocation-latitude').val();
-            var longitude = location.find('td input.geolocation-longitude').val();
+            var latitude = location.find('input.geolocation-latitude').val();
+            var longitude = location.find('input.geolocation-longitude').val();
             if (latitude.length != 0 && longitude.length != 0) {
                 var point = new google.maps.LatLng(latitude, longitude);
                 var marker = that.addMarker(point.lat(), point.lng());
             }
         });
 
-        var mapType = jQuery(locations[0]).find('td select.geolocation-map-type').val();
+        var mapType = jQuery(locations[0]).find('select.geolocation-map-type').val();
         that.map.setMapTypeId(this.convertMapType(mapType));
 
         this.fitMarkers();

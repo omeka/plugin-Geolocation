@@ -23,7 +23,7 @@ class Geolocation_View_Helper_MapForm extends Zend_View_Helper_Abstract
         // The first location is used to prepare the map (center, zoom, type).
         $location = reset($locations);
 
-        $address = $latitude = $longitude = '';
+        $latitude = $longitude = $address = $description = '';
         $zoomLevel = (integer) get_option('geolocation_default_zoom_level');
         $mapType = get_option('geolocation_default_map_type');
 
@@ -43,6 +43,7 @@ class Geolocation_View_Helper_MapForm extends Zend_View_Helper_Abstract
         $html .= '<input type="hidden" name="geolocation[longitude]" value="' . $longitude . '" />';
         $html .= '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoomLevel . '" />';
         $html .= '<input type="hidden" name="geolocation[map_type]" value="' . $mapType . '" />';
+        $html .= '<input type="hidden" name="geolocation[description]" value="' . $description . '" />';
 
         $html .= $view->partial('map/input-partial.php', array(
             'item' => $item,
