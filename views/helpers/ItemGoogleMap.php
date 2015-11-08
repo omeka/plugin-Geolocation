@@ -1,7 +1,7 @@
 <?php
 
 class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
-{    
+{
     public function itemGoogleMap($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = false, $markerHtmlClassName = 'geolocation_balloon')
     {
         $divId = "item-map-{$item->id}";
@@ -39,7 +39,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
                 $html .= '</div>';
                 $html .= '<figcaption class="element-invisible">' . $figcaption . '</figcaption>';
                 $html .= '</figure>';
-            } 
+            }
             else {
                 $html = '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '"></div>';
             }
@@ -49,6 +49,6 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
         } else {
             $html = '<p class="map-notification">'.__('This item has no location info associated with it.').'</p>';
         }
-         return $html;   
-    }    
+         return $html;
+    }
 }

@@ -36,7 +36,7 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
             $pagination = array(
                 'page' => $currentPage,
                 'per_page' => $limit,
-                'total_results' => $this->view->totalItems
+                'total_results' => $this->view->totalItems,
             );
             Zend_Registry::set('pagination', $pagination);
         }
