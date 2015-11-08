@@ -12,7 +12,7 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
     public $zoom_level;
     public $map_type;
     public $address;
-    
+
     /**
      * Executes before the record is saved.
      */
@@ -38,11 +38,6 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         if (!$this->getTable('Item')->exists($this->item_id)) {
             $this->addError('item_id', __('Location requires a valid item ID.'));
         }
-        // An item can only have one location. This assumes that updating an 
-        // existing location will never modify the item ID.
-        if (!$this->exists() && $this->getTable()->findBy(array('item_id' => $this->item_id))) {
-            $this->addError('latitude', __('A location already exists for the provided item.'));
-        }
         if (empty($this->latitude)) {
             $this->addError('latitude', __('Location requires a latitude.'));
         }
@@ -53,10 +48,10 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
             $this->addError('zoom_level', __('Location requires a zoom level.'));
         }
     }
-    
+
     /**
      * Identify Location records as relating to the Locations ACL resource.
-     * 
+     *
      * @return string
      */
     public function getResourceId()

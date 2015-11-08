@@ -2,8 +2,11 @@
     width: 100%;
     height: 300px;
 }
-button#geolocation_find_location_by_address {
+button#geolocation_location_find {
     float: none;
+}
+button#geolocation_location_add {
+    float: right;
 }
 
 div#geolocation {
@@ -38,4 +41,13 @@ div#geolocation {
     font-weight:bold;
     font-size:18px;
     margin-bottom:0px;
+}
+
+.geolocation-list {
+    margin-top: 12px;
+}
+input.geolocation-address,
+input.geolocation-latitude,
+input.geolocation-longitude {
+    width: 80px;
 }
