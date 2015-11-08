@@ -21,14 +21,14 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         if ($this->_helper->contextSwitch->getCurrentContext() == 'kml') {
             $items = $table->findBy($params, $limit, $currentPage);
             $this->view->items = $items;
-            $this->view->locations = $locationTable->findLocationByItem($items);
+            $this->view->locations = $locationTable->findLocationsByItem($items);
         }
         // Only get pagination data for the "normal" page.
         else {
             $item_id = $this->getParam('item_id');
             if (!empty($item_id)) {
                 $this->view->item = get_record_by_id('Item', $item_id);
-                $this->view->location = $locationTable->findLocationByItem($item_id, true);
+                $this->view->location = $locationTable->findLocationsByItem($item_id, true);
             }
             $this->view->totalItems = $table->count($params);
             $this->view->params = $params;
@@ -58,6 +58,6 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
 
         $items = $table->findBy($params, $limit, $currentPage);
         $this->view->items = $items;
-        $this->view->locations = $locationTable->findLocationByItem($items);
+        $this->view->locations = $locationTable->findLocationsByItem($items);
     }
 }

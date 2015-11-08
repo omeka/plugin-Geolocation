@@ -13,7 +13,7 @@ OmekaMap.prototype = {
     center: null,
     markerBounds: null,
 
-    addMarker: function (lat, lng, options, bindHtml)
+    addMarker: function (lat, lng, options, bindHtml, folder)
     {
         if (!options) {
             options = {};
@@ -38,6 +38,8 @@ OmekaMap.prototype = {
                 infoWindow.open(this.map, marker);
             });
         }
+
+        marker.set('folder', folder);
 
         this.markers.push(marker);
         this.markerBounds.extend(options.position);
@@ -91,6 +93,12 @@ OmekaMap.prototype = {
     }
 };
 
+function OmekaMapSingle(mapDivId, center, options) {
+    var omekaMap = new OmekaMap(mapDivId, center, options);
+    jQuery.extend(true, this, omekaMap);
+    this.initMap();
+}
+
 function OmekaMapBrowse(mapDivId, center, options) {
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
@@ -102,11 +110,13 @@ function OmekaMapBrowse(mapDivId, center, options) {
 
 OmekaMapBrowse.prototype = {
 
-    afterLoadItems: function () {
+    /* Update the main map and add the list of folders, if needed and if any. */
+    afterLoadItems: function (folders) {
         if (this.options.fitMarkers) {
             this.fitMarkers();
         }
 
+        // "list" contains the id used to build the list of links of locations.
         if (!this.options.list) {
             return;
         }
@@ -116,7 +126,7 @@ OmekaMapBrowse.prototype = {
             alert('Error: You have no map links div!');
         } else {
             //Create HTML links for each of the markers
-            this.buildListLinks(listDiv);
+            this.buildListLinks(listDiv, folders);
         }
     },
 
@@ -134,29 +144,59 @@ OmekaMapBrowse.prototype = {
 
                 /* KML can be parsed as:
                     kml - root element
-                        Placemark
-                            namewithlink
-                            description
-                            Point - longitude,latitude
+                        Document
+                            Folder - item level, if any
+                                Placemark
+                                    namewithlink
+                                    description
+                                    Point - longitude,latitude
                 */
-                var placeMarks = xml.find('Placemark');
 
-                // If we have some placemarks, load them
-                if (placeMarks.size()) {
-                    // Retrieve the balloon styling from the KML file
-                    that.browseBalloon = that.getBalloonStyling(xml);
+                // Retrieve the balloon styling from the KML file.
+                that.browseBalloon = that.getBalloonStyling(xml);
 
-                    // Build the markers from the placemarks
-                    jQuery.each(placeMarks, function (index, placeMark) {
-                        placeMark = jQuery(placeMark);
-                        that.buildMarkerFromPlacemark(placeMark);
+                var folders = xml.find('Folder');
+                if (folders.size()) {
+                    jQuery.each(folders, function (index, folder) {
+                        folder = jQuery(folder);
+                        var placeMarks = folder.find('Placemark');
+
+                        // If we have some placemarks, load them.
+                        if (placeMarks.size()) {
+                            // Build the markers from the placemarks
+                            jQuery.each(placeMarks, function (index, placeMark) {
+                                placeMark = jQuery(placeMark);
+                                that.buildMarkerFromPlacemark(placeMark, folder);
+                            });
+                        } else {
+                            // @todo Elaborate with an error message
+                            return false;
+                        }
                     });
 
-                    // We have successfully loaded some map points, so continue setting up the map object
-                    return that.afterLoadItems();
+                    // We have successfully loaded some map points, so continue
+                    // setting up the map object.
+                    return that.afterLoadItems(folders);
+
                 } else {
-                    // @todo Elaborate with an error message
-                    return false;
+                    var folder = null;
+                    var placeMarks = xml.find('Placemark');
+
+                    // If we have some placemarks, load them
+                    if (placeMarks.size()) {
+                        // Build the markers from the placemarks
+                        jQuery.each(placeMarks, function (index, placeMark) {
+                            placeMark = jQuery(placeMark);
+                            that.buildMarkerFromPlacemark(placeMark, folder);
+                        });
+
+                        // We have successfully loaded some map points, so
+                        // continue setting up the map object.
+                        return that.afterLoadItems(folders);
+                    } else {
+                        // @todo Elaborate with an error message
+                        return false;
+                    }
                 }
             }
         });
@@ -166,14 +206,23 @@ OmekaMapBrowse.prototype = {
         return xml.find('BalloonStyle text').text();
     },
 
-    // Build a marker given the KML XML Placemark data
+    // Build a marker given the KML XML Placemark data. Some data can be set at
+    // Folder (item) level.
     // I wish we could use the KML file directly, but it's behind the admin interface so no go
-    buildMarkerFromPlacemark: function (placeMark) {
+    buildMarkerFromPlacemark: function (placeMark, folder) {
         // Get the info for each location on the map
         var title = placeMark.find('name').text();
         var titleWithLink = placeMark.find('namewithlink').text();
         var body = placeMark.find('description').text();
         var snippet = placeMark.find('Snippet').text();
+
+        // Set the default values if none was provided at the location level.
+        if (folder) {
+            title = title ? title : folder.find('name').text();
+            titleWithLink = titleWithLink ? titleWithLink : folder.find('namewithlink').text();
+            body = body ? body : folder.find('description').text();
+            snippet = snippet ? snippet : folder.find('Snippet').text();
+        }
 
         // Extract the lat/long from the KML-formatted data
         var coordinates = placeMark.find('Point coordinates').text().split(',');
@@ -185,7 +234,7 @@ OmekaMapBrowse.prototype = {
         balloon = balloon.replace('$[namewithlink]', titleWithLink).replace('$[description]', body).replace('$[Snippet]', snippet);
 
         // Build a marker, add HTML for it
-        this.addMarker(latitude, longitude, {title: title}, balloon);
+        this.addMarker(latitude, longitude, {title: title}, balloon, folder);
     },
 
     // Calculate the zoom level given the 'range' value
@@ -196,42 +245,124 @@ OmekaMapBrowse.prototype = {
         return zoom;
     },
 
-    buildListLinks: function (container) {
+    // Build the list of links to markers, grouped by folders if any.
+    buildListLinks: function (container, folders) {
         var that = this;
         var list = jQuery('<ul></ul>');
         list.appendTo(container);
 
-        // Loop through all the markers
-        jQuery.each(this.markers, function (index, marker) {
-            var listElement = jQuery('<li></li>');
+        // TODO Factorize.
+        if (folders.size()) {
+            // Build the list of markers by folder. To avoid an issue, the
+            // process is done from the markers, already checked.
 
-            // Make an <a> tag, give it a class for styling
-            var link = jQuery('<a></a>');
-            link.addClass('item-link');
-
-            // Links open up the markers on the map, clicking them doesn't actually go anywhere
-            link.attr('href', 'javascript:void(0);');
-
-            // Each <li> starts with the title of the item
-            link.html(marker.getTitle());
-
-            // Clicking the link should take us to the map
-            link.bind('click', {}, function (event) {
-                google.maps.event.trigger(marker, 'click');
-                that.map.panTo(marker.getPosition());
+            // Build the list of markers by folder to simplify next process.
+            var markers = this.markers;
+            var markersByFolder = new Array();
+            jQuery.each(folders, function (index, folder) {
+                var folderId = jQuery(folder).attr('id');
+                var folderMarkers = {folderId: folderId, markers: []};
+                jQuery.each(markers, function (index, marker) {
+                    var markerFolderId = marker.get('folder').attr('id');
+                    if (folderId == markerFolderId) {
+                        folderMarkers.markers.push(marker);
+                    }
+                });
+                markersByFolder.push(folderMarkers);
             });
 
-            link.appendTo(listElement);
-            listElement.appendTo(list);
-        });
+            markersByFolder.forEach(function(folderMarkers, index) {
+                var listFolder = jQuery('<li class="locations-item"></li>');
+                listFolder.attr('id', folderMarkers.folderId);
+
+                // If there is one marker, don't display the list. This makes
+                // this view similar to old Geolocation.
+                if (folderMarkers.markers.length == 1) {
+                    var marker = folderMarkers.markers[0];
+                    var listElement = listFolder;
+                    listElement.addClass('single');
+
+                    // Make an <a> tag, give it a class for styling
+                    var link = jQuery('<a></a>');
+                    link.addClass('item-link');
+
+                    // Links open up the markers on the map, clicking them doesn't actually go anywhere
+                    link.attr('href', 'javascript:void(0);');
+
+                    // Each <li> starts with the title of the item
+                    link.html(marker.getTitle());
+
+                    // Clicking the link should take us to the map
+                    link.bind('click', {}, function (event) {
+                        google.maps.event.trigger(marker, 'click');
+                        that.map.panTo(marker.getPosition());
+                    });
+
+                    link.appendTo(listElement);
+                    listElement.appendTo(list);
+
+                } else {
+                    folderKml = folders.parent().find('#' + folderMarkers.folderId);
+                    listFolder.html(folderKml.find('name').text());
+                    var listElements = jQuery('<ul></ul>');
+
+                    // Add the list of markers, with links.
+                    folderMarkers.markers.forEach(function (marker, index) {
+                        var listElement = jQuery('<li></li>');
+
+                        // Make an <a> tag, give it a class for styling
+                        var link = jQuery('<a></a>');
+                        link.addClass('item-link');
+
+                        // Links open up the markers on the map, clicking them doesn't actually go anywhere
+                        link.attr('href', 'javascript:void(0);');
+
+                        // Each line is the index of the location of the item.
+                        var indexNumber = index + 1;
+                        link.html(indexNumber.toString() + ' ');
+
+                        // Clicking the link should take us to the map
+                        link.bind('click', {}, function (event) {
+                            google.maps.event.trigger(marker, 'click');
+                            that.map.panTo(marker.getPosition());
+                        });
+
+                        link.appendTo(listElement);
+                        listElement.appendTo(listElements);
+                    });
+
+                    listElements.appendTo(listFolder);
+                    listFolder.appendTo(list);
+                }
+            });
+
+        } else {
+            // Simple list of single markers.
+            jQuery.each(this.markers, function (index, marker) {
+                var listElement = jQuery('<li></li>');
+
+                // Make an <a> tag, give it a class for styling
+                var link = jQuery('<a></a>');
+                link.addClass('item-link');
+
+                // Links open up the markers on the map, clicking them doesn't actually go anywhere
+                link.attr('href', 'javascript:void(0);');
+
+                // Each <li> starts with the title of the item
+                link.html(marker.getTitle());
+
+                // Clicking the link should take us to the map
+                link.bind('click', {}, function (event) {
+                    google.maps.event.trigger(marker, 'click');
+                    that.map.panTo(marker.getPosition());
+                });
+
+                link.appendTo(listElement);
+                listElement.appendTo(list);
+            });
+        }
     }
 };
-
-function OmekaMapSingle(mapDivId, center, options) {
-    var omekaMap = new OmekaMap(mapDivId, center, options);
-    jQuery.extend(true, this, omekaMap);
-    this.initMap();
-}
 
 function OmekaMapForm(mapDivId, center, options) {
     var that = this;

@@ -321,7 +321,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $html = ''
                 . '<div class="geolocation panel">'
                 . '<h4>' . __('Geolocation') . '</h4>'
-                . '<div style="margin: 14px 0">' . $view->itemGoogleMap($item, '100%', '270px')
+                . '<div style="margin: 14px 0">' . $view->itemGoogleMap($item, true, '100%', '270px')
                 . '</div></div>';
             echo $html;
         }
@@ -338,7 +338,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $height = get_option('geolocation_item_map_height') ?: '300px';
             $html = '<div id="geolocation">';
             $html .= '<h2>' . __('Geolocation') . '</h2>';
-            $html .= $view->itemGoogleMap($item, $width, $height);
+            $html .= $view->itemGoogleMap($item, false, $width, $height);
             $html .= "</div>";
             echo $html;
         }
@@ -509,7 +509,7 @@ SQL
         $contexts['kml'] = array(
             'suffix' => 'kml',
             'headers' => array(
-                'Content-Type' => 'text/xml',
+                'Content-Type' => 'application/vnd.google-earth.kml+xml',
             ),
         );
         return $contexts;

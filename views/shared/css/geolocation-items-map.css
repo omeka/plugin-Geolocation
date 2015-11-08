@@ -12,6 +12,10 @@
     height: 436px;
 }
 
+#map-links {
+    padding: 10px 0 10px 0;
+}
+
 #map-links ul {
     margin-left:0;
     padding: 0;
@@ -27,14 +31,26 @@
     margin-bottom: 10px;
 }
 
-#map-links {
-    padding: 10px 0 10px 0;
-}
-
 #map-links li a {
     display:block;
     text-decoration:none;
     border-bottom: 0 !important;
+}
+
+#map-links ul ul {
+    line-height: 18px;
+}
+
+#map-links li li {
+    display: inline;
+    list-style-type: none;
+    padding: 0px;
+}
+
+#map-links li li a {
+    display: inline;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 #map-links h2:first-child {

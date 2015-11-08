@@ -2,20 +2,20 @@
 // Add a new location.
 if (empty($location)) {
     $id = time();
-    $address = '';
     $latitude = '';
     $longitude = '';
-    $zoom_level = 15;
-    $map_type = 'roadmap';
+    $zoom_level = get_option('geolocation_default_zoom_level');
+    $map_type = get_option('geolocation_default_map_type');
+    $address = '';
 }
 // Existing location.
 else {
     $id = $location->id;
-    $address = $location->address;
     $latitude = $location->latitude;
     $longitude = $location->longitude;
     $zoom_level = $location->zoom_level;
     $map_type = $location->map_type;
+    $address = $location->address;
 }
 
 $baseField = 'locations[' . $id . ']';
