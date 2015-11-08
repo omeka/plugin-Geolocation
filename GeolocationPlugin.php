@@ -1,14 +1,23 @@
 <?php
 
+/**
+ * The Geolocation plugin.
+ *
+ * @package Omeka\Plugins\Geolocation
+ */
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
     const GOOGLE_MAPS_API_VERSION = '3.x';
-    const DEFAULT_LOCATIONS_PER_PAGE = 10;
 
+    /**
+     * @var array Hooks for the plugin.
+     */
     protected $_hooks = array(
+        'initialize',
         'install',
-        'uninstall',
         'upgrade',
+        'uninstall',
+        'uninstall_message',
         'config_form',
         'config',
         'define_acl',
@@ -21,10 +30,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'items_browse_sql',
         'public_head',
         'admin_head',
-        'initialize',
         'contribution_type_form',
     );
 
+    /**
+     * @var array Filters for the plugin.
+     */
     protected $_filters = array(
         'admin_navigation_main',
         'public_navigation_main',
@@ -39,6 +50,37 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'item_search_filters',
     );
 
+    /**
+     * @var array Options and their default values.
+     */
+    protected $_options = array(
+        'geolocation_default_latitude' => '38',
+        'geolocation_default_longitude' => '-77',
+        'geolocation_default_zoom_level' => '5',
+        'geolocation_map_type' => 'roadmap',
+        'geolocation_per_page' => 10,
+        'geolocation_auto_fit_browse' => false,
+        'geolocation_default_radius' => 10,
+        'geolocation_use_metric_distances' => false,
+        'geolocation_item_map_width' => '',
+        'geolocation_item_map_height' => '',
+        'geolocation_link_to_nav' => false,
+        'geolocation_add_map_to_contribution_form' => false,
+        'geolocation_accessible_markup' => false,
+    );
+
+    /**
+     * Add the translations.
+     */
+    public function hookInitialize()
+    {
+        add_translation_source(dirname(__FILE__) . '/languages');
+        add_shortcode( 'geolocation', array($this, 'geolocationShortcode'));
+    }
+
+    /**
+     * Install the plugin.
+     */
     public function hookInstall()
     {
         $db = get_db();
@@ -54,33 +96,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         INDEX (`item_id`)) ENGINE = InnoDB";
         $db->query($sql);
 
-        set_option('geolocation_default_latitude', '38');
-        set_option('geolocation_default_longitude', '-77');
-        set_option('geolocation_default_zoom_level', '5');
-        set_option('geolocation_per_page', self::DEFAULT_LOCATIONS_PER_PAGE);
-        set_option('geolocation_add_map_to_contribution_form', '0');
-        set_option('geolocation_default_radius', 10);
-        set_option('geolocation_use_metric_distances', '0');
-        set_option('geolocation_accessible_markup', '0');
-    }
-
-    public function hookUninstall()
-    {
-        // Delete the plugin options
-        delete_option('geolocation_default_latitude');
-        delete_option('geolocation_default_longitude');
-        delete_option('geolocation_default_zoom_level');
-        delete_option('geolocation_per_page');
-        delete_option('geolocation_add_map_to_contribution_form');
-        delete_option('geolocation_use_metric_distances');
-        delete_option('geolocation_accessible_markup');
-
-        // This is for older versions of Geolocation, which used to store a Google Map API key.
-        delete_option('geolocation_gmaps_key');
-
-        // Drop the Location table
-        $db = get_db();
-        $db->query("DROP TABLE IF EXISTS `$db->Location`");
+        $this->_installOptions();
     }
 
     public function hookUpgrade($args)
@@ -103,45 +119,60 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
             delete_option('geo_gmaps_key');
         }
+
         if (version_compare($args['old_version'], '2.2.3', '<')) {
             set_option('geolocation_default_radius', 10);
         }
     }
 
     /**
-     * Shows plugin configuration page.
+     * Uninstall the plugin.
      */
-    public function hookConfigForm($args)
+    public function hookUninstall()
     {
-        $view = $args['view'];
-        include 'config_form.php';
+        $db = get_db();
+        $db->query("DROP TABLE IF EXISTS `$db->Location`");
+
+        $this->_uninstallOptions();
+
+        // This is for older versions of Geolocation, which used to store a Google Map API key.
+        delete_option('geolocation_gmaps_key');
     }
 
     /**
-     * Saves plugin configuration page.
+     * Display the uninstall message.
+     */
+    public function hookUninstallMessage()
+    {
+        echo __('%sWarning%s: This will remove all the geolocations added by this plugin.%s', '<p><strong>', '</strong>', '</p>');
+    }
+
+    /**
+     * Shows plugin configuration page.
      *
-     * @param array Options set in the config form.
+     * @return void
+     */
+    public function hookConfigForm($args)
+    {
+        $view = get_view();
+        echo $view->partial(
+            'plugins/geolocation-config-form.php'
+        );
+    }
+
+    /**
+     * Processes the configuration form.
+     *
+     * @return void
      */
     public function hookConfig($args)
     {
-        // Use the form to set a bunch of default options in the db
-        set_option('geolocation_default_latitude', $_POST['default_latitude']);
-        set_option('geolocation_default_longitude', $_POST['default_longitude']);
-        set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']);
-        set_option('geolocation_item_map_width', $_POST['item_map_width']);
-        set_option('geolocation_item_map_height', $_POST['item_map_height']);
-        $perPage = (int) $_POST['per_page'];
-        if ($perPage <= 0) {
-            $perPage = self::DEFAULT_LOCATIONS_PER_PAGE;
+        $post = $args['post'];
+        foreach ($this->_options as $optionKey => $optionValue) {
+            if (isset($post[$optionKey])) {
+                set_option($optionKey, $post[$optionKey]);
+            }
         }
-        set_option('geolocation_per_page', $perPage);
-        set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
-        set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
-        set_option('geolocation_default_radius', $_POST['geolocation_default_radius']);
-        set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
-        set_option('geolocation_map_type', $_POST['map_type']);
-        set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
-        set_option('geolocation_accessible_markup', $_POST['geolocation_accessible_markup']);
     }
 
     public function hookDefineAcl($args)
@@ -200,9 +231,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $tabularRoute = new Zend_Controller_Router_Route(
             'items/map/tabular',
             array(
+                'module' => 'geolocation',
                 'controller' => 'map',
                 'action' => 'tabular',
-                'module' => 'geolocation',
         ));
         $router->addRoute('items_map_tabular', $tabularRoute);
     }
@@ -431,15 +462,6 @@ SQL
                 $requestArray['geolocation-address']);
         }
         return $displayArray;
-    }
-
-    /**
-     * Add the translations.
-     */
-    public function hookInitialize()
-    {
-        add_translation_source(dirname(__FILE__) . '/languages');
-        add_shortcode('geolocation', array($this, 'geolocationShortcode'));
     }
 
     public function filterAdminNavigationMain($navArray)
