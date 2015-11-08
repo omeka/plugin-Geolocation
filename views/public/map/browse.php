@@ -29,19 +29,23 @@ echo pagination_links();
 ?>
 
 <div id="geolocation-browse">
-    <?php 
-    $accessible_markup = get_option('geolocation_accessible_markup'); 
-    $tabular_url = absolute_url('map/tabular');
+    <?php
+    $accessible_markup = get_option('geolocation_accessible_markup');
+    if ($accessible_markup):
+        $tabular_url = absolute_url('geolocation/map/tabular');
     ?>
-    <?php if ($accessible_markup):?>
-    <figure aria-describedat="<?php echo $tabular_url;?>"> 
-    <?php endif; ?>
-    <?php echo $this->googleMap('map_browse', array('list' => 'map-links', 'params' => $params), array(), $center); ?>
+    <figure aria-describedat="<?php echo $tabular_url;?>">
+    <?php endif;
+
+    echo $this->googleMap('map_browse', array('list' => 'map-links', 'params' => $params), array(), $center);
+    ?>
     <div id="map-links"><h2><?php echo __('Find An Item on the Map'); ?></h2></div>
     <?php if ($accessible_markup):?>
-    <figcaption class="element-invisible">Map with geographic locations of items. <a href="<?php echo $tabular_url;?>">View as text</a></figcaption>
+    <figcaption class="element-invisible"><?php echo __('Map with geographic locations of items.'); ?>
+        <a href="<?php echo $tabular_url;?>"><?php echo __('View as text'); ?></a>
+    </figcaption>
     </figure>
     <?php endif; ?>
 </div>
 
-<?php echo foot(); ?>
+<?php echo foot();

@@ -1,4 +1,4 @@
-<?php 
+<?php
 queue_css_file('geolocation-items-map');
 
 $title = __('Browse Items on the Map') . ' ' . __('(%s total)', $totalItems);
@@ -13,27 +13,27 @@ echo head(array('title' => $title, 'bodyclass' => 'map browse_tabular'));
 
 <div id="geolocation-tabular">
     <table>
-        <tr>
-            <th scope="col">Title</th>
-            <th scope="col">Longitude</th>
-            <th scope="col">Latitude</th>
-            <th scope="col">Address</th>
-        </tr>
-        <?php foreach($this->items as $item): ?>
-        <?php $title = metadata($item, array("Dublin Core", "Title")); ?>
-        <?php $item_link = link_to_item($title, array(), 'show', $item);  ?>
-        <tr>
-            <td><?php echo $item_link; ?></td>
-            <td><?php echo $item->longitude; ?></td>
-            <td><?php echo $item->latitude; ?></td>
-            <td><?php echo $item->address; ?></td>
-        </tr>    
-        <?php endforeach ?>
+        <thead>
+            <tr>
+                <th scope="col"><?php echo __('Title'); ?></th>
+                <th scope="col"><?php echo __('Longitude'); ?></th>
+                <th scope="col"><?php echo __('Latitude'); ?></th>
+                <th scope="col"><?php echo __('Address'); ?></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($items as $item): ?>
+            <tr>
+                <td><?php echo link_to_item(null, array(), 'show', $item); ?></td>
+                <td><?php echo $locations[$item->id]->longitude; ?></td>
+                <td><?php echo $locations[$item->id]->latitude; ?></td>
+                <td><?php echo $locations[$item->id]->address; ?></td>
+            </tr>
+            <?php endforeach ?>
+        </tbody>
     </table>
-    <p><?php
-        $map_url = absolute_url('items/map');
-        echo "<a href='{$map_url}'>View as a map</a>"; 
-    ?></p>
+    <p>
+        <a href="<?php echo absolute_url('items/map'); ?>"><?php echo __('View as a map'); ?></a>
+    </p>
 </div>
-
-<?php echo foot(); ?>
+<?php echo foot();

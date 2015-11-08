@@ -27,9 +27,9 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $center = js_escape($center);
             $options = js_escape($options);
             $style = "width: $width; height: $height";
-            $html = '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '"></div>';
+
             $accessible_markup = get_option('geolocation_accessible_markup');
-            if($accessible_markup) {
+            if ($accessible_markup) {
                 $figcaption = '';
                 if (isset($location->latitude) && !empty($location->latitude)) $figcaption .= "<div id='geolocation-latitude'>Latitude: {$location->latitude}</div>";
                 if (isset($location->longitude) && !empty($location->latitude)) $figcaption .= "<div id='geolocation-longitude'>Longitude: {$location->longitude}</div>";

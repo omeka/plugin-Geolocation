@@ -44,25 +44,20 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
 
     public function tabularAction()
     {
+        // Get pagination data via the browse action.
+        $this->browseAction();
+
+        // Get the list of items like in browse action / kml context.
         $table = $this->_helper->db->getTable();
         $locationTable = $this->_helper->db->getTable('Location');
-        
+
         $params = $this->getAllParams();
         $params['only_map_items'] = true;
+        $limit = (int) get_option('geolocation_per_page');
+        $currentPage = $this->getParam('page', 1);
 
-        //Add location data to the item objects
-        $this->view->totalItems = $table->count($params);
-        $this->view->params = $params;
-        $items = $table->findAll();
-        foreach($items as &$item) {
-            $location = $locationTable->findLocationByItem($item);
-            if(!empty($location)) {
-                $item->latitude = $location[$item->id]->latitude;
-                $item->longitude = $location[$item->id]->longitude;
-                $item->address = $location[$item->id]->address;
-            }
-        }
-
+        $items = $table->findBy($params, $limit, $currentPage);
         $this->view->items = $items;
+        $this->view->locations = $locationTable->findLocationByItem($items);
     }
 }
