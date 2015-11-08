@@ -23,7 +23,7 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
         }
 
         if (!array_key_exists('mapType', $options)) {
-            $options['mapType'] = get_option('geolocation_map_type');
+            $options['mapType'] = get_option('geolocation_default_map_type');
         }
 
         if (!array_key_exists('fitMarkers', $options)) {
@@ -35,16 +35,15 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
             $class .= ' ' . $attrs['class'];
         }
 
-        $options = js_escape($options);
-        $center = js_escape($center);
-        $varDivId = Inflector::variablize($divId);
         $divAttrs = array_merge($attrs, array(
             'id' => $divId,
-            'class' => $class
+            'class' => $class,
         ));
 
+        $js = sprintf('var %sOmekaMapBrowse = new OmekaMapBrowse(%s, %s, %s);',
+            Inflector::variablize($divId), js_escape($divId), js_escape($center), js_escape($options));
+
         $html = '<div ' . tag_attributes($divAttrs) . '></div>';
-        $js = "var $varDivId" . "OmekaMapBrowse = new OmekaMapBrowse(" . js_escape($divId) .", $center, $options); ";
         $html .= "<script type='text/javascript'>$js</script>";
         return $html;
     }

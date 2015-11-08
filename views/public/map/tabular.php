@@ -22,13 +22,22 @@ echo head(array('title' => $title, 'bodyclass' => 'map browse_tabular'));
             </tr>
         </thead>
         <tbody>
-            <?php foreach ($items as $item): ?>
+            <?php
+            foreach ($items as $item):
+                foreach ($locations[$item->id] as $key => $location): ?>
             <tr>
+                    <?php if ($key == 0): ?>
+                         <?php if (count($locations[$item->id]) == 1): ?>
                 <td><?php echo link_to_item(null, array(), 'show', $item); ?></td>
-                <td><?php echo $locations[$item->id]->longitude; ?></td>
-                <td><?php echo $locations[$item->id]->latitude; ?></td>
-                <td><?php echo $locations[$item->id]->address; ?></td>
+                    <?php else: ?>
+                <td rowspan="<?php echo count($locations[$item->id]); ?>"><?php echo link_to_item(null, array(), 'show', $item); ?></td>
+                    <?php endif; ?>
+                <?php endif; ?>
+                <td><?php echo $location->longitude; ?></td>
+                <td><?php echo $location->latitude; ?></td>
+                <td><?php echo $location->address; ?></td>
             </tr>
+                <?php endforeach; ?>
             <?php endforeach ?>
         </tbody>
     </table>

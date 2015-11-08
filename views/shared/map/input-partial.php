@@ -3,7 +3,11 @@
     <table id="geolocation-locations-<?php echo $item->id; ?>" class="geolocation-locations" cellspacing="0" cellpadding="0">
         <thead>
             <tr>
-                <th></th>
+                <th>
+                    <button type="button" class="geolocation-locations-display button small green" name="geolocation_locations_display" id="geolocation_locations_display-<?php echo $item->id; ?>">
+                        <?php echo __('All'); ?>
+                    </button>
+                </th>
                 <th><?php echo __('Address'); ?></th>
                 <th><?php echo __('Latitude'); ?></th>
                 <th><?php echo __('Longitude'); ?></th>
@@ -40,7 +44,7 @@
     <h3><?php echo __('Add a new location'); ?></h3>
     <div class="field">
         <div id="location_form" class="two columns alpha">
-            <label><?php echo __('Find by address'); ?></label>
+            <label><?php echo __('Find by address or point to a location'); ?></label>
         </div>
         <div class="inputs five columns omega">
             <div class="input-block">

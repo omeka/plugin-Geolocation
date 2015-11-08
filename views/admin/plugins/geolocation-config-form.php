@@ -38,7 +38,7 @@
     </div>
     <div class="field">
         <div class="two columns alpha">
-            <?php echo $this->formLabel('geolocation_map_type',
+            <?php echo $this->formLabel('geolocation_default_map_type',
                 __('Map Type')); ?>
         </div>
         <div class="inputs five columns omega">
@@ -46,7 +46,7 @@
                 <?php echo __('The type of map to display'); ?>
             </p>
             <?php
-            echo $this->formSelect('geolocation_map_type', get_option('geolocation_map_type'),
+            echo $this->formSelect('geolocation_default_map_type', get_option('geolocation_default_map_type'),
                 array(), array(
                     'roadmap' => __('Roadmap'),
                     'satellite' => __('Satellite'),

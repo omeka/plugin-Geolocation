@@ -28,6 +28,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
         // Multiple locations.
         else {
             $locations = get_db()->getTable('Location')->findLocationsByItem($item, $onlyFirst, true);
+            $location = reset($locations);
         }
 
         if (empty($locations)) {
@@ -35,48 +36,73 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             return;
         }
 
+        // Define the main data.
+        $center = array();
+        $center['latitude'] = $location->latitude;
+        $center['longitude'] = $location->longitude;
+        $center['zoomLevel'] = $location->zoom_level;
+        $center['show'] = true;
+        if ($hasBalloonForMarker) {
+            $titleLink = link_to_item(metadata($item, array('Dublin Core', 'Title'), array(), $item), array(), 'show', $item);
+            $itemImage = item_image('thumbnail',array(), 0, $item);
+            $thumbnailLink = $itemImage
+                ? link_to_item($itemImage , array(), 'show', $item)
+                : '';
+            $description = metadata($item, array('Dublin Core', 'Description'), array('snippet'=>150), $item);
+            $center['markerHtml'] = '<div class="' . $markerHtmlClassName . '">'
+                . '<div class="geolocation_balloon_title">' . $titleLink . '</div>'
+                . '<div class="geolocation_balloon_thumbnail">' . $thumbnailLink . '</div>'
+                . '<p class="geolocation_balloon_description">' . $description . '</p></div>';
+        }
+
+        $options = array();
+        $options['mapType'] = $location->map_type;
+
         // Only set the center of the map if this item actually has a location
         // associated with it.
+        $points = array();
         foreach ($locations as $location) {
-            $center = array();
-            $center['latitude'] = $location->latitude;
-            $center['longitude'] = $location->longitude;
-            $center['zoomLevel'] = $location->zoom_level;
-            $center['show'] = true;
-            if ($hasBalloonForMarker) {
-                $titleLink = link_to_item(metadata($item, array('Dublin Core', 'Title'), array(), $item), array(), 'show', $item);
-                $thumbnailLink = !(item_image('thumbnail')) ? '' : link_to_item(item_image('thumbnail',array(), 0, $item), array(), 'show', $item);
-                $description = metadata($item, array('Dublin Core', 'Description'), array('snippet'=>150), $item);
-                $center['markerHtml'] = '<div class="' . $markerHtmlClassName . '">'
-                                      . '<div class="geolocation_balloon_title">' . $titleLink . '</div>'
-                                      . '<div class="geolocation_balloon_thumbnail">' . $thumbnailLink . '</div>'
-                                      . '<p class="geolocation_balloon_description">' . $description . '</p></div>';
-            }
-            $options = array();
-            $options['mapType'] = get_option('geolocation_map_type');
-            $center = js_escape($center);
-            $options = js_escape($options);
-            $style = "width: $width; height: $height";
+            $point = array();
+            $point['address'] = $location->address;
+            $point['latitude'] = $location->latitude;
+            $point['longitude'] = $location->longitude;
+            $points[] = $point;
+        }
 
-            $accessible_markup = get_option('geolocation_accessible_markup');
-            if ($accessible_markup) {
-                $figcaption = '';
-                if (isset($location->latitude) && !empty($location->latitude)) $figcaption .= "<div id='geolocation-latitude'>Latitude: {$location->latitude}</div>";
-                if (isset($location->longitude) && !empty($location->latitude)) $figcaption .= "<div id='geolocation-longitude'>Longitude: {$location->longitude}</div>";
-                if (isset($location->address) && !empty($location->address)) $figcaption .= "<div id='geolocation-address'>Address: {$location->address}</div>";
-                $html = '<figure>';
-                $html .= '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '">';
-                $html .= '</div>';
+        $accessible_markup = get_option('geolocation_accessible_markup');
+        if ($accessible_markup) {
+            $html = '<figure>';
+            $html .= sprintf('<div id="%s" class="map geolocation-map" style="width: %s; height: %s"></div>',
+                $divId, $width, $height);
+            if (count($points) == 1) {
+                $point = reset($points);
+                $figcaption = sprintf('<div class="geolocation-latitude accessible">%s}</div>', __('Latitude: %s', $point['latitude']));
+                $figcaption .= sprintf('<div class="geolocation-longitude accessible">%s</div>', __('Longitude: %s', $point['longitude']));
+                if (!empty($point['address'])) $figcaption .= sprintf('<div class="geolocation-address accessible">%s</div>', __('Address: %s', $point['address']));
                 $html .= '<figcaption class="element-invisible">' . $figcaption . '</figcaption>';
-                $html .= '</figure>';
             }
             else {
-                $html = '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '"></div>';
+                foreach ($points as $key => $point) {
+                    $figcaption = sprintf('<div class="geolocation-point accessible">%s</div>', __('Point #%d', $key + 1));
+                    $figcaption .= sprintf('<div class="geolocation-latitude accessible">%s</div>', __('Latitude: %s', $point['latitude']));
+                    $figcaption .= sprintf('<div class="geolocation-longitude accessible">%s</div>', __('Longitude: %s', $point['longitude']));
+                    if (!empty($point['address'])) $figcaption .= sprintf('<div class="geolocation-address accessible">%s</div>', __('Address: %s', $point['address']));
+                    $html .= '<figcaption class="element-invisible">' . $figcaption . '</figcaption>';
+                }
             }
-            $js = "var " . Inflector::variablize($divId) . ";";
-            $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
-            $html .= "<script type='text/javascript'>$js</script>";
+            $html .= '</figure>';
         }
+
+        // Normal display.
+        else {
+            $html = sprintf('<div id="%s" class="map geolocation-map" style="width: %s; height: %s"></div>',
+                $divId, $width, $height);
+        }
+
+        $js = sprintf('var %s; omekaMapSingle = new OmekaMapSingle(%s, %s, %s, %s);',
+            Inflector::variablize($divId), js_escape($divId), js_escape($center), js_escape($options), js_escape($points));
+
+        $html .= "<script type='text/javascript'>$js</script>";
 
          return $html;
     }

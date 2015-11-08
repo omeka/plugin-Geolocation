@@ -93,10 +93,22 @@ OmekaMap.prototype = {
     }
 };
 
-function OmekaMapSingle(mapDivId, center, options) {
+function OmekaMapSingle(mapDivId, center, options, points) {
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
+
+    // Display all current geolocation points.
+    if (points) {
+        var that = this;
+        points.forEach(function (pointValue, index) {
+            if (pointValue.latitude.length != 0 && pointValue.longitude.length != 0) {
+                var point = new google.maps.LatLng(pointValue.latitude, pointValue.longitude);
+                var marker = that.addMarker(point.lat(), point.lng());
+            }
+        });
+        this.fitMarkers();
+    }
 }
 
 function OmekaMapBrowse(mapDivId, center, options) {
@@ -425,6 +437,11 @@ function OmekaMapForm(mapDivId, center, options) {
         that.displayLocation(locationElement);
      });
 
+    // Make the buttons All display all current points.
+    jQuery(document).on('click', '.geolocation-locations-display', function () {
+        that.displayLocations();
+     });
+
     // Add the existing map point.
     if (this.options.point) {
         this.map.setZoom(this.options.point.zoomLevel);
@@ -555,6 +572,33 @@ OmekaMapForm.prototype = {
         that.map.setMapTypeId(this.convertMapType(mapType));
         that.updateForm(point);
         that.setMarker(point);
+    },
+
+    /* Display all current geolocation from the list. */
+    displayLocations: function () {
+        var that = this;
+        this.clearForm();
+        this.updateForm();
+
+        var locations = jQuery('table.geolocation-locations tbody tr');
+        if (locations.length == 0) {
+            return;
+        }
+
+        jQuery.each(locations, function (index, location) {
+            location = jQuery(location);
+            var latitude = location.find('td input.geolocation-latitude').val();
+            var longitude = location.find('td input.geolocation-longitude').val();
+            if (latitude.length != 0 && longitude.length != 0) {
+                var point = new google.maps.LatLng(latitude, longitude);
+                var marker = that.addMarker(point.lat(), point.lng());
+            }
+        });
+
+        var mapType = jQuery(locations[0]).find('td select.geolocation-map-type').val();
+        that.map.setMapTypeId(this.convertMapType(mapType));
+
+        this.fitMarkers();
     },
 
     /* Set the marker to the point. */

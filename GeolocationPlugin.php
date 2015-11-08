@@ -57,7 +57,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'geolocation_default_latitude' => '38',
         'geolocation_default_longitude' => '-77',
         'geolocation_default_zoom_level' => '5',
-        'geolocation_map_type' => 'roadmap',
+        'geolocation_default_map_type' => 'roadmap',
         'geolocation_per_page' => 10,
         'geolocation_auto_fit_browse' => false,
         'geolocation_default_radius' => 10,
