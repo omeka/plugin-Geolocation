@@ -1,14 +1,23 @@
 <?php
 
+/**
+ * The Geolocation plugin.
+ *
+ * @package Omeka\Plugins\Geolocation
+ */
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
     const GOOGLE_MAPS_API_VERSION = '3.x';
-    const DEFAULT_LOCATIONS_PER_PAGE = 10;
 
+    /**
+     * @var array Hooks for the plugin.
+     */
     protected $_hooks = array(
+        'initialize',
         'install',
-        'uninstall',
         'upgrade',
+        'uninstall',
+        'uninstall_message',
         'config_form',
         'config',
         'define_acl',
@@ -21,11 +30,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'items_browse_sql',
         'public_head',
         'admin_head',
-        'initialize',
         'contribution_type_form',
-        'contribution_save_form'
     );
 
+    /**
+     * @var array Filters for the plugin.
+     */
     protected $_filters = array(
         'admin_navigation_main',
         'public_navigation_main',
@@ -37,58 +47,78 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'api_extend_items',
         'exhibit_layouts',
         'api_import_omeka_adapters',
-        'item_search_filters'
+        'item_search_filters',
     );
 
-    public function hookInstall()
-    {
-        $db = get_db();
-        $sql = "
-        CREATE TABLE IF NOT EXISTS `$db->Location` (
-        `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
-        `item_id` BIGINT UNSIGNED NOT NULL ,
-        `latitude` DOUBLE NOT NULL ,
-        `longitude` DOUBLE NOT NULL ,
-        `zoom_level` INT NOT NULL ,
-        `map_type` VARCHAR( 255 ) NOT NULL ,
-        `address` TEXT NOT NULL ,
-        INDEX (`item_id`)) ENGINE = InnoDB";
-        $db->query($sql);
+    /**
+     * @var array Options and their default values.
+     */
+    protected $_options = array(
+        'geolocation_default_latitude' => '38',
+        'geolocation_default_longitude' => '-77',
+        'geolocation_default_zoom_level' => '5',
+        'geolocation_default_map_type' => 'roadmap',
+        'geolocation_per_page' => 10,
+        'geolocation_auto_fit_browse' => false,
+        'geolocation_browse_append_search' => false,
+        'geolocation_default_radius' => 10,
+        'geolocation_use_metric_distances' => false,
+        'geolocation_item_map_width' => '',
+        'geolocation_item_map_height' => '',
+        'geolocation_link_to_nav' => false,
+        'geolocation_add_map_to_contribution_form' => false,
+        'geolocation_accessible_markup' => false,
+    );
 
-        set_option('geolocation_default_latitude', '38');
-        set_option('geolocation_default_longitude', '-77');
-        set_option('geolocation_default_zoom_level', '5');
-        set_option('geolocation_per_page', self::DEFAULT_LOCATIONS_PER_PAGE);
-        set_option('geolocation_add_map_to_contribution_form', '0');
-        set_option('geolocation_default_radius', 10);
-        set_option('geolocation_use_metric_distances', '0');
+    /**
+     * Add the translations.
+     */
+    public function hookInitialize()
+    {
+        add_translation_source(dirname(__FILE__) . '/languages');
+        add_shortcode( 'geolocation', array($this, 'geolocationShortcode'));
     }
 
-    public function hookUninstall()
+    /**
+     * Install the plugin.
+     */
+    public function hookInstall()
     {
-        // Delete the plugin options
-        delete_option('geolocation_default_latitude');
-        delete_option('geolocation_default_longitude');
-        delete_option('geolocation_default_zoom_level');
-        delete_option('geolocation_per_page');
-        delete_option('geolocation_add_map_to_contribution_form');
-        delete_option('geolocation_use_metric_distances');
+        $db = $this->_db;
+        $sql = "
+        CREATE TABLE IF NOT EXISTS `$db->Location` (
+            `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+            `item_id` int(10) unsigned NOT NULL,
+            `latitude` DOUBLE NOT NULL,
+            `longitude` DOUBLE NOT NULL,
+            `zoom_level` tinyint unsigned NOT NULL,
+            `map_type` VARCHAR( 255 ) NOT NULL DEFAULT '',
+            `address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+            `description` mediumtext COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+            PRIMARY KEY (`id`),
+            INDEX (`item_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
+        $db->query($sql);
 
-        // This is for older versions of Geolocation, which used to store a Google Map API key.
-        delete_option('geolocation_gmaps_key');
-
-        // Drop the Location table
-        $db = get_db();
-        $db->query("DROP TABLE IF EXISTS `$db->Location`");
+        $this->_installOptions();
     }
 
     public function hookUpgrade($args)
     {
+        $oldVersion = $args['old_version'];
+        $newVersion = $args['new_version'];
+        $db = $this->_db;
+
         if (version_compare($args['old_version'], '1.1', '<')) {
             // If necessary, upgrade the plugin options
             // Check for old plugin options, and if necessary, transfer to new options
-            $options = array('default_latitude', 'default_longitude', 'default_zoom_level', 'per_page');
-            foreach($options as $option) {
+            $options = array(
+                'default_latitude',
+                'default_longitude',
+                'default_zoom_level',
+                'per_page',
+            );
+            foreach ($options as $option) {
                 $oldOptionValue = get_option('geo_' . $option);
                 if ($oldOptionValue != '') {
                     set_option('geolocation_' . $option, $oldOptionValue);
@@ -97,35 +127,87 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
             delete_option('geo_gmaps_key');
         }
+
         if (version_compare($args['old_version'], '2.2.3', '<')) {
             set_option('geolocation_default_radius', 10);
         }
+
+        if (version_compare($oldVersion, '2.3', '<')) {
+            // All the table is normalized to Omeka standards and the field
+            // "description" is added.
+            $sql = "
+                ALTER TABLE `{$db->Location}`
+                CHANGE `id` `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+                CHANGE `item_id` `item_id` int(10) unsigned NOT NULL,
+                CHANGE `latitude` `latitude` DOUBLE NOT NULL,
+                CHANGE `longitude` `longitude` DOUBLE NOT NULL,
+                CHANGE `zoom_level` `zoom_level` tinyint unsigned NOT NULL,
+                CHANGE `map_type` `map_type` VARCHAR( 255 ) NOT NULL DEFAULT '',
+                CHANGE `address` `address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+                ADD `description` mediumtext COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+                ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+            ";
+            $db->query($sql);
+
+            // All wrong map types are reset to empty (the"Google Maps v3.x" is
+            // useless).
+            $sql = "
+                UPDATE `{$db->Location}`
+                SET `map_type` = ''
+                WHERE `map_type` NOT IN ('roadmap', 'satellite', 'hybrid', 'terrain');
+            ";
+            $db->query($sql);
+        }
     }
 
-    public function hookConfigForm()
+    /**
+     * Uninstall the plugin.
+     */
+    public function hookUninstall()
     {
-        include 'config_form.php';
+        $db = get_db();
+        $db->query("DROP TABLE IF EXISTS `$db->Location`");
+
+        $this->_uninstallOptions();
+
+        // This is for older versions of Geolocation, which used to store a Google Map API key.
+        delete_option('geolocation_gmaps_key');
     }
 
+    /**
+     * Display the uninstall message.
+     */
+    public function hookUninstallMessage()
+    {
+        echo __('%sWarning%s: This will remove all the geolocations added by this plugin.%s', '<p><strong>', '</strong>', '</p>');
+    }
+
+    /**
+     * Shows plugin configuration page.
+     *
+     * @return void
+     */
+    public function hookConfigForm($args)
+    {
+        $view = get_view();
+        echo $view->partial(
+            'plugins/geolocation-config-form.php'
+        );
+    }
+
+    /**
+     * Processes the configuration form.
+     *
+     * @return void
+     */
     public function hookConfig($args)
     {
-        // Use the form to set a bunch of default options in the db
-        set_option('geolocation_default_latitude', $_POST['default_latitude']);
-        set_option('geolocation_default_longitude', $_POST['default_longitude']);
-        set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']);
-        set_option('geolocation_item_map_width', $_POST['item_map_width']);
-        set_option('geolocation_item_map_height', $_POST['item_map_height']);
-        $perPage = (int)$_POST['per_page'];
-        if ($perPage <= 0) {
-            $perPage = self::DEFAULT_LOCATIONS_PER_PAGE;
+        $post = $args['post'];
+        foreach ($this->_options as $optionKey => $optionValue) {
+            if (isset($post[$optionKey])) {
+                set_option($optionKey, $post[$optionKey]);
+            }
         }
-        set_option('geolocation_per_page', $perPage);
-        set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
-        set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
-        set_option('geolocation_default_radius', $_POST['geolocation_default_radius']);
-        set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
-        set_option('geolocation_map_type', $_POST['map_type']);
-        set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
     }
 
     public function hookDefineAcl($args)
@@ -138,33 +220,70 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookDefineRoutes($args)
     {
         $router = $args['router'];
-        $mapRoute = new Zend_Controller_Router_Route('items/map',
-                        array('controller' => 'map',
-                                'action'     => 'browse',
-                                'module'     => 'geolocation'));
-        $router->addRoute('items_map', $mapRoute);
+
+        // Map based on an item to get all other items around.
+        $mapRoute = new Zend_Controller_Router_Route(
+            'items/map/:item_id/:page',
+            array(
+                'module' => 'geolocation',
+                'controller' => 'map',
+                'action' => 'browse',
+                'page' => 1,
+            ),
+            array(
+                'item_id' => '\d+',
+                'page' => '\d+',
+        ));
+        $router->addRoute('items_map_item', $mapRoute);
+
+        $mapRoute = new Zend_Controller_Router_Route(
+            'items/map/:pager/:page',
+            array(
+                'module' => 'geolocation',
+                'controller' => 'map',
+                'action' => 'browse',
+                'pager' => 'page',
+                'page' => 1,
+            ),
+            array(
+                'pager' => 'page',
+                'page' => '\d+',
+        ));
+        $router->addRoute('items_map_page', $mapRoute);
 
         // Trying to make the route look like a KML file so google will eat it.
         // @todo Include page parameter if this works.
-        $kmlRoute = new Zend_Controller_Router_Route_Regex('geolocation/map\.kml',
-                        array('controller' => 'map',
-                                'action' => 'browse',
-                                'module' => 'geolocation',
-                                'output' => 'kml'));
+        $kmlRoute = new Zend_Controller_Router_Route_Regex(
+            'geolocation/map\.kml',
+            array(
+                'module' => 'geolocation',
+                'controller' => 'map',
+                'action' => 'browse',
+                'output' => 'kml',
+        ));
         $router->addRoute('map_kml', $kmlRoute);
+
+        $tabularRoute = new Zend_Controller_Router_Route(
+            'items/map/tabular',
+            array(
+                'module' => 'geolocation',
+                'controller' => 'map',
+                'action' => 'tabular',
+        ));
+        $router->addRoute('items_map_tabular', $tabularRoute);
     }
 
     public function hookAdminHead($args)
     {
         queue_css_file('geolocation-marker');
-        queue_js_url("//maps.google.com/maps/api/js?sensor=false");
+        queue_js_url('//maps.google.com/maps/api/js');
         queue_js_file('map');
     }
 
     public function hookPublicHead($args)
     {
         queue_css_file('geolocation-marker');
-        queue_js_url("//maps.google.com/maps/api/js?sensor=false");
+        queue_js_url('//maps.google.com/maps/api/js');
         queue_js_file('map');
     }
 
@@ -174,33 +293,56 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             return;
         }
 
-        $item = $args['record'];
         // If we don't have the geolocation form on the page, don't do anything!
         if (!isset($post['geolocation'])) {
             return;
         }
 
-        // Find the location object for the item
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        $item = $args['record'];
 
-        // If we have filled out info for the geolocation, then submit to the db
-        $geolocationPost = $post['geolocation'];
-        if (!empty($geolocationPost)
-            && $geolocationPost['latitude'] != ''
-            && $geolocationPost['longitude'] != ''
-        ) {
-            if (!$location) {
+        // Find the current location objects for the item, by location id.
+        $locations = $this->_db->getTable('Location')->findLocationsByItem($item);
+        $existingLocations = array();
+        foreach ($locations as $location) {
+            $existingLocations[$location->id] = $location;
+        }
+        unset($locations);
+
+        // Get post values.
+        $request = Zend_Controller_Front::getInstance()->getRequest();
+        $locations = $request->getParam('locations');
+
+        // If we have filled out info for the geolocation, then submit to the db.
+        foreach ($locations as $id => $values) {
+            $values = array_map('trim', $values);
+            // Check the values: minimal is a latitude and a longitude.
+            // TODO Add a Zend validator (currently none).
+            if (empty($values) || strlen($values['latitude']) == 0 || strlen($values['longitude']) == 0) {
+                continue;
+            }
+
+            // New location.
+            if (strpos($id, 'new-') === 0
+                    // Should not be possible.
+                    || !isset($existingLocations[$id])
+                ) {
                 $location = new Location;
                 $location->item_id = $item->id;
             }
-            $location->setPostData($geolocationPost);
-            $location->save();
-        } else {
-            // If the form is empty, then we want to delete whatever location is
-            // currently stored
-            if ($location) {
-                $location->delete();
+            // Existing locations.
+            else {
+                $location = $existingLocations[$id];
+                unset($existingLocations[$id]);
             }
+            // Update the location.
+            $location->setPostData($values);
+            $location->save();
+        }
+
+        // If the form is empty, then we want to delete whatever location is
+        // currently stored.
+        foreach ($existingLocations as $location) {
+            $location->delete();
         }
     }
 
@@ -208,15 +350,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
-        if ($location) {
+        $totalLocations = $this->_db->getTable('Location')->countLocationsForItem($item);
+        if ($totalLocations) {
             $html = ''
-                  . '<div class="geolocation panel">'
-                  . '<h4>' . __('Geolocation') . '</h4>'
-                  . '<div style="margin: 14px 0">'
-                  . $view->itemGoogleMap($item, '100%', '270px' )
-                  . '</div></div>';
+                . '<div class="geolocation panel">'
+                . '<h4>' . __('Geolocation') . '</h4>'
+                . '<div style="margin: 14px 0">' . $view->itemGoogleMap($item, true, '100%', '270px')
+                . '</div></div>';
             echo $html;
         }
     }
@@ -225,25 +366,35 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
-        if ($location) {
-            $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '';
-            $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';
-            $html = "<div id='geolocation'>";
-            $html .= '<h2>Geolocation</h2>';
-            $html .= $view->itemGoogleMap($item, $width, $height);
+        $totalLocations = $this->_db->getTable('Location')->countLocationsForItem($item);
+        if ($totalLocations) {
+            $width = get_option('geolocation_item_map_width') ?: '';
+            $height = get_option('geolocation_item_map_height') ?: '300px';
+            $html = '<div id="geolocation">';
+            $html .= '<h2>' . __('Geolocation') . '</h2>';
+            $html .= $view->itemGoogleMap($item, false, $width, $height);
             $html .= "</div>";
             echo $html;
         }
     }
 
+    /**
+     * Hook to include a form in the admin items search form.
+     *
+     * @internal Themed partial should go to "my_theme/map".
+     */
     public function hookAdminItemsSearch($args)
     {
         $view = $args['view'];
         echo $view->partial('map/advanced-search-partial.php');
     }
 
+    /**
+     * Hook to include a form in the admin items search form.
+     *
+     * @internal Themed partial should go to "my_theme/map".
+     */
     public function hookPublicItemsSearch($args)
     {
         $view = $args['view'];
@@ -254,42 +405,72 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $db = $this->_db;
         $select = $args['select'];
+        $params = $args['params'];
+
         $alias = $this->_db->getTable('Location')->getTableAlias();
-        if (!empty($args['params']['only_map_items'])
-            || !empty($args['params']['geolocation-address'])
-        ) {
+        if (!empty($params['only_map_items'])
+                || !empty($params['item_id'])
+                || !empty($params['geolocation-address'])
+            ) {
             $select->joinInner(
                 array($alias => $db->Location),
                 "$alias.item_id = items.id",
-                array()
-            );
+                array());
         }
-        if (!empty($args['params']['geolocation-address'])) {
+
+        // Select all items around the selected one.
+        if (!empty($params['item_id'])) {
+            // TODO Use a sub-query?
+            $location = $db->getTable('Location')->findLocationByItem($params['item_id'], true);
+            if ($location) {
+                $params['geolocation-address'] = $location->address;
+                $params['geolocation-latitude'] = $location->latitude;
+                $params['geolocation-longitude'] = $location->longitude;
+                $params['geolocation-radius'] = isset($params['geolocation-radius'])
+                    ? $params['geolocation-radius']
+                    : get_option('geolocation_default_radius');
+                $this->_selectItemsBrowseSql($select, $params);
+            }
+        }
+
+        elseif (!empty($params['geolocation-address'])) {
             // Get the address, latitude, longitude, and the radius from parameters
-            $address = trim($args['params']['geolocation-address']);
-            $lat = trim($args['params']['geolocation-latitude']);
-            $lng = trim($args['params']['geolocation-longitude']);
-            $radius = trim($args['params']['geolocation-radius']);
+            $params['geolocation-address'] = trim($params['geolocation-address']);
+            $params['geolocation-latitude'] = trim($params['geolocation-latitude']);
+            $params['geolocation-longitude'] = trim($params['geolocation-longitude']);
+            $params['geolocation-radius'] = trim($params['geolocation-radius']);
             // Limit items to those that exist within a geographic radius if an address and radius are provided
-            if ($address != ''
-                && is_numeric($lat)
-                && is_numeric($lng)
-                && is_numeric($radius)
-            ) {
-                // SELECT distance based upon haversine forumula
-                if (get_option('geolocation_use_metric_distances')) {
-                    $denominator = 111;
-                    $earthRadius = 6371;
-                } else {
-                    $denominator = 69;
-                    $earthRadius = 3959;
-                }
+            if ($params['geolocation-address'] != ''
+                    && is_numeric($params['geolocation-latitude'])
+                    && is_numeric($params['geolocation-longitude'])
+                    && is_numeric($params['geolocation-radius'])
+                ) {
+                $this->_selectItemsBrowseSql($select, $params);
+            }
+        }
+    }
 
-                $radius = $db->quote($radius, Zend_Db::FLOAT_TYPE);
-                $lat = $db->quote($lat, Zend_Db::FLOAT_TYPE);
-                $lng = $db->quote($lng, Zend_Db::FLOAT_TYPE);
+    /**
+     * Helper for hookItemsBrowseSql().
+     */
+    private function _selectItemsBrowseSql($select, $params)
+    {
+        $db = $this->_db;
 
-                $select->columns(<<<SQL
+        // Select distance based upon haversine forumula.
+        if (get_option('geolocation_use_metric_distances')) {
+            $denominator = 111;
+            $earthRadius = 6371;
+        } else {
+            $denominator = 69;
+            $earthRadius = 3959;
+        }
+
+        $lat = $db->quote($params['geolocation-latitude'], Zend_Db::FLOAT_TYPE);
+        $lng = $db->quote($params['geolocation-longitude'], Zend_Db::FLOAT_TYPE);
+        $radius = $db->quote($params['geolocation-radius'], Zend_Db::FLOAT_TYPE);
+
+        $select->columns(<<<SQL
 $earthRadius * ACOS(
     COS(RADIANS($lat)) *
     COS(RADIANS(locations.latitude)) *
@@ -299,23 +480,21 @@ $earthRadius * ACOS(
     SIN(RADIANS(locations.latitude))
 ) AS distance
 SQL
-                );
+        );
 
-                // WHERE the distance is within radius miles/kilometers of the specified lat & long
-                $select->where(<<<SQL
+        // WHERE the distance is within radius miles/kilometers of the specified lat & long
+        $select->where(<<<SQL
 (locations.latitude BETWEEN $lat - $radius / $denominator AND $lat + $radius / $denominator)
 AND
 (locations.longitude BETWEEN $lng - $radius / $denominator AND $lng + $radius / $denominator)
 SQL
-                );
+        );
 
-                // Actually use distance calculation.
-                //$select->having('distance < radius');
+        // Actually use distance calculation.
+        //$select->having('distance < radius');
 
-                //ORDER by the closest distances
-                $select->order('distance');
-            }
-        }
+        //ORDER by the closest distances
+        $select->order('distance');
     }
 
     /**
@@ -337,37 +516,37 @@ SQL
             $displayArray['location'] = __('within %1$s %2$s of "%3$s"',
                 $requestArray['geolocation-radius'],
                 $unit,
-                $requestArray['geolocation-address']
-            );
+                $requestArray['geolocation-address']);
         }
         return $displayArray;
     }
 
-    /**
-     * Add the translations.
-     */
-    public function hookInitialize()
-    {
-        add_translation_source(dirname(__FILE__) . '/languages');
-        add_shortcode( 'geolocation', array($this, 'geolocationShortcode'));
-    }
-
     public function filterAdminNavigationMain($navArray)
     {
-        $navArray['Geolocation'] = array('label'=>__('Map'), 'uri'=>url('geolocation/map/browse'));
+        $navArray['Geolocation'] = array(
+            'label' => __('Map'),
+            'uri' => url('geolocation/map/browse'),
+        );
         return $navArray;
     }
 
     public function filterPublicNavigationMain($navArray)
     {
-        $navArray['Geolocation'] = array('label'=>__('Map'), 'uri'=>url('geolocation/map/browse'));
+        $navArray['Geolocation'] = array(
+            'label' => __('Map'),
+            'uri' => url('geolocation/map/browse'),
+        );
         return $navArray;
     }
 
     public function filterResponseContexts($contexts)
     {
-        $contexts['kml'] = array('suffix'  => 'kml',
-                'headers' => array('Content-Type' => 'text/xml'));
+        $contexts['kml'] = array(
+            'suffix' => 'kml',
+            'headers' => array(
+                'Content-Type' => 'application/vnd.google-earth.kml+xml',
+            ),
+        );
         return $contexts;
     }
 
@@ -375,7 +554,9 @@ SQL
     {
         $controller = $args['controller'];
         if ($controller instanceof Geolocation_MapController) {
-            $contexts['browse'] = array('kml');
+            $contexts['browse'] = array(
+                'kml',
+            );
         }
         return $contexts;
     }
@@ -384,7 +565,7 @@ SQL
     {
         // insert the map tab before the Miscellaneous tab
         $item = $args['item'];
-        $tabs['Map'] = $this->_mapForm($item);
+        $tabs['Map'] = get_view()->mapForm($item);
 
         return $tabs;
     }
@@ -393,8 +574,8 @@ SQL
     {
         if (get_option('geolocation_link_to_nav')) {
             $navArray['Browse Map'] = array(
-                'label'=>__('Browse Map'),
-                'uri' => url('items/map')
+                'label' => __('Browse Map'),
+                'uri' => url('items/map'),
             );
         }
         return $navArray;
@@ -410,7 +591,13 @@ SQL
     {
         $apiResources['geolocations'] = array(
             'record_type' => 'Location',
-            'actions' => array('get', 'index', 'post', 'put', 'delete'),
+            'actions' => array(
+                'get',
+                'index',
+                'post',
+                'put',
+                'delete',
+            )
         );
         return $apiResources;
     }
@@ -425,7 +612,9 @@ SQL
     public function filterApiExtendItems($extend, $args)
     {
         $item = $args['record'];
-        $location = $this->_db->getTable('Location')->findBy(array('item_id' => $item->id));
+        $location = $this->_db->getTable('Location')->findBy(array(
+            'item_id' => $item->id,
+        ));
         if (!$location) {
             return $extend;
         }
@@ -438,32 +627,37 @@ SQL
         return $extend;
     }
 
+    /**
+     * Hook to include a form in a contribution type form.
+     *
+     * @internal Themed partial should go to "my_theme/contribution/map".
+     */
     public function hookContributionTypeForm($args)
     {
         if (get_option('geolocation_add_map_to_contribution_form')) {
             $contributionType = $args['type'];
-            echo $this->_mapForm(null, __('Find A Geographic Location For The ') . $contributionType->display_name . ':', false );
+            $view = $args['view'];
+            // Item is used only to get original location, if not changed.
+            $item = (empty($_POST) && isset($view->item)) ? $view->item : null;
+            echo $view->mapForm($item);
         }
-    }
-
-    public function hookContributionSaveForm($args)
-    {
-        $this->hookAfterSaveItem($args);
     }
 
     public function filterExhibitLayouts($layouts)
     {
         $layouts['geolocation-map'] = array(
             'name' => __('Geolocation Map'),
-            'description' => __('Show attached items on a map')
+            'description' => __('Show attached items on a map'),
         );
         return $layouts;
     }
-    
+
     public function filterApiImportOmekaAdapters($adapters, $args)
     {
         $geolocationAdapter = new ApiImport_ResponseAdapter_Omeka_GenericAdapter(null, $args['endpointUri'], 'Location');
-        $geolocationAdapter->setResourceProperties(array('item' => 'Item'));
+        $geolocationAdapter->setResourceProperties(array(
+            'item' => 'Item',
+        ));
         $adapters['geolocations'] = $geolocationAdapter;
         return $adapters;
     }
@@ -478,7 +672,7 @@ SQL
         if (isset($args['lat'])) {
             $latitude = $args['lat'];
         } else {
-            $latitude  = get_option('geolocation_default_latitude');
+            $latitude = get_option('geolocation_default_latitude');
         }
 
         if (isset($args['lon'])) {
@@ -493,7 +687,11 @@ SQL
             $zoomLevel = get_option('geolocation_default_zoom_level');
         }
 
-        $center = array('latitude' => (double) $latitude, 'longitude' => (double) $longitude, 'zoomLevel' => (double) $zoomLevel);
+        $center = array(
+            'latitude' => (double) $latitude,
+            'longitude' => (double) $longitude,
+            'zoomLevel' => (double) $zoomLevel,
+        );
 
         $options = array();
 
@@ -513,7 +711,7 @@ SQL
 
         if (isset($args['tags'])) {
             $options['params']['tags'] = $args['tags'];
-        }        
+        }
 
         $pattern = '#^[0-9]*(px|%)$#';
 
@@ -529,99 +727,9 @@ SQL
             $width = '100%';
         }
 
-        $attrs = array('style' => "height:$height;width:$width");
-        return get_view()->googleMap("geolocation-shortcode-$index", $options, $attrs, $center);
-    }
-
-    /**
-     * Returns the form code for geographically searching for items
-     * @param Item $item
-     * @param int $width
-     * @param int $height
-     * @return string
-     **/
-    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
-    {
-        $html = '';
-        $label = __('Find a Location by Address:');
-        $center = $this->_getCenter();
-        $center['show'] = false;
-
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
-
-        if ($post === null) {
-            $post = $_POST;
-        }
-
-        $usePost = !empty($post) 
-                    && !empty($post['geolocation'])
-                    && $post['geolocation']['longitude'] != ''
-                    && $post['geolocation']['latitude'] != '';
-        if ($usePost) {
-            $lng = (double) $post['geolocation']['longitude'];
-            $lat = (double) $post['geolocation']['latitude'];
-            $zoom = (int) $post['geolocation']['zoom_level'];
-            $addr = html_escape($post['geolocation']['address']);
-        } else {
-            if ($location) {
-                $lng  = (double) $location['longitude'];
-                $lat  = (double) $location['latitude'];
-                $zoom = (int) $location['zoom_level'];
-                $addr = html_escape($location['address']);
-            } else {
-                $lng = $lat = $zoom = $addr = '';
-            }
-        }
-
-        $html .= '<div class="field">';
-        $html .=     '<div id="location_form" class="two columns alpha">';
-        $html .=         '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
-        $html .=         '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
-        $html .=         '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
-        $html .=         '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . self::GOOGLE_MAPS_API_VERSION . '" />';
-        $html .=         '<label>' . html_escape($label) . '</label>';
-        $html .=     '</div>';
-        $html .=     '<div class="inputs five columns omega">';
-        $html .=          '<div class="input-block">';
-        $html .=            '<input type="text" name="geolocation[address]" id="geolocation_address" value="' . $addr . '" class="textinput"/>';
-        $html .=            '<button type="button" style="float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">'.__('Find').'</button>';
-        $html .=          '</div>';
-        $html .=     '</div>';
-        $html .= '</div>';
-        $html .= '<div  id="omeka-map-form" style="width: 100%; height: 300px"></div>';
-
-
-        $options = array();
-        $options['form'] = array('id' => 'location_form',
-                'posted' => $usePost);
-        if ($location or $usePost) {
-            $options['point'] = array('latitude' => $lat,
-                    'longitude' => $lng,
-                    'zoomLevel' => $zoom);
-        }
-
-        $options['confirmLocationChange'] = $confirmLocationChange;
-
-        $center = js_escape($center);
-        $options = js_escape($options);
-
-        $js = "var anOmekaMapForm = new OmekaMapForm(" . js_escape('omeka-map-form') . ", $center, $options);";
-        $js .= "
-            jQuery(document).bind('omeka:tabselected', function () {
-                anOmekaMapForm.resize();
-            });
-        ";
-
-        $html .= "<script type='text/javascript'>" . $js . "</script>";
-        return $html;
-    }
-
-    protected function _getCenter()
-    {
-        return array(
-            'latitude'=>  (double) get_option('geolocation_default_latitude'),
-            'longitude'=> (double) get_option('geolocation_default_longitude'),
-            'zoomLevel'=> (double) get_option('geolocation_default_zoom_level')
+        $attrs = array(
+            'style' => "height:$height;width:$width",
         );
+        return get_view()->googleMap("geolocation-shortcode-$index", $options, $attrs, $center);
     }
 }

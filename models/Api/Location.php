@@ -20,13 +20,14 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
     public function getRepresentation(Omeka_Record_AbstractRecord $record)
     {
         $representation = array(
-            'id' => $record->id, 
-            'url' => $this->getResourceUrl("/geolocations/{$record->id}"), 
-            'latitude' => $record->latitude, 
-            'longitude' => $record->longitude, 
-            'zoom_level' => $record->zoom_level, 
-            'map_type' => $record->map_type, 
-            'address' => $record->address, 
+            'id' => $record->id,
+            'url' => $this->getResourceUrl("/geolocations/{$record->id}"),
+            'latitude' => $record->latitude,
+            'longitude' => $record->longitude,
+            'zoom_level' => $record->zoom_level,
+            'map_type' => $record->map_type,
+            'address' => $record->address,
+            'description' => $record->description,
             'item' => array(
                 'id' => $record->item_id, 
                 'url' => $this->getResourceUrl("/items/{$record->item_id}"), 
@@ -66,6 +67,11 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
         } else {
             $record->address = '';
         }
+        if (isset($data->description)) {
+            $record->description = $data->description;
+        } else {
+            $record->description = '';
+        }
     }
     
     /**
@@ -94,6 +100,11 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
             $record->address = $data->address;
         } else {
             $record->address = '';
+        }
+        if (isset($data->description)) {
+            $record->description = $data->description;
+        } else {
+            $record->description = '';
         }
     }
 }

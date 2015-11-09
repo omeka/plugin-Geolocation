@@ -19,7 +19,7 @@ class GeolocationGetCenterTest extends Omeka_Test_AppTestCase
         $this->_checkValidCenter();
         set_option('geolocation_default_latitude', '4');
         set_option('geolocation_default_longitude', '5');
-        set_option('geolocation_default_zoom', '6');
+        set_option('geolocation_default_zoom_level', '6');
         $this->_checkValidCenter();
     }
 
