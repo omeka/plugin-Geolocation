@@ -288,26 +288,28 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 $radius = $db->quote($radius, Zend_Db::FLOAT_TYPE);
                 $lat = $db->quote($lat, Zend_Db::FLOAT_TYPE);
                 $lng = $db->quote($lng, Zend_Db::FLOAT_TYPE);
-
-                $select->columns(<<<SQL
-$earthRadius * ACOS(
-    COS(RADIANS($lat)) *
-    COS(RADIANS(locations.latitude)) *
-    COS(RADIANS($lng) - RADIANS(locations.longitude))
-    +
-    SIN(RADIANS($lat)) *
-    SIN(RADIANS(locations.latitude))
-) AS distance
-SQL
-                );
+                $sqlMathExpression = 
+                    new Zend_Db_Expr(
+                        "$earthRadius * ACOS(
+                        COS(RADIANS($lat)) *
+                        COS(RADIANS(locations.latitude)) *
+                        COS(RADIANS($lng) - RADIANS(locations.longitude))
+                        +
+                        SIN(RADIANS($lat)) *
+                        SIN(RADIANS(locations.latitude))
+                        ) AS distance");
+                
+                $select->columns($sqlMathExpression);
 
                 // WHERE the distance is within radius miles/kilometers of the specified lat & long
-                $select->where(<<<SQL
-(locations.latitude BETWEEN $lat - $radius / $denominator AND $lat + $radius / $denominator)
-AND
-(locations.longitude BETWEEN $lng - $radius / $denominator AND $lng + $radius / $denominator)
-SQL
-                );
+                $locationWithinRadius = 
+                    new Zend_Db_Expr(
+                        "(locations.latitude BETWEEN $lat - $radius / $denominator 
+                            AND $lat + $radius / $denominator)
+                            AND
+                        (locations.longitude BETWEEN $lng - $radius / $denominator 
+                            AND $lng + $radius / $denominator)");
+                $select->where($locationWithinRadius);
 
                 // Actually use distance calculation.
                 //$select->having('distance < radius');
