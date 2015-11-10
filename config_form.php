@@ -153,3 +153,19 @@
     </div>
 </div>
 </fieldset>
+
+<fieldset>
+<legend><?php echo __('Accessibility'); ?></legend>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_accessible_markup"><?php echo __('Enable alternate format.'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Provide accessible markup and a link to a tabular version of the map content.'); ?></p>
+        <?php
+        echo get_view()->formCheckbox('geolocation_accessible_markup', true,
+            array('checked' => (boolean) get_option('geolocation_accessible_markup')));
+        ?>
+    </div>
+</div>
+</fieldset>

@@ -28,7 +28,21 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $options = js_escape($options);
             $style = "width: $width; height: $height";
             $html = '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '"></div>';
-            
+            $accessible_markup = get_option('geolocation_accessible_markup');
+            if($accessible_markup) {
+                $figcaption = '';
+                if (isset($location->latitude) && !empty($location->latitude)) $figcaption .= "<div id='geolocation-latitude'>Latitude: {$location->latitude}</div>";
+                if (isset($location->longitude) && !empty($location->latitude)) $figcaption .= "<div id='geolocation-longitude'>Longitude: {$location->longitude}</div>";
+                if (isset($location->address) && !empty($location->address)) $figcaption .= "<div id='geolocation-address'>Address: {$location->address}</div>";
+                $html = '<figure>';
+                $html .= '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '">';
+                $html .= '</div>';
+                $html .= '<figcaption class="element-invisible">' . $figcaption . '</figcaption>';
+                $html .= '</figure>';
+            } 
+            else {
+                $html = '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '"></div>';
+            }
             $js = "var " . Inflector::variablize($divId) . ";";
             $js .= "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
             $html .= "<script type='text/javascript'>$js</script>";
