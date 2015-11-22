@@ -85,10 +85,11 @@ OmekaMap.prototype = {
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {
-            this.addMarker(this.center.latitude,
-                           this.center.longitude,
-                           {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"},
-                           this.center.markerHtml);
+            this.addMarker(
+                this.center.latitude,
+                this.center.longitude,
+                {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"},
+                this.center.markerHtml);
         }
     }
 };
@@ -432,21 +433,27 @@ function OmekaMapForm(mapDivId, center, options) {
 
     // Make the buttons Remove remove the point of the list (may be dynamically
     // created).
-    jQuery(document).on('click', '.geolocation-remove', function () {
+    jQuery(document).on('click', '.geolocation-remove', function (event) {
         var locationElement = jQuery(this).closest('tr');
         that.removeLocation(locationElement);
+        event.stopPropagation();
+        return false;
      });
 
     // Make the buttons Display display the current point (may be dynamically
     // created).
-    jQuery(document).on('click', '.geolocation-display', function () {
+    jQuery(document).on('click', '.geolocation-display', function (event) {
         var locationElement = jQuery(this).closest('tr');
         that.displayLocation(locationElement);
+        event.stopPropagation();
+        return false;
      });
 
     // Make the buttons All display all current points.
-    jQuery(document).on('click', '.geolocation-locations-display', function () {
+    jQuery(document).on('click', '.geolocation-locations-display', function (event) {
         that.displayLocations();
+        event.stopPropagation();
+        return false;
      });
 
     // Add the existing map point.
@@ -510,11 +517,6 @@ OmekaMapForm.prototype = {
         // Set the value in the list.
         var locations = jQuery('table.geolocation-locations tbody tr');
 
-        // Remove the message for empty location if any.
-        if (locations.length == 1) {
-            locations.remove();
-        }
-
         var newRowId = 'new-' + Math.floor(Math.random() * 999999999);
 
         // Add a new row to the list.
@@ -552,12 +554,18 @@ OmekaMapForm.prototype = {
         row += '</td>';
         row += '</tr>';
 
-        jQuery('table.geolocation-locations tr:last').after(row);
+        jQuery('table.geolocation-locations tbody tr:last').after(row);
         document.getElementById('locations-' + newRowId + '-address').value = addressElement.value;
         document.getElementById('locations-' + newRowId + '-latitude').value = latitudeElement.value;
         document.getElementById('locations-' + newRowId + '-longitude').value = longitudeElement.value;
         jQuery('#locations-' + newRowId + '-zoom_level').val(this.map.getZoom().toString());
         jQuery('#locations-' + newRowId + '-map_type').val(this.map.getMapTypeId());
+
+        // Remove the message for empty location if any.
+        geolocationEmpty = jQuery('#geolocation-empty');
+        if (geolocationEmpty.length > 0) {
+            geolocationEmpty.remove();
+        }
     },
 
     /* Remove the current geolocation from the list. */
@@ -568,7 +576,7 @@ OmekaMapForm.prototype = {
         var locations = jQuery('table.geolocation-locations tbody tr');
         if (locations.length == 0) {
             var row = '<tr id="geolocation-empty"><td colspan="5">No location defined.</td></tr>';
-            jQuery('table.geolocation-locations tbody').innerHTML(row);
+            jQuery('table.geolocation-locations tbody').html(row);
         }
     },
 
@@ -602,7 +610,7 @@ OmekaMapForm.prototype = {
         this.clearForm();
         this.updateForm();
 
-        var locations = jQuery('table.geolocation-locations tbody tr');
+        var locations = jQuery('table.geolocation-locations tbody tr.geolocation-location');
         if (locations.length == 0) {
             return;
         }
@@ -611,7 +619,7 @@ OmekaMapForm.prototype = {
             location = jQuery(location);
             var latitude = location.find('input.geolocation-latitude').val();
             var longitude = location.find('input.geolocation-longitude').val();
-            if (latitude.length != 0 && longitude.length != 0) {
+            if (latitude && longitude && latitude.length != 0 && longitude.length != 0) {
                 var point = new google.maps.LatLng(latitude, longitude);
                 var marker = that.addMarker(point.lat(), point.lng());
             }
