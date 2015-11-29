@@ -48,7 +48,7 @@
         </div>
         <div class="inputs five columns omega">
             <div class="input-block">
-                <input type="text" name="geolocation[address]" id="geolocation_address" value="" placeholder="<?php echo __('Address to find'); ?>" class="textinput" />
+                <input type="text" name="current-geolocation[address]" id="geolocation_address" value="" placeholder="<?php echo __('Address to find'); ?>" class="textinput" />
                 <button type="button" name="geolocation_location_find" id="geolocation_location_find" class="button small green">
                     <?php echo __('Find'); ?>
                 </button>

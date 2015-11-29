@@ -306,11 +306,15 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         foreach ($locations as $location) {
             $existingLocations[$location->id] = $location;
         }
-        unset($locations);
 
         // Get post values.
-        $request = Zend_Controller_Front::getInstance()->getRequest();
-        $locations = $request->getParam('locations');
+        $locations = $post['geolocation'];
+
+        // Check if this is a single geolocation for compatibility with old
+        // standard plugins.
+        if (isset($locations['latitude'])) {
+            $locations = array('new-old' => $locations);
+        }
 
         // If we have filled out info for the geolocation, then submit to the db.
         foreach ($locations as $id => $values) {

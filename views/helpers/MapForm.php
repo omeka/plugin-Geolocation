@@ -39,11 +39,11 @@ class Geolocation_View_Helper_MapForm extends Zend_View_Helper_Abstract
         $options['confirmLocationChange'] = false;
 
         // Prepare the output.
-        $html = '<input type="hidden" name="geolocation[latitude]" value="' . $latitude . '" />';
-        $html .= '<input type="hidden" name="geolocation[longitude]" value="' . $longitude . '" />';
-        $html .= '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoomLevel . '" />';
-        $html .= '<input type="hidden" name="geolocation[map_type]" value="' . $mapType . '" />';
-        $html .= '<input type="hidden" name="geolocation[description]" value="' . $description . '" />';
+        $html = '<input type="hidden" name="current-geolocation[latitude]" value="' . $latitude . '" />';
+        $html .= '<input type="hidden" name="current-geolocation[longitude]" value="' . $longitude . '" />';
+        $html .= '<input type="hidden" name="current-geolocation[zoom_level]" value="' . $zoomLevel . '" />';
+        $html .= '<input type="hidden" name="current-geolocation[map_type]" value="' . $mapType . '" />';
+        $html .= '<input type="hidden" name="current-geolocation[description]" value="' . $description . '" />';
 
         $html .= $view->partial('map/input-partial.php', array(
             'item' => $item,

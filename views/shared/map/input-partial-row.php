@@ -20,7 +20,7 @@ else {
     $description = $location->description;
 }
 
-$baseField = 'locations[' . $id . ']';
+$baseField = 'geolocation[' . $id . ']';
 $mapTypes = array(
     'roadmap' => __('Roadmap'),
     'satellite' => __('Satellite'),

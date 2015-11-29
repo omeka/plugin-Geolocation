@@ -504,10 +504,10 @@ OmekaMapForm.prototype = {
         var marker = this.markers[0];
         var point = marker.getPosition();
 
-        var addressElement = document.getElementsByName('geolocation[address]')[0];
-        var latitudeElement = document.getElementsByName('geolocation[latitude]')[0];
-        var longitudeElement = document.getElementsByName('geolocation[longitude]')[0];
-        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
+        var addressElement = document.getElementsByName('current-geolocation[address]')[0];
+        var latitudeElement = document.getElementsByName('current-geolocation[latitude]')[0];
+        var longitudeElement = document.getElementsByName('current-geolocation[longitude]')[0];
+        var zoomElement = document.getElementsByName('current-geolocation[zoom_level]')[0];
 
         if (latitudeElement.value == '' || longitudeElement.value == '') {
             alert('Error: No point defined!');
@@ -522,19 +522,19 @@ OmekaMapForm.prototype = {
         // Add a new row to the list.
         var row = '<tr id="geolocation-location-' + newRowId + '" class="geolocation-location location-new ' + (locations.length % 2 ? 'odd' : 'even') + '">';
         row += '<td>';
-        row += '<button type="button" class="geolocation-display button small green" id="locations-' + newRowId + '-display" name="locations[' + newRowId + '][display]" title="Display this location">O</button>';
-        row += '<button type="button" class="geolocation-remove button small red" id="locations-' + newRowId + '-remove" name="locations[' + newRowId + '][remove]" title="Remove this location">X</button>';
+        row += '<button type="button" class="geolocation-display button small green" id="locations-' + newRowId + '-display" name="geolocation[' + newRowId + '][display]" title="Display this location">O</button>';
+        row += '<button type="button" class="geolocation-remove button small red" id="locations-' + newRowId + '-remove" name="geolocation[' + newRowId + '][remove]" title="Remove this location">X</button>';
         row += '</td>';
         row += '<td colspan="4">';
         row += '<div>';
         row += '<span>';
-        row += '<input type="text" name="locations[' + newRowId + '][latitude]" id="locations-' + newRowId + '-latitude" value="" placeholder="Latitude" maxlength="15" class="geolocation-latitude">';
+        row += '<input type="text" name="geolocation[' + newRowId + '][latitude]" id="locations-' + newRowId + '-latitude" value="" placeholder="Latitude" maxlength="15" class="geolocation-latitude">';
         row += '</span>';
         row += '<span>';
-        row += '<input type="text" name="locations[' + newRowId + '][longitude]" id="locations-' + newRowId + '-longitude" value="" placeholder="Longitude" maxlength="15" class="geolocation-longitude">';
+        row += '<input type="text" name="geolocation[' + newRowId + '][longitude]" id="locations-' + newRowId + '-longitude" value="" placeholder="Longitude" maxlength="15" class="geolocation-longitude">';
         row += '</span>';
         row += '<span>';
-        row += '<select name="locations[' + newRowId + '][zoom_level]" id="locations-' + newRowId + '-zoom_level" class="geolocation-zoom-level">';
+        row += '<select name="geolocation[' + newRowId + '][zoom_level]" id="locations-' + newRowId + '-zoom_level" class="geolocation-zoom-level">';
         row += '<option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option>';
         row += '<option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option>';
         row += '<option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option>';
@@ -542,14 +542,14 @@ OmekaMapForm.prototype = {
         row += '</select>';
         row += '</span>';
         row += '<span>';
-        row += '<select name="locations[' + newRowId + '][map_type]" id="locations-' + newRowId + '-map_type" class="geolocation-map-type">';
+        row += '<select name="geolocation[' + newRowId + '][map_type]" id="locations-' + newRowId + '-map_type" class="geolocation-map-type">';
         row += '<option value="roadmap">Roadmap</option><option value="satellite">Satellite</option><option value="hybrid">Hybrid</option><option value="terrain">Terrain</option>';
         row += '</select>';
         row += '</span>';
         row += '</div>';
         row += '<div>';
-        row += '<span><input type="text" name="locations[' + newRowId + '][address]" id="locations-' + newRowId + '-address" value="" placeholder="Address" class="geolocation-address"></span>';
-        row += '<span><input type="text" name="locations[' + newRowId + '][description]" id="locations-' + newRowId + '-description" value="" placeholder="Description" class="geolocation-description"></span>';
+        row += '<span><input type="text" name="geolocation[' + newRowId + '][address]" id="locations-' + newRowId + '-address" value="" placeholder="Address" class="geolocation-address"></span>';
+        row += '<span><input type="text" name="geolocation[' + newRowId + '][description]" id="locations-' + newRowId + '-description" value="" placeholder="Description" class="geolocation-description"></span>';
         row += '</div>';
         row += '</td>';
         row += '</tr>';
@@ -658,9 +658,9 @@ OmekaMapForm.prototype = {
 
     /* Update the latitude, longitude, and zoom of the form. */
     updateForm: function (point) {
-        var latElement = document.getElementsByName('geolocation[latitude]')[0];
-        var lngElement = document.getElementsByName('geolocation[longitude]')[0];
-        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
+        var latElement = document.getElementsByName('current-geolocation[latitude]')[0];
+        var lngElement = document.getElementsByName('current-geolocation[longitude]')[0];
+        var zoomElement = document.getElementsByName('current-geolocation[zoom_level]')[0];
 
         // If we passed a point, then set the form to that. If there is no point, clear the form
         if (point) {
@@ -676,7 +676,7 @@ OmekaMapForm.prototype = {
 
     /* Update the zoom input of the form to be the current zoom on the map. */
     updateZoomForm: function () {
-        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
+        var zoomElement = document.getElementsByName('current-geolocation[zoom_level]')[0];
         zoomElement.value = this.map.getZoom();
     },
 
