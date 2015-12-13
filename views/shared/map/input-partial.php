@@ -1,6 +1,6 @@
 <div class="geolocation-list seven columns alpha omega">
     <h3><?php echo __('List of locations'); ?></h3>
-    <table id="geolocation-locations-<?php echo $item->id; ?>" class="geolocation-locations" cellspacing="0" cellpadding="0">
+    <table id="geolocation-locations-<?php echo $item->id; ?>" class="geolocation-locations">
         <colgroup><col /></colgroup>
         <thead>
             <tr>
