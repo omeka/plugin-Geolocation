@@ -4,70 +4,74 @@
 # 
 # Translators:
 # Jan Černý <cernyhonza@gmail.com>, 2013
-# MICHAL D. <black23@gmail.com>, 2013
+# Jiří Vírava <appukonrad@gmail.com>, 2014
+# MICHAL D. <black23@gmail.com>, 2013-2014
 msgid ""
 msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2014-05-22 21:24+0000\n"
+"PO-Revision-Date: 2014-12-01 19:16+0000\n"
 "Last-Translator: John Flatness <john@zerocrates.org>\n"
-"Language-Team: Czech (http://www.transifex.com/projects/p/omeka/language/cs/)\n"
+"Language-Team: Czech (http://www.transifex.com/omeka/omeka/language/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: cs\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
-#: GeolocationPlugin.php:298
+#: GeolocationPlugin.php:216
+msgid "Geolocation"
+msgstr ""
+
+#: GeolocationPlugin.php:333
 msgid "kilometers"
-msgstr ""
+msgstr "kilometry"
 
-#: GeolocationPlugin.php:300
+#: GeolocationPlugin.php:335
 msgid "miles"
-msgstr ""
+msgstr "míle"
 
-#: GeolocationPlugin.php:302
+#: GeolocationPlugin.php:337
 #, php-format
 msgid "within %1$s %2$s of \"%3$s\""
 msgstr ""
 
-#: GeolocationPlugin.php:322 GeolocationPlugin.php:328
-#: GeolocationPlugin.php:352
+#: GeolocationPlugin.php:357 GeolocationPlugin.php:363
 msgid "Map"
 msgstr "Mapa"
 
-#: GeolocationPlugin.php:361
+#: GeolocationPlugin.php:396
 msgid "Browse Map"
 msgstr "Procházet mapu"
 
-#: GeolocationPlugin.php:409
+#: GeolocationPlugin.php:445
 msgid "Find A Geographic Location For The "
 msgstr "Najít geografickou lokaci pro"
 
-#: GeolocationPlugin.php:420
+#: GeolocationPlugin.php:457
 msgid "Geolocation Map"
 msgstr ""
 
-#: GeolocationPlugin.php:421
+#: GeolocationPlugin.php:458
 msgid "Show attached items on a map"
-msgstr ""
+msgstr "Zobrazit přiložené položky na mapě"
 
-#: GeolocationPlugin.php:509
+#: GeolocationPlugin.php:546
 msgid "Find a Location by Address:"
 msgstr "Najít lokaci podleadresy"
 
-#: GeolocationPlugin.php:547
+#: GeolocationPlugin.php:587
 msgid "Find"
 msgstr "Najít"
 
 #: config_form.php:3
 msgid "General Settings"
-msgstr ""
+msgstr "Obecná Nastavení"
 
 #: config_form.php:6
 msgid "Default Latitude"
-msgstr ""
+msgstr "Výchozí zeměpisná šířka"
 
 #: config_form.php:9
 msgid ""
@@ -77,7 +81,7 @@ msgstr ""
 
 #: config_form.php:16
 msgid "Default Longitude"
-msgstr ""
+msgstr "Výchozí zeměpisná délka"
 
 #: config_form.php:19
 msgid ""
@@ -93,11 +97,11 @@ msgstr "Výchozí úroveň zvětšení"
 msgid ""
 "An integer greater than or equal to 0, where 0 represents the most zoomed "
 "out scale."
-msgstr ""
+msgstr "Celé číslo větší nebo rovno 0, kde 0 představuje největší oddálení stupnice."
 
 #: config_form.php:36
 msgid "Map Type"
-msgstr ""
+msgstr "Typ mapy"
 
 #: config_form.php:39
 msgid "The type of map to display"
@@ -105,19 +109,19 @@ msgstr ""
 
 #: config_form.php:42
 msgid "Roadmap"
-msgstr ""
+msgstr "Silniční síť"
 
 #: config_form.php:43
 msgid "Satellite"
-msgstr ""
+msgstr "Satelitní"
 
 #: config_form.php:44
 msgid "Hybrid"
-msgstr ""
+msgstr "Smíšený"
 
 #: config_form.php:45
 msgid "Terrain"
-msgstr ""
+msgstr "Terénní"
 
 #: config_form.php:54
 msgid "Browse Map Settings"
@@ -143,54 +147,64 @@ msgid ""
 msgstr ""
 
 #: config_form.php:84
-msgid "Use metric distances"
+msgid "Default Radius"
 msgstr ""
 
 #: config_form.php:87
+msgid ""
+"The size of the default radius to use on the items advanced search page. See"
+" below for whether to measure in miles or kilometers."
+msgstr ""
+
+#: config_form.php:93
+msgid "Use metric distances"
+msgstr "Použít metrické vzdálenosti"
+
+#: config_form.php:96
 msgid "Use metric distances in proximity search."
 msgstr ""
 
-#: config_form.php:97
+#: config_form.php:106
 msgid "Item Map Settings"
 msgstr ""
 
-#: config_form.php:100
+#: config_form.php:109
 msgid "Width for Item Map"
 msgstr ""
 
-#: config_form.php:103
+#: config_form.php:112
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
 msgstr ""
 
-#: config_form.php:110
+#: config_form.php:119
 msgid "Height for Item Map"
 msgstr ""
 
-#: config_form.php:113
+#: config_form.php:122
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
 msgstr ""
 
-#: config_form.php:120
+#: config_form.php:129
 msgid "Map Integration"
 msgstr ""
 
-#: config_form.php:123
+#: config_form.php:132
 msgid "Add Link to Map on Items/Browse Navigation"
 msgstr ""
 
-#: config_form.php:126
+#: config_form.php:135
 msgid "Add a link to the items map on all the items/browse pages."
 msgstr ""
 
-#: config_form.php:136
+#: config_form.php:145
 msgid "Add Map To Contribution Form"
 msgstr ""
 
-#: config_form.php:139
+#: config_form.php:148
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add"
 " a geolocation map field to the contribution form to associate a location to"
@@ -233,18 +247,18 @@ msgstr "celkem"
 msgid "Find An Item on the Map"
 msgstr "Najít položku na mapě"
 
-#: views/helpers/ItemGoogleMap.php:50
+#: views/helpers/ItemGoogleMap.php:36
 msgid "This item has no location info associated with it."
-msgstr ""
+msgstr "Tato položka nemá informace o místě s ním spojeném."
 
 #: views/shared/map/advanced-search-partial.php:16
 msgid "Geographic Radius (kilometers)"
-msgstr ""
+msgstr "Geografický radius (kilometry)"
 
 #: views/shared/map/advanced-search-partial.php:18
 msgid "Geographic Radius (miles)"
-msgstr ""
+msgstr "Geografický radius (míle)"
 
 #: views/shared/map/advanced-search-partial.php:25
 msgid "Geographic Address"
-msgstr ""
+msgstr "Geografická adresa"
