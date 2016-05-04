@@ -3,66 +3,69 @@
 # This file is distributed under the same license as the Omeka package.
 # 
 # Translators:
-# Matti Lassila <matti.lassila@gmail.com>, 2013
+# Matti Lassila <matti.lassila@gmail.com>, 2013-2014
 msgid ""
 msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2014-05-22 21:24+0000\n"
+"PO-Revision-Date: 2014-12-01 19:16+0000\n"
 "Last-Translator: John Flatness <john@zerocrates.org>\n"
-"Language-Team: Finnish (Finland) (http://www.transifex.com/projects/p/omeka/language/fi_FI/)\n"
+"Language-Team: Finnish (Finland) (http://www.transifex.com/omeka/omeka/language/fi_FI/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fi_FI\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: GeolocationPlugin.php:298
+#: GeolocationPlugin.php:216
+msgid "Geolocation"
+msgstr ""
+
+#: GeolocationPlugin.php:333
 msgid "kilometers"
-msgstr ""
+msgstr "kilometriä"
 
-#: GeolocationPlugin.php:300
+#: GeolocationPlugin.php:335
 msgid "miles"
-msgstr ""
+msgstr "mailia"
 
-#: GeolocationPlugin.php:302
+#: GeolocationPlugin.php:337
 #, php-format
 msgid "within %1$s %2$s of \"%3$s\""
 msgstr ""
 
-#: GeolocationPlugin.php:322 GeolocationPlugin.php:328
-#: GeolocationPlugin.php:352
+#: GeolocationPlugin.php:357 GeolocationPlugin.php:363
 msgid "Map"
 msgstr "Kartta"
 
-#: GeolocationPlugin.php:361
+#: GeolocationPlugin.php:396
 msgid "Browse Map"
 msgstr "Selaa karttaa"
 
-#: GeolocationPlugin.php:409
+#: GeolocationPlugin.php:445
 msgid "Find A Geographic Location For The "
 msgstr "Hae maantieteellinen sijainti"
 
-#: GeolocationPlugin.php:420
+#: GeolocationPlugin.php:457
 msgid "Geolocation Map"
-msgstr ""
+msgstr "Kartta"
 
-#: GeolocationPlugin.php:421
+#: GeolocationPlugin.php:458
 msgid "Show attached items on a map"
-msgstr ""
+msgstr "Näytä aineistot kartalla"
 
-#: GeolocationPlugin.php:509
+#: GeolocationPlugin.php:546
 msgid "Find a Location by Address:"
 msgstr "Hae paikka osoitteen tai paikan nimen mukaan:"
 
-#: GeolocationPlugin.php:547
+#: GeolocationPlugin.php:587
 msgid "Find"
 msgstr "Hae"
 
 #: config_form.php:3
 msgid "General Settings"
-msgstr ""
+msgstr "Yleisasetukset"
 
 #: config_form.php:6
 msgid "Default Latitude"
@@ -96,31 +99,31 @@ msgstr "Aloitusnäkymän zoomausaste. Arvon tulee olla nolla tai sitä suurempi 
 
 #: config_form.php:36
 msgid "Map Type"
-msgstr ""
+msgstr "Kartan tyyppi"
 
 #: config_form.php:39
 msgid "The type of map to display"
-msgstr ""
+msgstr "Karttanäkymän karttatyyppi"
 
 #: config_form.php:42
 msgid "Roadmap"
-msgstr ""
+msgstr "Maantiekartta"
 
 #: config_form.php:43
 msgid "Satellite"
-msgstr ""
+msgstr "Ilmakuva"
 
 #: config_form.php:44
 msgid "Hybrid"
-msgstr ""
+msgstr "Yhdistelmä"
 
 #: config_form.php:45
 msgid "Terrain"
-msgstr ""
+msgstr "Maasto"
 
 #: config_form.php:54
 msgid "Browse Map Settings"
-msgstr ""
+msgstr "Karttaselausnäkymän asetukset"
 
 #: config_form.php:57
 msgid "Number of Locations Per Page"
@@ -128,68 +131,78 @@ msgstr "Sijainteja sivua kohti"
 
 #: config_form.php:60
 msgid "The number of locations displayed per page when browsing the map."
-msgstr ""
+msgstr "Kerralla näytettyjen sijaintien määrä karttaselausnäkymässä."
 
 #: config_form.php:66
 msgid "Auto-fit to Locations"
-msgstr ""
+msgstr "Sovita aineistoihin"
 
 #: config_form.php:70
 msgid ""
 "If checked, the default location and zoom settings will be ignored on the "
 "browse map. Instead, the map will automatically pan and zoom to fit the "
 "locations displayed on each page."
-msgstr ""
+msgstr "Jätä oletussijainti ja zoomausasetus huomiotta ja sovita kartta näyttämään kaikki karttaselausnäkymän sivun aineistot kerralla."
 
 #: config_form.php:84
+msgid "Default Radius"
+msgstr ""
+
+#: config_form.php:87
+msgid ""
+"The size of the default radius to use on the items advanced search page. See"
+" below for whether to measure in miles or kilometers."
+msgstr ""
+
+#: config_form.php:93
 msgid "Use metric distances"
 msgstr "Käytä mittayksikkönä kilometrejä"
 
-#: config_form.php:87
+#: config_form.php:96
 msgid "Use metric distances in proximity search."
 msgstr "Käytä läheisyyteen perustuvassa haussa yksikkönä kilometrejä. Oletuksena mittayksikkö on maili."
 
-#: config_form.php:97
+#: config_form.php:106
 msgid "Item Map Settings"
-msgstr ""
+msgstr "Aineistonäkymän kartta-asetukset"
 
-#: config_form.php:100
+#: config_form.php:109
 msgid "Width for Item Map"
 msgstr "Aineistonäkymän kartan leveys"
 
-#: config_form.php:103
+#: config_form.php:112
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
 msgstr "Karttanäkymän leveys aineistosivulla. Oletuksena kartta näytetään sivupohjan suhteen täysleveänä (100%)."
 
-#: config_form.php:110
+#: config_form.php:119
 msgid "Height for Item Map"
 msgstr "Aineistonäkymän kartan korkeus"
 
-#: config_form.php:113
+#: config_form.php:122
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
 msgstr "Karttanäkymän korkeus aineistolivulla. Oletuskorkeus on 300 pikseliä."
 
-#: config_form.php:120
+#: config_form.php:129
 msgid "Map Integration"
-msgstr ""
+msgstr "Karttaintegraatio"
 
-#: config_form.php:123
+#: config_form.php:132
 msgid "Add Link to Map on Items/Browse Navigation"
 msgstr "Lisää linkki karttaan aineistojen selausnäkymiin"
 
-#: config_form.php:126
+#: config_form.php:135
 msgid "Add a link to the items map on all the items/browse pages."
 msgstr "Lisää karttalinkki selausnäkymiin."
 
-#: config_form.php:136
+#: config_form.php:145
 msgid "Add Map To Contribution Form"
 msgstr "Lisää kartta julkiselle tallennuslomakkeelle"
 
-#: config_form.php:139
+#: config_form.php:148
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add"
 " a geolocation map field to the contribution form to associate a location to"
@@ -232,7 +245,7 @@ msgstr "yhteensä"
 msgid "Find An Item on the Map"
 msgstr "Aineistot kartalla"
 
-#: views/helpers/ItemGoogleMap.php:50
+#: views/helpers/ItemGoogleMap.php:36
 msgid "This item has no location info associated with it."
 msgstr "Aineistoon ei liity sijaintitietoja."
 

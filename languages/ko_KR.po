@@ -3,33 +3,31 @@
 # This file is distributed under the same license as the Omeka package.
 # 
 # Translators:
-# Doru  DEACONU <dumitrudeaconu@yahoo.com>, 2014
-# Nicolaie Constantinescu <kosson@gmail.com>, 2013-2014
 msgid ""
 msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2014-12-05 09:28+0000\n"
-"Last-Translator: Doru  DEACONU <dumitrudeaconu@yahoo.com>\n"
-"Language-Team: Romanian (http://www.transifex.com/omeka/omeka/language/ro/)\n"
+"PO-Revision-Date: 2014-12-18 08:37+0000\n"
+"Last-Translator: Seung-il, Lee <silee0523@gmail.com>\n"
+"Language-Team: Korean (Korea) (http://www.transifex.com/omeka/omeka/language/ko_KR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ro\n"
-"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?2:1));\n"
+"Language: ko_KR\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: GeolocationPlugin.php:216
 msgid "Geolocation"
-msgstr ""
+msgstr "위치정보"
 
 #: GeolocationPlugin.php:333
 msgid "kilometers"
-msgstr "kilometri"
+msgstr "킬로미터"
 
 #: GeolocationPlugin.php:335
 msgid "miles"
-msgstr "mile"
+msgstr "마일"
 
 #: GeolocationPlugin.php:337
 #, php-format
@@ -38,69 +36,69 @@ msgstr ""
 
 #: GeolocationPlugin.php:357 GeolocationPlugin.php:363
 msgid "Map"
-msgstr "Hartă"
+msgstr "지도"
 
 #: GeolocationPlugin.php:396
 msgid "Browse Map"
-msgstr "Navighează pe hartă"
+msgstr "지도보기"
 
 #: GeolocationPlugin.php:445
 msgid "Find A Geographic Location For The "
-msgstr "Caută o locație geografică pentru"
+msgstr ""
 
 #: GeolocationPlugin.php:457
 msgid "Geolocation Map"
-msgstr ""
+msgstr "위치정보 지도"
 
 #: GeolocationPlugin.php:458
 msgid "Show attached items on a map"
-msgstr ""
+msgstr "지도에 추가된 아이템 보기"
 
 #: GeolocationPlugin.php:546
 msgid "Find a Location by Address:"
-msgstr "Caută o locație după adresa:"
+msgstr "주소로 장소 검색 : "
 
 #: GeolocationPlugin.php:587
 msgid "Find"
-msgstr "Caută"
+msgstr "검색"
 
 #: config_form.php:3
 msgid "General Settings"
-msgstr "Setări generale"
+msgstr "일반 설정"
 
 #: config_form.php:6
 msgid "Default Latitude"
-msgstr "Latitudinea de start"
+msgstr "기본 위도"
 
 #: config_form.php:9
 msgid ""
 "Latitude of the map's initial center point, in degrees. Must be between -90 "
 "and 90."
-msgstr "Latitudinea punctului central inițial al hărții în grade. Trebuie să fie între -90 și 90."
+msgstr ""
 
 #: config_form.php:16
 msgid "Default Longitude"
-msgstr "Longitudinea de start"
+msgstr "기본 경도"
 
 #: config_form.php:19
 msgid ""
 "Longitude of the map's initial center point, in degrees. Must be between "
 "-180 and 180."
-msgstr "Longitudinea punctului central inițial al hărții în grade. Trebuie să fie între -180 și 180."
+msgstr ""
 
 #: config_form.php:26
 msgid "Default Zoom Level"
-msgstr "Nivelul de detaliu inițial"
+msgstr "기본 Zomm 레벨"
 
 #: config_form.php:29
 msgid ""
 "An integer greater than or equal to 0, where 0 represents the most zoomed "
 "out scale."
-msgstr "Un întreg mai mare decât sau egal cu 0. 0 reprezintă nivelul în afara scalei."
+msgstr ""
 
 #: config_form.php:36
 msgid "Map Type"
-msgstr "Tip hartă"
+msgstr "지도 유형"
 
 #: config_form.php:39
 msgid "The type of map to display"
@@ -108,27 +106,27 @@ msgstr ""
 
 #: config_form.php:42
 msgid "Roadmap"
-msgstr ""
+msgstr "로드맵"
 
 #: config_form.php:43
 msgid "Satellite"
-msgstr "Satelit"
+msgstr "위성"
 
 #: config_form.php:44
 msgid "Hybrid"
-msgstr "Hybrid"
+msgstr "하이브리드"
 
 #: config_form.php:45
 msgid "Terrain"
-msgstr "Teren"
+msgstr "지역"
 
 #: config_form.php:54
 msgid "Browse Map Settings"
-msgstr ""
+msgstr "지도 설정 보기"
 
 #: config_form.php:57
 msgid "Number of Locations Per Page"
-msgstr "Numărul de locații per pagină"
+msgstr "페이지당 장소 개수"
 
 #: config_form.php:60
 msgid "The number of locations displayed per page when browsing the map."
@@ -157,35 +155,35 @@ msgstr ""
 
 #: config_form.php:93
 msgid "Use metric distances"
-msgstr "Folosește sistemul metric"
+msgstr ""
 
 #: config_form.php:96
 msgid "Use metric distances in proximity search."
-msgstr "Folosește distanțele în metri pentru căutările într-un anumit perimetru."
+msgstr ""
 
 #: config_form.php:106
 msgid "Item Map Settings"
-msgstr ""
+msgstr "아이템 지도 설정"
 
 #: config_form.php:109
 msgid "Width for Item Map"
-msgstr "Lățimea hărții"
+msgstr "아이템 지도의 너비"
 
 #: config_form.php:112
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
-msgstr "Lățimea hărții afișate pe pagina resurselor/panotare. Dacă nu este completat, va fi utilizată o lățime de 100%."
+msgstr ""
 
 #: config_form.php:119
 msgid "Height for Item Map"
-msgstr "Înălțimea pentru Harta Resursei"
+msgstr "아이템 지도의 높이"
 
 #: config_form.php:122
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
-msgstr "Înălțimea hărții afișate pe pagina resurselor/panotare. Dacă nu este completat, va fi utilizată o înălțime de 300px."
+msgstr ""
 
 #: config_form.php:129
 msgid "Map Integration"
@@ -193,15 +191,15 @@ msgstr ""
 
 #: config_form.php:132
 msgid "Add Link to Map on Items/Browse Navigation"
-msgstr "Adaugă un link la hartă din Navigarea pe Resurse"
+msgstr "아이템/보기 메뉴에 지도 링크 추가"
 
 #: config_form.php:135
 msgid "Add a link to the items map on all the items/browse pages."
-msgstr ""
+msgstr "아이템/보기 페이지에 아이템 지도 링크 추가"
 
 #: config_form.php:145
 msgid "Add Map To Contribution Form"
-msgstr ""
+msgstr "기록물 기증 폼에 지도 추가"
 
 #: config_form.php:148
 msgid ""
@@ -236,28 +234,28 @@ msgstr ""
 
 #: views/admin/map/browse.php:4 views/public/map/browse.php:4
 msgid "Browse Items on the Map"
-msgstr ""
+msgstr "지도에 등록된 아이템 보기"
 
 #: views/admin/map/browse.php:4
 msgid "total"
-msgstr "total"
+msgstr "전체"
 
 #: views/admin/map/browse.php:13 views/public/map/browse.php:21
 msgid "Find An Item on the Map"
-msgstr ""
+msgstr "지도에서 아이템 검색"
 
 #: views/helpers/ItemGoogleMap.php:36
 msgid "This item has no location info associated with it."
-msgstr ""
+msgstr "이 아이템은 연관된 장소 정보가 없습니다."
 
 #: views/shared/map/advanced-search-partial.php:16
 msgid "Geographic Radius (kilometers)"
-msgstr ""
+msgstr "지리적 반경(킬로미터)"
 
 #: views/shared/map/advanced-search-partial.php:18
 msgid "Geographic Radius (miles)"
-msgstr ""
+msgstr "지리적 반경(마일)"
 
 #: views/shared/map/advanced-search-partial.php:25
 msgid "Geographic Address"
-msgstr "Adresă Geografică"
+msgstr "지리적 주소"
