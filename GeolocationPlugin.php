@@ -73,6 +73,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_per_page');
         delete_option('geolocation_add_map_to_contribution_form');
         delete_option('geolocation_use_metric_distances');
+        delete_option('geolocation_api_key');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
@@ -126,6 +127,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
         set_option('geolocation_map_type', $_POST['map_type']);
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
+        set_option('geolocation_api_key', $_POST['api_key']);
     }
 
     public function hookDefineAcl($args)
@@ -156,15 +158,23 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookAdminHead($args)
     {
-        queue_css_file('geolocation-marker');
-        queue_js_url("//maps.google.com/maps/api/js");
-        queue_js_file('map');
+        $this->_head();
     }
 
     public function hookPublicHead($args)
     {
+        $this->_head();
+    }
+
+    private function _head()
+    {
+        $key = get_option('geolocation_api_key');
+        $mapsUrl = '//maps.googleapis.com/maps/api/js';
+        if ($key) {
+            $mapsUrl .= "?key=$key";
+        }
         queue_css_file('geolocation-marker');
-        queue_js_url("//maps.google.com/maps/api/js");
+        queue_js_url($mapsUrl);
         queue_js_file('map');
     }
 
