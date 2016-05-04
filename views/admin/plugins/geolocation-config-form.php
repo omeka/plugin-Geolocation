@@ -56,6 +56,15 @@
             ?>
         </div>
     </div>
+    <div class="field">
+        <div class="two columns alpha">
+            <label for="api_key"><?php echo __('API Key'); ?></label>
+        </div>
+        <div class="inputs five columns omega">
+            <p class="explanation"><?php echo __('Google API key for this project.'); ?></p>
+            <?php echo $this->formText('api_key', get_option('geolocation_api_key')); ?>
+        </div>
+    </div>
 </fieldset>
 <fieldset id="fieldset-geolocation-browse">
     <legend><?php echo __('Browse Map Settings'); ?></legend>

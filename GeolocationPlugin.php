@@ -68,6 +68,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'geolocation_link_to_nav' => false,
         'geolocation_add_map_to_contribution_form' => false,
         'geolocation_accessible_markup' => false,
+        'geolocation_api_key' => '',
     );
 
     /**
@@ -275,15 +276,23 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookAdminHead($args)
     {
-        queue_css_file('geolocation-marker');
-        queue_js_url('//maps.google.com/maps/api/js');
-        queue_js_file('map');
+        $this->_head();
     }
 
     public function hookPublicHead($args)
     {
+        $this->_head();
+    }
+
+    private function _head()
+    {
+        $key = get_option('geolocation_api_key');
+        $mapsUrl = '//maps.googleapis.com/maps/api/js';
+        if ($key) {
+            $mapsUrl .= "?key=$key";
+        }
         queue_css_file('geolocation-marker');
-        queue_js_url('//maps.google.com/maps/api/js');
+        queue_js_url($mapsUrl);
         queue_js_file('map');
     }
 
