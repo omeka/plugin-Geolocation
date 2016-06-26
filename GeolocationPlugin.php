@@ -93,8 +93,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             `longitude` DOUBLE NOT NULL,
             `zoom_level` tinyint unsigned NOT NULL,
             `map_type` VARCHAR( 255 ) NOT NULL DEFAULT '',
-            `address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-            `description` mediumtext COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+            `address` text COLLATE utf8_unicode_ci NOT NULL,
+            `description` mediumtext COLLATE utf8_unicode_ci NOT NULL,
             PRIMARY KEY (`id`),
             INDEX (`item_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
@@ -143,8 +143,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 CHANGE `longitude` `longitude` DOUBLE NOT NULL,
                 CHANGE `zoom_level` `zoom_level` tinyint unsigned NOT NULL,
                 CHANGE `map_type` `map_type` VARCHAR( 255 ) NOT NULL DEFAULT '',
-                CHANGE `address` `address` text COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
-                ADD `description` mediumtext COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
+                CHANGE `address` `address` text COLLATE utf8_unicode_ci NOT NULL,
+                ADD `description` mediumtext COLLATE utf8_unicode_ci NOT NULL,
                 ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
             ";
             $db->query($sql);
