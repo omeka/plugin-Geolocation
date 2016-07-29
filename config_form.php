@@ -1,7 +1,24 @@
 <?php $view = get_view(); ?>
 <fieldset>
-    <legend><?php echo __('General Settings'); ?></legend>
-    <div class="field">
+<legend><?php echo __('General Settings'); ?></legend>
+
+<div class="field">
+    <div class="two columns alpha">
+        <label for="api_key"><?php echo __('API Key'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+            <?php
+            echo __('Google API key for this project. For more information, see %s.',
+                '<a target="_blank" href="https://developers.google.com/maps/web/">developers.google.com/maps/web</a>'
+            );
+            ?>
+        </p>
+        <?php echo $view->formText('api_key', get_option('geolocation_api_key')); ?>
+    </div>
+</div>
+
+<div class="field">
     <div class="two columns alpha">
         <label for="default_latitude"><?php echo __('Default Latitude'); ?></label>
     </div>
@@ -46,15 +63,6 @@
             )
         );
         ?>
-    </div>
-</div>
-<div class="field">
-    <div class="two columns alpha">
-        <label for="api_key"><?php echo __('API Key'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('Google API key for this project. For more information, see: %s','<a target="_blank" href="https://developers.google.com/maps/web/">developers.google.com/maps/web</a>'); ?></p>
-        <?php echo $view->formText('api_key', get_option('geolocation_api_key')); ?>
     </div>
 </div>
 </fieldset>
