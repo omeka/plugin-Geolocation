@@ -1,6 +1,7 @@
 #omeka-map-form {
     width: 100%;
     height: 300px;
+    clear: both;
 }
 button#geolocation_find_location_by_address {
     float: none;
