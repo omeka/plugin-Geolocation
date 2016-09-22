@@ -121,7 +121,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         // Use the form to set a bunch of default options in the db
         set_option('geolocation_default_latitude', $_POST['default_latitude']);
         set_option('geolocation_default_longitude', $_POST['default_longitude']);
-        set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']);
+        set_option('geolocation_default_zoom_level', $_POST['default_zoom_level']);
         set_option('geolocation_item_map_width', $_POST['item_map_width']);
         set_option('geolocation_item_map_height', $_POST['item_map_height']);
         $perPage = (int)$_POST['per_page'];

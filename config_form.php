@@ -40,11 +40,11 @@
 
 <div class="field">
     <div class="two columns alpha">
-        <label for="default_zoomlevel"><?php echo __('Default Zoom Level'); ?></label>
+        <label for="default_zoom_level"><?php echo __('Default Zoom Level'); ?></label>
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('An integer greater than or equal to 0, where 0 represents the most zoomed out scale.'); ?></p>
-        <?php echo $view->formText('default_zoomlevel', get_option('geolocation_default_zoom_level')); ?>
+        <?php echo $view->formText('default_zoom_level', get_option('geolocation_default_zoom_level')); ?>
     </div>
 </div>
 
