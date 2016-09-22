@@ -3,6 +3,9 @@
     height: 300px;
     clear: both;
 }
+#geolocation_address {
+    width: 80%;
+}
 button#geolocation_find_location_by_address {
     float: none;
 }
