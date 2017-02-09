@@ -12,6 +12,7 @@ OmekaMap.prototype = {
     options: {},
     center: null,
     markerBounds: null,
+    infoWindow: null,
     
     addMarker: function (lat, lng, options, bindHtml)
     {        
@@ -24,18 +25,11 @@ OmekaMap.prototype = {
         var marker = new google.maps.Marker(options);
         
         if (bindHtml) {
-            var infoWindow = new google.maps.InfoWindow({
-                content: bindHtml
-            });
-
             var that = this;
             google.maps.event.addListener(marker, 'click', function () {
                 // Prevent multiple windows from being open at once.
-                if (that.lastWindow) {
-                    that.lastWindow.close();
-                }
-                that.lastWindow = infoWindow;
-                infoWindow.open(this.map, marker);
+                that.infoWindow.setContent(bindHtml);
+                that.infoWindow.open(this.map, marker);
             });
         }
                
@@ -83,6 +77,7 @@ OmekaMap.prototype = {
 
         this.map = new google.maps.Map(document.getElementById(this.mapDivId), mapOptions);
         this.markerBounds = new google.maps.LatLngBounds();
+        this.infoWindow = new google.maps.InfoWindow();
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {
