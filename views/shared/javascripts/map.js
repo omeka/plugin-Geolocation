@@ -287,6 +287,25 @@ OmekaMapForm.prototype = {
     /* Get the geolocation of the address and add marker. */
     findAddress: function (address) {
         var that = this;
+
+        function setFoundAddress(point) {
+            // If required, ask the user if they want to add a marker to the geolocation point of the address.
+            // If so, add the marker, otherwise clear the address.
+            if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
+                var marker = that.setMarker(point);
+            } else {
+                jQuery('#geolocation_address').val('');
+                jQuery('#geolocation_address').focus();
+            }
+        }
+
+        // Use lat/lng pair
+        var latLngMatch = address.trim().match(/^(-?[\d]+(?:\.[\d]+)?)[\s]*[,;][\s]*(-?[\d]+(?:\.[\d]+)?)$/);
+        if (latLngMatch && Math.abs(latLngMatch[1]) <= 90 && Math.abs(latLngMatch[2]) <= 180) {
+            var point = new google.maps.LatLng(latLngMatch[1], latLngMatch[2]);
+            setFoundAddress(point);
+            return;
+        }
         if (!this.geocoder) {
             this.geocoder = new google.maps.Geocoder();
         }    
@@ -294,15 +313,7 @@ OmekaMapForm.prototype = {
             // If the point was found, then put the marker on that spot
             if (status == google.maps.GeocoderStatus.OK) {
                 var point = results[0].geometry.location;
-
-                // If required, ask the user if they want to add a marker to the geolocation point of the address.
-                // If so, add the marker, otherwise clear the address.
-                if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
-                    var marker = that.setMarker(point);
-                } else {
-                    jQuery('#geolocation_address').val('');
-                    jQuery('#geolocation_address').focus();
-                }
+                setFoundAddress(point);
             } else {
                 // If no point was found, give us an alert
                 alert('Error: "' + address + '" was not found!');
