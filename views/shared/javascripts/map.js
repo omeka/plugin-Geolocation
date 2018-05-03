@@ -12,35 +12,23 @@ OmekaMap.prototype = {
     options: {},
     center: null,
     markerBounds: null,
-    infoWindow: null,
     
-    addMarker: function (lat, lng, options, bindHtml)
-    {        
-        if (!options) {
-            options = {};
-        }
-        options.position = new google.maps.LatLng(lat, lng);
-        options.map = this.map;
-          
-        var marker = new google.maps.Marker(options);
+    addMarker: function (latLng, options, bindHtml)
+    {
+        var marker = L.marker(latLng, options).addTo(this.map);
         
         if (bindHtml) {
-            var that = this;
-            google.maps.event.addListener(marker, 'click', function () {
-                // Prevent multiple windows from being open at once.
-                that.infoWindow.setContent(bindHtml);
-                that.infoWindow.open(this.map, marker);
-            });
+            marker.bindPopup(bindHtml);
         }
                
         this.markers.push(marker);
-        this.markerBounds.extend(options.position);
+        this.markerBounds.extend(latLng);
         return marker;
     },
 
     fitMarkers: function () {
         if (this.markers.length == 1) {
-            this.map.setCenter(this.markers[0].getPosition());
+            this.map.panTo(this.markers[0].getLatLng());
         } else {
             this.map.fitBounds(this.markerBounds);
         }
@@ -52,12 +40,7 @@ OmekaMap.prototype = {
             return;
         }
 
-        // Build the map.
-        var mapOptions = {
-            zoom: this.center.zoomLevel,
-            center: new google.maps.LatLng(this.center.latitude, this.center.longitude),
-        };
-
+        /*
         switch (this.options.mapType) {
         case 'hybrid':
             mapOptions.mapTypeId = google.maps.MapTypeId.HYBRID;
@@ -74,15 +57,16 @@ OmekaMap.prototype = {
         }
 
         jQuery.extend(mapOptions, this.options.mapOptions);
+        */
 
-        this.map = new google.maps.Map(document.getElementById(this.mapDivId), mapOptions);
-        this.markerBounds = new google.maps.LatLngBounds();
-        this.infoWindow = new google.maps.InfoWindow();
+        this.map = L.map(this.mapDivId).setView([this.center.latitude, this.center.longitude], this.center.zoomLevel);
+        this.markerBounds = L.latLngBounds();
+
+        L.tileLayer.provider('CartoDB.Positron').addTo(this.map);
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {
-            this.addMarker(this.center.latitude, 
-                           this.center.longitude, 
+            this.addMarker([this.center.latitude, this.center.longitude],
                            {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"}, 
                            this.center.markerHtml);
         }
@@ -183,15 +167,7 @@ OmekaMapBrowse.prototype = {
         balloon = balloon.replace('$[namewithlink]', titleWithLink).replace('$[description]', body).replace('$[Snippet]', snippet);
 
         // Build a marker, add HTML for it
-        this.addMarker(latitude, longitude, {title: title}, balloon);
-    },
-    
-    // Calculate the zoom level given the 'range' value
-    // Not currently used by this class, but possibly useful
-    // http://throwless.wordpress.com/2008/02/23/gmap-geocoding-zoom-level-and-accuracy/
-    calculateZoom: function (range, width, height) {
-        var zoom = 18 - Math.log(3.3 * range / Math.sqrt(width * width + height * height)) / Math.log(2);
-        return zoom;
+        this.addMarker([latitude, longitude], {title: title}, balloon);
     },
     
     buildListLinks: function (container) {
@@ -211,12 +187,12 @@ OmekaMapBrowse.prototype = {
             link.attr('href', 'javascript:void(0);');
 
             // Each <li> starts with the title of the item            
-            link.html(marker.getTitle());
+            link.html(marker.options.title);
 
             // Clicking the link should take us to the map
             link.bind('click', {}, function (event) {
-                google.maps.event.trigger(marker, 'click');
-                that.map.panTo(marker.getPosition()); 
+                marker.fire('click');
+                that.map.flyTo(marker.getLatLng()); 
             });     
 
             link.appendTo(listElement);
@@ -240,17 +216,17 @@ function OmekaMapForm(mapDivId, center, options) {
     this.formDiv = jQuery('#' + this.options.form.id);       
         
     // Make the map clickable to add a location point.
-    google.maps.event.addListener(this.map, 'click', function (event) {
+    this.map.on('click', function (event) {
         // If we are clicking a new spot on the map
         if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
-            var point = event.latLng;
+            var point = event.latlng;
             var marker = that.setMarker(point);
             jQuery('#geolocation_address').val('');
         }
     });
 	
     // Make the map update on zoom changes.
-    google.maps.event.addListener(this.map, 'zoom_changed', function () {
+    this.map.on('zoomend', function () {
         that.updateZoomForm();
     });
 
@@ -275,11 +251,8 @@ function OmekaMapForm(mapDivId, center, options) {
 
     // Add the existing map point.
     if (this.options.point) {
+        this.setMarker(L.latLng(this.options.point.latitude, this.options.point.longitude));
         this.map.setZoom(this.options.point.zoomLevel);
-
-        var point = new google.maps.LatLng(this.options.point.latitude, this.options.point.longitude);
-        var marker = this.setMarker(point);
-        this.map.setCenter(marker.getPosition());
     }
 }
 
@@ -325,19 +298,19 @@ OmekaMapForm.prototype = {
     /* Set the marker to the point. */   
     setMarker: function (point) {
         var that = this;
-        
+
         // Get rid of existing markers.
         this.clearForm();
         
         // Add the marker
-        var marker = this.addMarker(point.lat(), point.lng());
-        marker.setAnimation(google.maps.Animation.DROP);
+        var marker = this.addMarker(point);
+        //marker.setAnimation(google.maps.Animation.DROP);
         
         // Pan the map to the marker
-        that.map.panTo(point);
+        this.map.panTo(point);
         
         //  Make the marker clear the form if clicked.
-        google.maps.event.addListener(marker, 'click', function (event) {
+        marker.on('click', function (event) {
             if (!that.options.confirmLocationChange || confirm('Are you sure you want to remove the location of the item?')) {
                 that.clearForm();
             }
@@ -355,8 +328,8 @@ OmekaMapForm.prototype = {
         
         // If we passed a point, then set the form to that. If there is no point, clear the form
         if (point) {
-            latElement.value = point.lat();
-            lngElement.value = point.lng();
+            latElement.value = point.lat;
+            lngElement.value = point.lng;
             zoomElement.value = this.map.getZoom();          
         } else {
             latElement.value = '';
@@ -375,7 +348,7 @@ OmekaMapForm.prototype = {
     clearForm: function () {
         // Remove the markers from the map
         for (var i = 0; i < this.markers.length; i++) {
-            this.markers[i].setMap(null);
+            this.markers[i].remove();
         }
         
         // Clear the markers array
@@ -387,7 +360,8 @@ OmekaMapForm.prototype = {
     
     /* Resize the map and center it on the first marker. */
     resize: function () {
-        google.maps.event.trigger(this.map, 'resize');
+        this.map.invalidateSize();
+        /*
         var point;
         if (this.markers.length) {
             var marker = this.markers[0];
@@ -396,5 +370,6 @@ OmekaMapForm.prototype = {
             point = new google.maps.LatLng(this.center.latitude, this.center.longitude);
         }
         this.map.setCenter(point);
+        */
     }
 };
