@@ -134,9 +134,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
         set_option('geolocation_default_radius', $_POST['geolocation_default_radius']);
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
-        set_option('geolocation_map_type', $_POST['map_type']);
+        set_option('geolocation_basemap', $_POST['basemap']);
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
-        set_option('geolocation_api_key', $_POST['api_key']);
     }
 
     public function hookDefineAcl($args)
@@ -636,6 +635,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                     'zoomLevel' => $zoom);
         }
         $options['confirmLocationChange'] = $confirmLocationChange;
+        $options['basemap'] = get_option('geolocation_basemap');
 
         $center = js_escape($center);
         $options = js_escape($options);

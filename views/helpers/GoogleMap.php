@@ -22,8 +22,8 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
             $options['uri'] = url('geolocation/map.kml');
         }
 
-        if (!array_key_exists('mapType', $options)) {
-            $options['mapType'] = get_option('geolocation_map_type');
+        if (!array_key_exists('basemap', $options)) {
+            $options['basemap'] = get_option('geolocation_basemap');
         }
 
         if (!array_key_exists('fitMarkers', $options)) {

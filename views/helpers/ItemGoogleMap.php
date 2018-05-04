@@ -23,7 +23,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
                                       . '<p class="geolocation_balloon_description">' . $description . '</p></div>';
             }
             $options = array();
-            $options['mapType'] = get_option('geolocation_map_type');
+            $options['basemap'] = get_option('geolocation_basemap');
             $center = js_escape($center);
             $options = js_escape($options);
             $style = "width: $width; height: $height";

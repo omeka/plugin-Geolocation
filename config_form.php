@@ -4,22 +4,6 @@
 
 <div class="field">
     <div class="two columns alpha">
-        <label for="api_key"><?php echo __('API Key'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation">
-            <?php
-            echo __('Google API key for this project. For more information, see %s.',
-                '<a target="_blank" href="https://developers.google.com/maps/web/">developers.google.com/maps/web</a>'
-            );
-            ?>
-        </p>
-        <?php echo $view->formText('api_key', get_option('geolocation_api_key')); ?>
-    </div>
-</div>
-
-<div class="field">
-    <div class="two columns alpha">
         <label for="default_latitude"><?php echo __('Default Latitude'); ?></label>
     </div>
     <div class="inputs five columns omega">
@@ -50,18 +34,60 @@
 
 <div class="field">
     <div class="two columns alpha">
-        <label for="map_type"><?php echo __('Map Type'); ?></label>
+        <label for="map_type"><?php echo __('Base Map'); ?></label>
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The type of map to display'); ?></p>
         <?php
-        echo $view->formSelect('map_type', get_option('geolocation_map_type'), array(), array(
-            'roadmap' => __('Roadmap'),
-            'satellite' => __('Satellite'),
-            'hybrid' =>__('Hybrid'),
-            'terrain' => __('Terrain')
-            )
-        );
+        echo $view->formSelect('basemap', get_option('geolocation_basemap'), array(), array(
+            __('OpenStreetMap') => array(
+                'OpenStreetMap' => __('Standard'),
+                'OpenStreetMap.BlackAndWhite' => __('Grayscale'),
+                'OpenStreetMap.HOT' => __('Humanitarian'),
+            ),
+            __('OpenTopoMap') => array(
+                'OpenTopoMap' => __('OpenTopoMap'),
+            ),
+            __('OpenMapSurfer') => array(
+                'OpenMapSurfer.Roads' => __('Roads'),
+                'OpenMapSurfer.AdminBounds' => __('Administrative Boundaries'),
+                'OpenMapSurfer.Grayscale' => __('Grayscale'),
+            ),
+            __('Hydda') => array(
+                'Hydda.Full' => __('Full'),
+                'Hydda.Base' => __('Base'),
+                'Hydda.RoadsAndLabels' => __('Roads and Labels'),
+            ),
+            __('Stamen') => array(
+                'Stamen.Toner' => __('Toner'),
+                'Stamen.TonerBackground' => __('Toner (background)'),
+                'Stamen.TonerLite' => __('Toner (lite)'),
+                'Stamen.Watercolor' => __('Watercolor'),
+                'Stamen.Terrain' => __('Terrain'),
+                'Stamen.TerrainBackground' => __('Terrain (background)'),
+                'Stamen.TopOSMRelief' => __('TopOSM Relief'),
+            ),
+            __('Esri') => array(
+                'Esri.WorldStreetMap' => __('World Street Map'),
+                'Esri.DeLorme' => __('DeLorme'),
+                'Esri.WorldTopoMap' => __('World Topographic Map'),
+                'Esri.WorldImagery' => __('World Imagery'),
+                'Esri.WorldTerrain' => __('World Terrain'),
+                'Esri.WorldShadedRelief' => __('World Shaded Relief'),
+                'Esri.WorldPhysical' => __('World Physical Map'),
+                'Esri.OceanBasemap' => __('Ocean Basemap'),
+                'Esri.NatGeoWorldMap' => __('National Geographic World Map'),
+                'Esri.WorldGrayCanvas' => __('Light Gray Canvas'),
+            ),
+            __('CartoDB') => array(
+                'CartoDB.Positron' => __('Positron'),
+                'CartoDB.PositronNoLabels' => __('Positron (no labels)'),
+                'CartoDB.PositronOnlyLabels' => __('Positron (only labels)'),
+                'CartoDB.DarkMatter' => __('Dark Matter'),
+                'CartoDB.DarkMatterNoLabels' => __('Dark Matter (no labels)'),
+                'CartoDB.DarkMatterOnlyLabels' => __('Dark Matter (only labels)'),
+            ),
+        ));
         ?>
     </div>
 </div>
