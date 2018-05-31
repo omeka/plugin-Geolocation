@@ -2,7 +2,6 @@
 
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
-    const GOOGLE_MAPS_API_VERSION = '3.x';
     const DEFAULT_LOCATIONS_PER_PAGE = 10;
 
     protected $_hooks = array(
