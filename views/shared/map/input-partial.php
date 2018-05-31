@@ -19,9 +19,36 @@ $options = js_escape($options);
 </div>
 <div id="omeka-map-form"></div>
 
+<?php echo js_tag('geocoder'); ?>
 <script type="text/javascript">
 var omekaGeolocationForm = new OmekaMapForm('omeka-map-form', <?php echo $center; ?>, <?php echo $options; ?>);
+var geocoder = new OmekaGeocoder('photon');
 jQuery(document).on('omeka:tabselected', function () {
     omekaGeolocationForm.resize();
+});
+
+jQuery(document).ready(function () {
+    // Make the Find By Address button lookup the geocode of an address and add a marker.
+    jQuery('#geolocation_find_location_by_address').on('click', function (event) {
+        event.preventDefault();
+        var address = jQuery('#geolocation_address').val();
+        geocoder.geocode(address).then(function (coords) {
+            var marker = omekaGeolocationForm.setMarker(L.latLng(coords));
+            if (marker === false) {
+                jQuery('#geolocation_address').val('');
+                jQuery('#geolocation_address').focus();
+            }
+        }, function () {
+            alert('Error: "' + address + '" was not found!');
+        });
+    });
+
+    // Make the return key in the geolocation address input box click the button to find the address.
+    jQuery('#geolocation_address').on('keydown', function (event) {
+        if (event.which == 13) {
+            event.preventDefault();
+            jQuery('#geolocation_find_location_by_address').click();
+        }
+    });
 });
 </script>

@@ -218,9 +218,8 @@ function OmekaMapForm(mapDivId, center, options) {
     // Make the map clickable to add a location point.
     this.map.on('click', function (event) {
         // If we are clicking a new spot on the map
-        if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
-            var point = event.latlng;
-            var marker = that.setMarker(point);
+        var marker = that.setMarker(event.latlng);
+        if (marker) {
             jQuery('#geolocation_address').val('');
         }
     });
@@ -228,25 +227,6 @@ function OmekaMapForm(mapDivId, center, options) {
     // Make the map update on zoom changes.
     this.map.on('zoomend', function () {
         that.updateZoomForm();
-    });
-
-    // Make the Find By Address button lookup the geocode of an address and add a marker.
-    jQuery('#geolocation_find_location_by_address').bind('click', function (event) {
-        var address = jQuery('#geolocation_address').val();
-        that.findAddress(address);
-
-        //Don't submit the form
-        event.stopPropagation();
-        return false;
-    });
-	
-    // Make the return key in the geolocation address input box click the button to find the address.
-    jQuery('#geolocation_address').bind('keydown', function (event) {
-        if (event.which == 13) {
-            jQuery('#geolocation_find_location_by_address').click();
-            event.stopPropagation();
-            return false;
-        }
     });
 
     // Add the existing map point.
@@ -258,47 +238,16 @@ function OmekaMapForm(mapDivId, center, options) {
 }
 
 OmekaMapForm.prototype = {
-    /* Get the geolocation of the address and add marker. */
-    findAddress: function (address) {
-        var that = this;
-
-        function setFoundAddress(point) {
-            // If required, ask the user if they want to add a marker to the geolocation point of the address.
-            // If so, add the marker, otherwise clear the address.
-            if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
-                var marker = that.setMarker(point);
-            } else {
-                jQuery('#geolocation_address').val('');
-                jQuery('#geolocation_address').focus();
-            }
-        }
-
-        // Use lat/lng pair
-        var latLngMatch = address.trim().match(/^(-?[\d]+(?:\.[\d]+)?)[\s]*[,;][\s]*(-?[\d]+(?:\.[\d]+)?)$/);
-        if (latLngMatch && Math.abs(latLngMatch[1]) <= 90 && Math.abs(latLngMatch[2]) <= 180) {
-            var point = new google.maps.LatLng(latLngMatch[1], latLngMatch[2]);
-            setFoundAddress(point);
-            return;
-        }
-        if (!this.geocoder) {
-            this.geocoder = new google.maps.Geocoder();
-        }    
-        this.geocoder.geocode({'address': address}, function (results, status) {
-            // If the point was found, then put the marker on that spot
-            if (status == google.maps.GeocoderStatus.OK) {
-                var point = results[0].geometry.location;
-                setFoundAddress(point);
-            } else {
-                // If no point was found, give us an alert
-                alert('Error: "' + address + '" was not found!');
-                return null;
-            }
-        });
-    },
-    
     /* Set the marker to the point. */   
     setMarker: function (point) {
         var that = this;
+
+        if (this.options.confirmLocationChange
+            && this.markers.length > 0
+            && !confirm('Are you sure you want to change the location of the item?')
+        ) {
+            return false;
+        }
 
         // Get rid of existing markers.
         this.clearForm();
