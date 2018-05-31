@@ -251,8 +251,9 @@ function OmekaMapForm(mapDivId, center, options) {
 
     // Add the existing map point.
     if (this.options.point) {
-        this.setMarker(L.latLng(this.options.point.latitude, this.options.point.longitude));
-        this.map.setZoom(this.options.point.zoomLevel);
+        var point = L.latLng(this.options.point.latitude, this.options.point.longitude);
+        this.setMarker(point);
+        this.map.setView(point, this.options.point.zoomLevel);
     }
 }
 
