@@ -637,29 +637,15 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $options['confirmLocationChange'] = $confirmLocationChange;
         $options['basemap'] = get_option('geolocation_basemap');
 
-        $center = js_escape($center);
-        $options = js_escape($options);
-
-        $js = "var anOmekaMapForm = new OmekaMapForm(" . js_escape('omeka-map-form') . ", $center, $options);";
-        $js .= "
-            jQuery(document).bind('omeka:tabselected', function () {
-                anOmekaMapForm.resize();
-            });
-        ";
-
-        $html .= '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
-        $html .= '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
-        $html .= '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
-        $html .= '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . self::GOOGLE_MAPS_API_VERSION . '" />';
-
-        $html .= $view->partial('map/input-partial.php', array(
+        return $view->partial('map/input-partial.php', array(
             'label' => $label,
             'address' => $address,
+            'center' => $center,
+            'options' => $options,
+            'lng' => $lng,
+            'lat' => $lat,
+            'zoom' => $zoom,
         ));
-
-        $html .= "<script type='text/javascript'>" . $js . "</script>";
-
-        return $html;
     }
 
     protected function _getCenter()
