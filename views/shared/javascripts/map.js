@@ -40,25 +40,6 @@ OmekaMap.prototype = {
             return;
         }
 
-        /*
-        switch (this.options.mapType) {
-        case 'hybrid':
-            mapOptions.mapTypeId = google.maps.MapTypeId.HYBRID;
-            break;
-        case 'satellite':
-            mapOptions.mapTypeId = google.maps.MapTypeId.SATELLITE;
-            break;
-        case 'terrain':
-            mapOptions.mapTypeId = google.maps.MapTypeId.TERRAIN;
-            break;
-        case 'roadmap':
-        default:
-            mapOptions.mapTypeId = google.maps.MapTypeId.ROADMAP;
-        }
-
-        jQuery.extend(mapOptions, this.options.mapOptions);
-        */
-
         this.map = L.map(this.mapDivId).setView([this.center.latitude, this.center.longitude], this.center.zoomLevel);
         this.markerBounds = L.latLngBounds();
 
@@ -254,7 +235,6 @@ OmekaMapForm.prototype = {
         
         // Add the marker
         var marker = this.addMarker(point);
-        //marker.setAnimation(google.maps.Animation.DROP);
         
         // Pan the map to the marker
         this.map.panTo(point);
@@ -311,15 +291,5 @@ OmekaMapForm.prototype = {
     /* Resize the map and center it on the first marker. */
     resize: function () {
         this.map.invalidateSize();
-        /*
-        var point;
-        if (this.markers.length) {
-            var marker = this.markers[0];
-            point = marker.getPosition();
-        } else {
-            point = new google.maps.LatLng(this.center.latitude, this.center.longitude);
-        }
-        this.map.setCenter(point);
-        */
     }
 };
