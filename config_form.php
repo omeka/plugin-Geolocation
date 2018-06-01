@@ -34,7 +34,7 @@
 
 <div class="field">
     <div class="two columns alpha">
-        <label for="map_type"><?php echo __('Base Map'); ?></label>
+        <label for="basemap"><?php echo __('Base Map'); ?></label>
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The type of map to display'); ?></p>
@@ -87,8 +87,41 @@
                 'CartoDB.DarkMatterNoLabels' => __('Dark Matter (no labels)'),
                 'CartoDB.DarkMatterOnlyLabels' => __('Dark Matter (only labels)'),
             ),
+            __('Mapbox') => array(
+                'MapBox' => __('Mapbox (see settings below)')
+            ),
         ));
         ?>
+    </div>
+</div>
+
+<div class="field mapbox-settings">
+    <div class="two columns alpha">
+        <label for="mapbox_access_token"><?php echo __('Mapbox Access Token'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+        <?php
+        echo __('Mapbox access token. A token is required when Mapbox is selected as the basemap. Get your token at %s.',
+            '<a target="_blank" href="https://www.mapbox.com/account/access-tokens/">https://www.mapbox.com/account/access-tokens/</a>'
+
+        );
+        ?>
+        </p>
+        <?php echo $view->formText('mapbox_access_token', get_option('geolocation_mapbox_access_token')); ?>
+    </div>
+</div>
+<div class="field mapbox-settings">
+    <div class="two columns alpha">
+        <label for="mapbox_map_id"><?php echo __('Mapbox Map ID'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+        <?php
+        echo __('Mapbox Map ID for the map to display as the basemap. The default "streets" map will be used if nothing is entered here.');
+        ?>
+        </p>
+        <?php echo $view->formText('mapbox_map_id', get_option('geolocation_mapbox_map_id')); ?>
     </div>
 </div>
 </fieldset>
@@ -196,3 +229,12 @@
     </div>
 </div>
 </fieldset>
+<script type="text/javascript">
+function toggleMapboxSettings() {
+    jQuery('.mapbox-settings').toggle(jQuery('#basemap').val() === 'MapBox');
+}
+jQuery(document).ready(function () {
+    toggleMapboxSettings();
+    jQuery('#basemap').on('change', toggleMapboxSettings);
+});
+</script>

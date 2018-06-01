@@ -1,6 +1,6 @@
 <?php
 $center = js_escape($center);
-$options = js_escape($options);
+$options = $this->geolocationMapOptions($options);
 ?>
 
 <input type="hidden" name="geolocation[latitude]" value="<?php echo $lat; ?>">

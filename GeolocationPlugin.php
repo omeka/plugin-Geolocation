@@ -135,6 +135,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
         set_option('geolocation_basemap', $_POST['basemap']);
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
+        set_option('geolocation_mapbox_access_token', $_POST['mapbox_access_token']);
+        set_option('geolocation_mapbox_map_id', $_POST['mapbox_map_id']);
     }
 
     public function hookDefineAcl($args)
@@ -634,7 +636,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                     'zoomLevel' => $zoom);
         }
         $options['confirmLocationChange'] = $confirmLocationChange;
-        $options['basemap'] = get_option('geolocation_basemap');
 
         return $view->partial('map/input-partial.php', array(
             'label' => $label,

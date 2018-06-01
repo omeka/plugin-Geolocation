@@ -25,7 +25,7 @@ class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
             $options = array();
             $options['basemap'] = get_option('geolocation_basemap');
             $center = js_escape($center);
-            $options = js_escape($options);
+            $options = $this->view->geolocationMapOptions($options);
             $style = "width: $width; height: $height";
             $html = '<div id="' . $divId . '" class="map geolocation-map" style="' . $style . '"></div>';
             

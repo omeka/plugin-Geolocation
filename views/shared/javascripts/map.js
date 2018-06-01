@@ -43,7 +43,7 @@ OmekaMap.prototype = {
         this.map = L.map(this.mapDivId).setView([this.center.latitude, this.center.longitude], this.center.zoomLevel);
         this.markerBounds = L.latLngBounds();
 
-        L.tileLayer.provider(this.options.basemap).addTo(this.map);
+        L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {

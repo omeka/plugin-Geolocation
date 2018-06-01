@@ -7,9 +7,6 @@ $center = array(
 );
 $locationTable = get_db()->getTable('Location');
 $locations = array();
-$mapOptions = array(
-    'basemap' => get_option('geolocation_basemap')
-);
 foreach ($attachments as $attachment):
     $item = $attachment->getItem();
     $file = $attachment->getFile();
@@ -42,7 +39,7 @@ jQuery(window).on('load', function () {
     var geolocation_map = new OmekaMap(
         <?php echo json_encode($divId); ?>,
         <?php echo json_encode($center); ?>,
-        <?php echo json_encode($mapOptions); ?>);
+        <?php echo $this->geolocationMapOptions(); ?>);
     geolocation_map.initMap();
     var map_locations = <?php echo json_encode($locations); ?>;
     for (var i = 0; i < map_locations.length; i++) {
