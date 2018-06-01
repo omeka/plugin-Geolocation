@@ -29,7 +29,7 @@ OmekaMap.prototype = {
     fitMarkers: function () {
         if (this.markers.length == 1) {
             this.map.panTo(this.markers[0].getLatLng());
-        } else {
+        } else if (this.markers.length > 0) {
             this.map.fitBounds(this.markerBounds, {padding: [25, 25]});
         }
     },
