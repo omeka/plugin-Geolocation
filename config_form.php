@@ -80,6 +80,9 @@
                 'Esri.WorldGrayCanvas' => __('Light Gray Canvas'),
             ),
             __('CartoDB') => array(
+                'CartoDB.Voyager' => __('Voyager'),
+                'CartoDB.VoyagerNoLabels' => __('Voyager (no labels)'),
+                'CartoDB.VoyagerOnlyLabels' => __('Voyager (only labels'),
                 'CartoDB.Positron' => __('Positron'),
                 'CartoDB.PositronNoLabels' => __('Positron (no labels)'),
                 'CartoDB.PositronOnlyLabels' => __('Positron (only labels)'),
