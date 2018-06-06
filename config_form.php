@@ -48,16 +48,6 @@
             __('OpenTopoMap') => array(
                 'OpenTopoMap' => __('OpenTopoMap'),
             ),
-            __('OpenMapSurfer') => array(
-                'OpenMapSurfer.Roads' => __('Roads'),
-                'OpenMapSurfer.AdminBounds' => __('Administrative Boundaries'),
-                'OpenMapSurfer.Grayscale' => __('Grayscale'),
-            ),
-            __('Hydda') => array(
-                'Hydda.Full' => __('Full'),
-                'Hydda.Base' => __('Base'),
-                'Hydda.RoadsAndLabels' => __('Roads and Labels'),
-            ),
             __('Stamen') => array(
                 'Stamen.Toner' => __('Toner'),
                 'Stamen.TonerBackground' => __('Toner (background)'),
@@ -65,7 +55,6 @@
                 'Stamen.Watercolor' => __('Watercolor'),
                 'Stamen.Terrain' => __('Terrain'),
                 'Stamen.TerrainBackground' => __('Terrain (background)'),
-                'Stamen.TopOSMRelief' => __('TopOSM Relief'),
             ),
             __('Esri') => array(
                 'Esri.WorldStreetMap' => __('World Street Map'),
@@ -82,13 +71,10 @@
             __('CartoDB') => array(
                 'CartoDB.Voyager' => __('Voyager'),
                 'CartoDB.VoyagerNoLabels' => __('Voyager (no labels)'),
-                'CartoDB.VoyagerOnlyLabels' => __('Voyager (only labels'),
                 'CartoDB.Positron' => __('Positron'),
                 'CartoDB.PositronNoLabels' => __('Positron (no labels)'),
-                'CartoDB.PositronOnlyLabels' => __('Positron (only labels)'),
                 'CartoDB.DarkMatter' => __('Dark Matter'),
                 'CartoDB.DarkMatterNoLabels' => __('Dark Matter (no labels)'),
-                'CartoDB.DarkMatterOnlyLabels' => __('Dark Matter (only labels)'),
             ),
             __('Mapbox') => array(
                 'MapBox' => __('Mapbox (see settings below)')
