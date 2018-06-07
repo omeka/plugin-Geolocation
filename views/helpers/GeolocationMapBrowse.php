@@ -1,8 +1,8 @@
 <?php
 
-class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
+class Geolocation_View_Helper_GeolocationMapBrowse extends Zend_View_Helper_Abstract
 {
-    public function googleMap($divId = 'map', $options = array(), $attrs = array(), $center = array())
+    public function geolocationMapBrowse($divId = 'map', $options = array(), $attrs = array(), $center = array())
     {
         if (!$center) {
             $center = array(

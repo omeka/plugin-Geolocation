@@ -1,8 +1,8 @@
 <?php
 
-class Geolocation_View_Helper_ItemGoogleMap extends Zend_View_Helper_Abstract
+class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abstract
 {    
-    public function itemGoogleMap($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = false, $markerHtmlClassName = 'geolocation_balloon')
+    public function geolocationMapSingle($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = false, $markerHtmlClassName = 'geolocation_balloon')
     {
         $divId = "item-map-{$item->id}";
         $location = get_db()->getTable('Location')->findLocationByItem($item, true);
