@@ -172,7 +172,9 @@ OmekaMapBrowse.prototype = {
 
             // Clicking the link should take us to the map
             link.bind('click', {}, function (event) {
-                marker.fire('click');
+                that.map.once('moveend', function () {
+                    marker.fire('click');
+                });
                 that.map.flyTo(marker.getLatLng()); 
             });     
 
