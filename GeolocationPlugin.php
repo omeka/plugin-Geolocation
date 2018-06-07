@@ -631,9 +631,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $options['form'] = array('id' => 'location_form',
                 'posted' => $usePost);
         if ($location or $usePost) {
-            $options['point'] = array('latitude' => $lat,
-                    'longitude' => $lng,
-                    'zoomLevel' => $zoom);
+            $options['point'] = array(
+                'latitude' => $lat,
+                'longitude' => $lng,
+                'zoomLevel' => $zoom);
+            $center = $options['point'];
         }
         $options['confirmLocationChange'] = $confirmLocationChange;
 
