@@ -15,10 +15,29 @@ OmekaMap.prototype = {
     
     addMarker: function (latLng, options, bindHtml)
     {
-        var marker = L.marker(latLng, options).addTo(this.map);
+        var map = this.map;
+        var marker = L.marker(latLng, options).addTo(map);
         
         if (bindHtml) {
             marker.bindPopup(bindHtml);
+            // Fit images on the map on first load
+            marker.once('popupopen', function (event) {
+                var popup = event.popup;
+                var imgs = popup.getElement().getElementsByTagName('img');
+                for (var i = 0; i < imgs.length; i++) {
+                    imgs[i].addEventListener('load', function imgLoadListener(event) {
+                        event.target.removeEventListener('load', imgLoadListener);
+                        // Marker autopan is disabled during panning, so defer
+                        if (map._panAnim && map._panAnim._inProgress) {
+                            map.once('moveend', function () {
+                                popup.update();
+                            });
+                        } else {
+                            popup.update();
+                        }
+                    });
+                }
+            });
         }
                
         this.markers.push(marker);
