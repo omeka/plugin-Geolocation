@@ -26,8 +26,8 @@ if (get_option('geolocation_use_metric_distances')) {
     </div>
     <div class="five columns omega inputs">
         <?php echo $this->formText('geolocation-address',  $address, array('size' => '40', 'id' => 'geolocation-address-input')); ?>
-        <?php echo $this->formHidden('geolocation-latitude', $currentLat); ?>
-        <?php echo $this->formHidden('geolocation-longitude', $currentLng); ?>
+        <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('id' => 'geolocation-latitude-input')); ?>
+        <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('id' => 'geolocation-longitude-input')); ?>
     </div>
 </div>
 
@@ -57,8 +57,8 @@ if (get_option('geolocation_use_metric_distances')) {
             if ($.trim(address).length > 0) {
                 event.preventDefault();
                 geocoder.geocode(address).then(function (coords) {
-                    $('#geolocation-latitude').val(coords[0]);
-                    $('#geolocation-longitude').val(coords[1]);
+                    $('#geolocation-latitude-input').val(coords[0]);
+                    $('#geolocation-longitude-input').val(coords[1]);
                     pauseForm = false;
                     form.submit();
                 }, function () {
