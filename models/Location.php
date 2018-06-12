@@ -14,6 +14,19 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
     public $address;
     
     /**
+     * Executes before the record is saved.
+     */
+    protected function beforeSave($args)
+    {
+        if (is_null($this->map_type)) {
+            $this->map_type = '';
+        }
+        if (is_null($this->address)) {
+            $this->address = '';
+        }
+    }
+
+    /**
      * Validate this location before saving.
      */
     protected function _validate()
