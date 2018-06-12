@@ -25,7 +25,7 @@ if (get_option('geolocation_use_metric_distances')) {
         <?php echo $this->formLabel('geolocation-address', __('Geographic Address')); ?>
     </div>
     <div class="five columns omega inputs">
-        <?php echo $this->formText('geolocation-address',  $address, array('size' => '40')); ?>
+        <?php echo $this->formText('geolocation-address',  $address, array('size' => '40', 'id' => 'geolocation-address-input')); ?>
         <?php echo $this->formHidden('geolocation-latitude', $currentLat); ?>
         <?php echo $this->formHidden('geolocation-longitude', $currentLng); ?>
     </div>
@@ -46,14 +46,14 @@ if (get_option('geolocation_use_metric_distances')) {
     $(document).ready(function() {
         var geocoder = new OmekaGeocoder('photon');
         var pauseForm = true;
-        $('#geolocation-address').parents('form').submit(function(event) {
+        $('#geolocation-address-input').parents('form').submit(function(event) {
             // Find the geolocation for the address
             if (!pauseForm) {
                 return;
             }
 
             var form = this;
-            var address = $('#geolocation-address').val();
+            var address = $('#geolocation-address-input').val();
             if ($.trim(address).length > 0) {
                 event.preventDefault();
                 geocoder.geocode(address).then(function (coords) {
