@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Helper used to preprocess options passed to the Geolocation JS.
+ *
+ * Specifies mandatory defaults if they're not present in the given options,
+ * and outputs them in a format for use in JS.
+ */
 class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abstract
 {
     public function geolocationMapOptions($options = array())

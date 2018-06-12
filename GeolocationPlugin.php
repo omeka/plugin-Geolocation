@@ -189,15 +189,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     private function _head()
     {
-        /*$key = get_option('geolocation_api_key');
-        $mapsUrl = '//maps.googleapis.com/maps/api/js';
-        if ($key) {
-            $mapsUrl .= "?key=$key";
-        }
-        queue_css_file('geolocation-marker');
-        queue_js_url($mapsUrl);
-        queue_js_file('map');*/
-
         queue_css_file('leaflet/leaflet', null, null, 'javascripts');
         queue_css_file('geolocation-marker');
         queue_js_file(array('leaflet/leaflet', 'leaflet/leaflet-providers', 'map'));
