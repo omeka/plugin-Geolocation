@@ -10,13 +10,32 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
 
         if ($options['basemap'] === 'MapBox') {
             $options['basemapOptions']['accessToken'] = get_option('geolocation_mapbox_access_token');
-            $mapId = get_option('geolocation_mapbox_map_id');
-            if (!$mapId) {
-                $mapId = 'mapbox.streets';
-            }
-            $options['basemapOptions']['id'] = $mapId;
+
+            $type = isset($options['mapType']) ? $options['mapType'] : null;
+            $options['basemapOptions']['id'] = $this->_getMapboxMapId($type);
         }
 
         return js_escape($options);
+    }
+
+    private function _getMapboxMapId($mapType)
+    {
+        switch ($mapType) {
+            case 'roadmap':
+                return 'mapbox.streets';
+            case 'satellite':
+                return 'mapbox.satellite';
+            case 'hybrid':
+                return 'mapbox.streets-satellite';
+            case 'terrain':
+                return 'mapbox.outdoors';
+            default:
+                // empty case, fallthrough
+        }
+
+        $mapId = get_option('geolocation_mapbox_map_id');
+        if (!$mapId) {
+            return 'mapbox.streets';
+        }
     }
 }
