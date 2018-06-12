@@ -61,6 +61,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_add_map_to_contribution_form', '0');
         set_option('geolocation_default_radius', 10);
         set_option('geolocation_use_metric_distances', '0');
+        set_option('geolocation_basemap', 'CartoDB.Voyager');
     }
 
     public function hookUninstall()
@@ -72,7 +73,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_per_page');
         delete_option('geolocation_add_map_to_contribution_form');
         delete_option('geolocation_use_metric_distances');
-        delete_option('geolocation_api_key');
+        delete_option('geolocation_link_to_nav');
+        delete_option('geolocation_default_radius');
+        delete_option('geolocation_basemap');
+        delete_option('geolocation_auto_fit_browse');
+        delete_option('geolocation_mapbox_access_token');
+        delete_option('geolocation_mapbox_map_id');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
@@ -99,6 +105,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         if (version_compare($args['old_version'], '2.2.3', '<')) {
             set_option('geolocation_default_radius', 10);
+        }
+        if (version_compare($args['old_version'], '3.0', '<')) {
+            delete_option('geolocation_api_key');
+            delete_option('geolocation_map_type');
+            set_option('geolocation_basemap', 'CartoDB.Voyager');
         }
     }
 
