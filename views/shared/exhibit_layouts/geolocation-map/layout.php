@@ -35,19 +35,17 @@ foreach ($attachments as $attachment):
 endforeach;
 ?>
 <script type="text/javascript">
-google.maps.event.addDomListener(window, 'load', function () {
+jQuery(window).on('load', function () {
     var geolocation_map = new OmekaMap(
         <?php echo json_encode($divId); ?>,
         <?php echo json_encode($center); ?>,
-        {}
-    );
+        <?php echo $this->geolocationMapOptions(); ?>);
     geolocation_map.initMap();
     var map_locations = <?php echo json_encode($locations); ?>;
     for (var i = 0; i < map_locations.length; i++) {
         var locationData = map_locations[i];
         geolocation_map.addMarker(
-            locationData.lat,
-            locationData.lng,
+            [locationData.lat, locationData.lng],
             {},
             locationData.html
         );

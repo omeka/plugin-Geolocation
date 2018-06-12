@@ -4,22 +4,6 @@
 
 <div class="field">
     <div class="two columns alpha">
-        <label for="api_key"><?php echo __('API Key'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation">
-            <?php
-            echo __('Google API key for this project. For more information, see %s.',
-                '<a target="_blank" href="https://developers.google.com/maps/web/">developers.google.com/maps/web</a>'
-            );
-            ?>
-        </p>
-        <?php echo $view->formText('api_key', get_option('geolocation_api_key')); ?>
-    </div>
-</div>
-
-<div class="field">
-    <div class="two columns alpha">
         <label for="default_latitude"><?php echo __('Default Latitude'); ?></label>
     </div>
     <div class="inputs five columns omega">
@@ -50,19 +34,83 @@
 
 <div class="field">
     <div class="two columns alpha">
-        <label for="map_type"><?php echo __('Map Type'); ?></label>
+        <label for="basemap"><?php echo __('Base Map'); ?></label>
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The type of map to display'); ?></p>
         <?php
-        echo $view->formSelect('map_type', get_option('geolocation_map_type'), array(), array(
-            'roadmap' => __('Roadmap'),
-            'satellite' => __('Satellite'),
-            'hybrid' =>__('Hybrid'),
-            'terrain' => __('Terrain')
-            )
+        echo $view->formSelect('basemap', get_option('geolocation_basemap'), array(), array(
+            __('OpenStreetMap') => array(
+                'OpenStreetMap' => __('Standard'),
+                'OpenStreetMap.BlackAndWhite' => __('Grayscale'),
+                'OpenStreetMap.HOT' => __('Humanitarian'),
+            ),
+            __('OpenTopoMap') => array(
+                'OpenTopoMap' => __('OpenTopoMap'),
+            ),
+            __('Stamen') => array(
+                'Stamen.Toner' => __('Toner'),
+                'Stamen.TonerBackground' => __('Toner (background)'),
+                'Stamen.TonerLite' => __('Toner (lite)'),
+                'Stamen.Watercolor' => __('Watercolor'),
+                'Stamen.Terrain' => __('Terrain'),
+                'Stamen.TerrainBackground' => __('Terrain (background)'),
+            ),
+            __('Esri') => array(
+                'Esri.WorldStreetMap' => __('World Street Map'),
+                'Esri.DeLorme' => __('DeLorme'),
+                'Esri.WorldTopoMap' => __('World Topographic Map'),
+                'Esri.WorldImagery' => __('World Imagery'),
+                'Esri.WorldTerrain' => __('World Terrain'),
+                'Esri.WorldShadedRelief' => __('World Shaded Relief'),
+                'Esri.WorldPhysical' => __('World Physical Map'),
+                'Esri.OceanBasemap' => __('Ocean Basemap'),
+                'Esri.NatGeoWorldMap' => __('National Geographic World Map'),
+                'Esri.WorldGrayCanvas' => __('Light Gray Canvas'),
+            ),
+            __('CartoDB') => array(
+                'CartoDB.Voyager' => __('Voyager'),
+                'CartoDB.VoyagerNoLabels' => __('Voyager (no labels)'),
+                'CartoDB.Positron' => __('Positron'),
+                'CartoDB.PositronNoLabels' => __('Positron (no labels)'),
+                'CartoDB.DarkMatter' => __('Dark Matter'),
+                'CartoDB.DarkMatterNoLabels' => __('Dark Matter (no labels)'),
+            ),
+            __('Mapbox') => array(
+                'MapBox' => __('Mapbox (see settings below)')
+            ),
+        ));
+        ?>
+    </div>
+</div>
+
+<div class="field mapbox-settings">
+    <div class="two columns alpha">
+        <label for="mapbox_access_token"><?php echo __('Mapbox Access Token'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+        <?php
+        echo __('Mapbox access token. A token is required when Mapbox is selected as the basemap. Get your token at %s.',
+            '<a target="_blank" href="https://www.mapbox.com/account/access-tokens/">https://www.mapbox.com/account/access-tokens/</a>'
+
         );
         ?>
+        </p>
+        <?php echo $view->formText('mapbox_access_token', get_option('geolocation_mapbox_access_token')); ?>
+    </div>
+</div>
+<div class="field mapbox-settings">
+    <div class="two columns alpha">
+        <label for="mapbox_map_id"><?php echo __('Mapbox Map ID'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+        <?php
+        echo __('Mapbox Map ID for the map to display as the basemap. The default "mapbox.streets" map will be used if nothing is entered here.');
+        ?>
+        </p>
+        <?php echo $view->formText('mapbox_map_id', get_option('geolocation_mapbox_map_id')); ?>
     </div>
 </div>
 </fieldset>
@@ -170,3 +218,12 @@
     </div>
 </div>
 </fieldset>
+<script type="text/javascript">
+function toggleMapboxSettings() {
+    jQuery('.mapbox-settings').toggle(jQuery('#basemap').val() === 'MapBox');
+}
+jQuery(document).ready(function () {
+    toggleMapboxSettings();
+    jQuery('#basemap').on('change', toggleMapboxSettings);
+});
+</script>

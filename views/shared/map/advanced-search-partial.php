@@ -25,9 +25,9 @@ if (get_option('geolocation_use_metric_distances')) {
         <?php echo $this->formLabel('geolocation-address', __('Geographic Address')); ?>
     </div>
     <div class="five columns omega inputs">
-        <?php echo $this->formText('geolocation-address',  $address, array('size' => '40')); ?>
-        <?php echo $this->formHidden('geolocation-latitude', $currentLat); ?>
-        <?php echo $this->formHidden('geolocation-longitude', $currentLng); ?>
+        <?php echo $this->formText('geolocation-address',  $address, array('size' => '40', 'id' => 'geolocation-address-input')); ?>
+        <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('id' => 'geolocation-latitude-input')); ?>
+        <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('id' => 'geolocation-longitude-input')); ?>
     </div>
 </div>
 
@@ -40,34 +40,29 @@ if (get_option('geolocation_use_metric_distances')) {
     </div>
 </div>
 
+<?php echo js_tag('geocoder'); ?>
 <script type="text/javascript">
 (function ($) {
     $(document).ready(function() {
+        var geocoder = new OmekaGeocoder('photon');
         var pauseForm = true;
-        $('#geolocation-address').parents('form').submit(function(event) {
+        $('#geolocation-address-input').parents('form').submit(function(event) {
             // Find the geolocation for the address
             if (!pauseForm) {
                 return;
             }
 
             var form = this;
-            var address = $('#geolocation-address').val();
+            var address = $('#geolocation-address-input').val();
             if ($.trim(address).length > 0) {
                 event.preventDefault();
-                var geocoder = new google.maps.Geocoder();
-                geocoder.geocode({'address': address}, function(results, status) {
-                    // If the point was found, then put the marker on that spot
-                    if (status == google.maps.GeocoderStatus.OK) {
-                        var gLatLng = results[0].geometry.location;
-                        // Set the latitude and longitude hidden inputs
-                        $('#geolocation-latitude').val(gLatLng.lat());
-                        $('#geolocation-longitude').val(gLatLng.lng());
-                        pauseForm = false;
-                        form.submit();
-                    } else {
-                        // If no point was found, give us an alert
-                        alert('Error: "' + address + '" was not found!');
-                    }
+                geocoder.geocode(address).then(function (coords) {
+                    $('#geolocation-latitude-input').val(coords[0]);
+                    $('#geolocation-longitude-input').val(coords[1]);
+                    pauseForm = false;
+                    form.submit();
+                }, function () {
+                    alert('Error: "' + address + '" was not found!');
                 });
             }
         });

@@ -2,8 +2,8 @@
 
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
-    const GOOGLE_MAPS_API_VERSION = '3.x';
     const DEFAULT_LOCATIONS_PER_PAGE = 10;
+    const DEFAULT_BASEMAP = 'CartoDB.Voyager';
 
     protected $_hooks = array(
         'install',
@@ -62,6 +62,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_add_map_to_contribution_form', '0');
         set_option('geolocation_default_radius', 10);
         set_option('geolocation_use_metric_distances', '0');
+        set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
     }
 
     public function hookUninstall()
@@ -73,7 +74,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_per_page');
         delete_option('geolocation_add_map_to_contribution_form');
         delete_option('geolocation_use_metric_distances');
-        delete_option('geolocation_api_key');
+        delete_option('geolocation_link_to_nav');
+        delete_option('geolocation_default_radius');
+        delete_option('geolocation_basemap');
+        delete_option('geolocation_auto_fit_browse');
+        delete_option('geolocation_mapbox_access_token');
+        delete_option('geolocation_mapbox_map_id');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
@@ -100,6 +106,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         if (version_compare($args['old_version'], '2.2.3', '<')) {
             set_option('geolocation_default_radius', 10);
+        }
+        if (version_compare($args['old_version'], '3.0', '<')) {
+            delete_option('geolocation_api_key');
+            delete_option('geolocation_map_type');
+            set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
         }
     }
 
@@ -134,9 +145,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);
         set_option('geolocation_default_radius', $_POST['geolocation_default_radius']);
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
-        set_option('geolocation_map_type', $_POST['map_type']);
+        set_option('geolocation_basemap', $_POST['basemap']);
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
-        set_option('geolocation_api_key', $_POST['api_key']);
+        set_option('geolocation_mapbox_access_token', $_POST['mapbox_access_token']);
+        set_option('geolocation_mapbox_map_id', $_POST['mapbox_map_id']);
     }
 
     public function hookDefineAcl($args)
@@ -177,14 +189,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     private function _head()
     {
-        $key = get_option('geolocation_api_key');
-        $mapsUrl = '//maps.googleapis.com/maps/api/js';
-        if ($key) {
-            $mapsUrl .= "?key=$key";
-        }
+        queue_css_file('leaflet/leaflet', null, null, 'javascripts');
         queue_css_file('geolocation-marker');
-        queue_js_url($mapsUrl);
-        queue_js_file('map');
+        queue_js_file(array('leaflet/leaflet', 'leaflet/leaflet-providers', 'map'));
     }
 
     public function hookAfterSaveItem($args)
@@ -234,7 +241,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                   . '<div class="geolocation panel">'
                   . '<h4>' . __('Geolocation') . '</h4>'
                   . '<div style="margin: 14px 0">'
-                  . $view->itemGoogleMap($item, '100%', '270px' )
+                  . $view->geolocationMapSingle($item, '100%', '270px' )
                   . '</div></div>';
             echo $html;
         }
@@ -251,7 +258,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';
             $html = "<div id='geolocation'>";
             $html .= '<h2>'.__('Geolocation').'</h2>';
-            $html .= $view->itemGoogleMap($item, $width, $height);
+            $html .= $view->geolocationMapSingle($item, $width, $height);
             $html .= "</div>";
             echo $html;
         }
@@ -567,7 +574,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         $attrs = array('style' => "height:$height;width:$width");
-        return get_view()->googleMap("geolocation-shortcode-$index", $options, $attrs, $center);
+        return get_view()->geolocationMapBrowse("geolocation-shortcode-$index", $options, $attrs, $center);
     }
 
     /**
@@ -627,35 +634,23 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $options['form'] = array('id' => 'location_form',
                 'posted' => $usePost);
         if ($location or $usePost) {
-            $options['point'] = array('latitude' => $lat,
-                    'longitude' => $lng,
-                    'zoomLevel' => $zoom);
+            $options['point'] = array(
+                'latitude' => $lat,
+                'longitude' => $lng,
+                'zoomLevel' => $zoom);
+            $center = $options['point'];
         }
         $options['confirmLocationChange'] = $confirmLocationChange;
 
-        $center = js_escape($center);
-        $options = js_escape($options);
-
-        $js = "var anOmekaMapForm = new OmekaMapForm(" . js_escape('omeka-map-form') . ", $center, $options);";
-        $js .= "
-            jQuery(document).bind('omeka:tabselected', function () {
-                anOmekaMapForm.resize();
-            });
-        ";
-
-        $html .= '<input type="hidden" name="geolocation[latitude]" value="' . $lat . '" />';
-        $html .= '<input type="hidden" name="geolocation[longitude]" value="' . $lng . '" />';
-        $html .= '<input type="hidden" name="geolocation[zoom_level]" value="' . $zoom . '" />';
-        $html .= '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . self::GOOGLE_MAPS_API_VERSION . '" />';
-
-        $html .= $view->partial('map/input-partial.php', array(
+        return $view->partial('map/input-partial.php', array(
             'label' => $label,
             'address' => $address,
+            'center' => $center,
+            'options' => $options,
+            'lng' => $lng,
+            'lat' => $lat,
+            'zoom' => $zoom,
         ));
-
-        $html .= "<script type='text/javascript'>" . $js . "</script>";
-
-        return $html;
     }
 
     protected function _getCenter()

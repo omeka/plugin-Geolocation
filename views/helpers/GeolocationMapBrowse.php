@@ -1,8 +1,8 @@
 <?php
 
-class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
+class Geolocation_View_Helper_GeolocationMapBrowse extends Zend_View_Helper_Abstract
 {
-    public function googleMap($divId = 'map', $options = array(), $attrs = array(), $center = array())
+    public function geolocationMapBrowse($divId = 'map', $options = array(), $attrs = array(), $center = array())
     {
         if (!$center) {
             $center = array(
@@ -22,10 +22,6 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
             $options['uri'] = url('geolocation/map.kml');
         }
 
-        if (!array_key_exists('mapType', $options)) {
-            $options['mapType'] = get_option('geolocation_map_type');
-        }
-
         if (!array_key_exists('fitMarkers', $options)) {
             $options['fitMarkers'] = (bool) get_option('geolocation_auto_fit_browse');
         }
@@ -35,7 +31,7 @@ class Geolocation_View_Helper_GoogleMap extends Zend_View_Helper_Abstract
             $class .= ' ' . $attrs['class'];
         }
 
-        $options = js_escape($options);
+        $options = $this->view->geolocationMapOptions($options);
         $center = js_escape($center);
         $varDivId = Inflector::variablize($divId);
         $divAttrs = array_merge($attrs, array(
