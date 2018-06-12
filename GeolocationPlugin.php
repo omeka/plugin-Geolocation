@@ -3,6 +3,7 @@
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
     const DEFAULT_LOCATIONS_PER_PAGE = 10;
+    const DEFAULT_BASEMAP = 'CartoDB.Voyager';
 
     protected $_hooks = array(
         'install',
@@ -61,7 +62,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_add_map_to_contribution_form', '0');
         set_option('geolocation_default_radius', 10);
         set_option('geolocation_use_metric_distances', '0');
-        set_option('geolocation_basemap', 'CartoDB.Voyager');
+        set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
     }
 
     public function hookUninstall()
@@ -109,7 +110,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         if (version_compare($args['old_version'], '3.0', '<')) {
             delete_option('geolocation_api_key');
             delete_option('geolocation_map_type');
-            set_option('geolocation_basemap', 'CartoDB.Voyager');
+            set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
         }
     }
 
