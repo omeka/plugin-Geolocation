@@ -165,6 +165,18 @@
         ?>
     </div>
 </div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="cluster"><?php echo __('Enable marker clustering'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Show close or overlapping markers as clusters.'); ?></p>
+        <?php
+        echo $view->formCheckbox('cluster', true,
+            array('checked' => (boolean) get_option('geolocation_cluster')));
+        ?>
+    </div>
+</div>
 </fieldset>
 
 <fieldset>

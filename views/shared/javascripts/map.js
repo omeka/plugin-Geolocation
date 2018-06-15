@@ -12,11 +12,18 @@ OmekaMap.prototype = {
     options: {},
     center: null,
     markerBounds: null,
+    clusterGroup: null,
     
     addMarker: function (latLng, options, bindHtml)
     {
         var map = this.map;
-        var marker = L.marker(latLng, options).addTo(map);
+        var marker = L.marker(latLng, options);
+
+        if (this.clusterGroup) {
+            this.clusterGroup.addLayer(marker);
+        } else {
+            marker.addTo(map);
+        }
         
         if (bindHtml) {
             marker.bindPopup(bindHtml);
@@ -63,6 +70,11 @@ OmekaMap.prototype = {
         this.markerBounds = L.latLngBounds();
 
         L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
+
+        if (this.options.cluster) {
+            this.clusterGroup = L.markerClusterGroup();
+            this.map.addLayer(this.clusterGroup);
+        }
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {
@@ -191,11 +203,17 @@ OmekaMapBrowse.prototype = {
 
             // Clicking the link should take us to the map
             link.bind('click', {}, function (event) {
-                that.map.once('moveend', function () {
-                    marker.fire('click');
-                });
-                that.map.flyTo(marker.getLatLng()); 
-            });     
+                if (that.clusterGroup) {
+                    that.clusterGroup.zoomToShowLayer(marker, function () {
+                        marker.fire('click');
+                    });
+                } else {
+                    that.map.once('moveend', function () {
+                        marker.fire('click');
+                    });
+                    that.map.flyTo(marker.getLatLng());
+                }
+            });
 
             link.appendTo(listElement);
             listElement.appendTo(list);

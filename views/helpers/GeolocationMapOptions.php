@@ -21,6 +21,10 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
             $options['basemapOptions']['id'] = $this->_getMapboxMapId($type);
         }
 
+        if (!array_key_exists('cluster', $options)) {
+            $options['cluster'] = (bool) get_option('geolocation_cluster');
+        }
+
         return js_escape($options);
     }
 

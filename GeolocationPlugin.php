@@ -80,6 +80,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_auto_fit_browse');
         delete_option('geolocation_mapbox_access_token');
         delete_option('geolocation_mapbox_map_id');
+        delete_option('geolocation_cluster');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
@@ -149,6 +150,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
         set_option('geolocation_mapbox_access_token', $_POST['mapbox_access_token']);
         set_option('geolocation_mapbox_map_id', $_POST['mapbox_map_id']);
+        set_option('geolocation_cluster', $_POST['cluster']);
     }
 
     public function hookDefineAcl($args)
@@ -192,6 +194,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         queue_css_file('leaflet/leaflet', null, null, 'javascripts');
         queue_css_file('geolocation-marker');
         queue_js_file(array('leaflet/leaflet', 'leaflet/leaflet-providers', 'map'));
+
+        if (get_option('geolocation_cluster')) {
+            queue_css_file(array('MarkerCluster', 'MarkerCluster.Default'), null, null,
+                'javascripts/leaflet-markercluster');
+            queue_js_file('leaflet-markercluster/leaflet.markercluster');
+        }
     }
 
     public function hookAfterSaveItem($args)
