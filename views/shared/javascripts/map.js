@@ -26,7 +26,7 @@ OmekaMap.prototype = {
         }
         
         if (bindHtml) {
-            marker.bindPopup(bindHtml);
+            marker.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
             // Fit images on the map on first load
             marker.once('popupopen', function (event) {
                 var popup = event.popup;
