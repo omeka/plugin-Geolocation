@@ -72,7 +72,9 @@ OmekaMap.prototype = {
         L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
 
         if (this.options.cluster) {
-            this.clusterGroup = L.markerClusterGroup();
+            this.clusterGroup = L.markerClusterGroup({
+                showCoverageOnHover: false
+            });
             this.map.addLayer(this.clusterGroup);
         }
 
