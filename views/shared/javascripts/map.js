@@ -78,6 +78,8 @@ OmekaMap.prototype = {
             this.map.addLayer(this.clusterGroup);
         }
 
+        jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
+
         // Show the center marker if we have that enabled.
         if (this.center.show) {
             this.addMarker([this.center.latitude, this.center.longitude],
