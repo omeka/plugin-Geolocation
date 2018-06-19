@@ -17,45 +17,45 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: GeolocationPlugin.php:242 GeolocationPlugin.php:260
+#: GeolocationPlugin.php:250 GeolocationPlugin.php:268
 msgid "Geolocation"
 msgstr ""
 
-#: GeolocationPlugin.php:371
+#: GeolocationPlugin.php:379
 msgid "kilometers"
 msgstr ""
 
-#: GeolocationPlugin.php:373
+#: GeolocationPlugin.php:381
 msgid "miles"
 msgstr ""
 
-#: GeolocationPlugin.php:375
+#: GeolocationPlugin.php:383
 #, php-format
 msgid "within %1$s %2$s of \"%3$s\""
 msgstr ""
 
-#: GeolocationPlugin.php:395 GeolocationPlugin.php:401
+#: GeolocationPlugin.php:403 GeolocationPlugin.php:409
 msgid "Map"
 msgstr ""
 
-#: GeolocationPlugin.php:434
+#: GeolocationPlugin.php:442
 msgid "Browse Map"
 msgstr ""
 
-#: GeolocationPlugin.php:489
+#: GeolocationPlugin.php:497
 #, php-format
 msgid "Find A Geographic Location For The %s:"
 msgstr ""
 
-#: GeolocationPlugin.php:501
+#: GeolocationPlugin.php:509
 msgid "Geolocation Map"
 msgstr ""
 
-#: GeolocationPlugin.php:502
+#: GeolocationPlugin.php:510
 msgid "Show attached items on a map"
 msgstr ""
 
-#: GeolocationPlugin.php:601
+#: GeolocationPlugin.php:609
 msgid "Find a Location by Address:"
 msgstr ""
 
@@ -291,74 +291,82 @@ msgstr ""
 msgid "Use metric distances in proximity search."
 msgstr ""
 
-#: config_form.php:171
+#: config_form.php:170
+msgid "Enable marker clustering"
+msgstr ""
+
+#: config_form.php:173
+msgid "Show close or overlapping markers as clusters."
+msgstr ""
+
+#: config_form.php:183
 msgid "Item Map Settings"
 msgstr ""
 
-#: config_form.php:174
+#: config_form.php:186
 msgid "Width for Item Map"
 msgstr ""
 
-#: config_form.php:177
+#: config_form.php:189
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
 msgstr ""
 
-#: config_form.php:184
+#: config_form.php:196
 msgid "Height for Item Map"
 msgstr ""
 
-#: config_form.php:187
+#: config_form.php:199
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
 msgstr ""
 
-#: config_form.php:194
+#: config_form.php:206
 msgid "Map Integration"
 msgstr ""
 
-#: config_form.php:197
+#: config_form.php:209
 msgid "Add Link to Map on Items/Browse Navigation"
 msgstr ""
 
-#: config_form.php:200
+#: config_form.php:212
 msgid "Add a link to the items map on all the items/browse pages."
 msgstr ""
 
-#: config_form.php:210
+#: config_form.php:222
 msgid "Add Map To Contribution Form"
 msgstr ""
 
-#: config_form.php:213
+#: config_form.php:225
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add "
 "a geolocation map field to the contribution form to associate a location to "
 "a contributed item."
 msgstr ""
 
-#: models/Location.php:22
+#: models/Location.php:35
 msgid "Location requires an item ID."
 msgstr ""
 
-#: models/Location.php:26
+#: models/Location.php:39
 msgid "Location requires a valid item ID."
 msgstr ""
 
-#: models/Location.php:31
+#: models/Location.php:44
 msgid "A location already exists for the provided item."
 msgstr ""
 
-#: models/Location.php:34
+#: models/Location.php:47
 msgid "Location requires a latitude."
 msgstr ""
 
-#: models/Location.php:37
+#: models/Location.php:50
 msgid "Location requires a longitude."
 msgstr ""
 
-#: models/Location.php:40
+#: models/Location.php:53
 msgid "Location requires a zoom level."
 msgstr ""
 
