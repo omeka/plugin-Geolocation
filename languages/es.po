@@ -3,7 +3,8 @@
 # This file is distributed under the same license as the Omeka package.
 # 
 # Translators:
-# dario hereñu <magallania@gmail.com>, 2014,2016
+# Camilo Martinez <cmart@decolector.net>, 2018
+# Darío Hereñú <magallania@gmail.com>, 2014,2016
 # Francisco Gálvez Prada <iguannaweb@gmail.com>, 2013
 # John Flatness <john@zerocrates.org>, 2016
 msgid ""
@@ -11,8 +12,8 @@ msgstr ""
 "Project-Id-Version: Omeka\n"
 "Report-Msgid-Bugs-To: http://github.com/omeka/plugin-Geolocation/issues\n"
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
-"PO-Revision-Date: 2018-06-19 16:54+0000\n"
-"Last-Translator: John Flatness <john@zerocrates.org>\n"
+"PO-Revision-Date: 2018-07-06 22:13+0000\n"
+"Last-Translator: Camilo Martinez <cmart@decolector.net>\n"
 "Language-Team: Spanish (http://www.transifex.com/omeka/omeka/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -98,7 +99,7 @@ msgstr "Un número entero mayor que o igual a 0, donde 0 representa la escala m�
 
 #: config_form.php:37
 msgid "Base Map"
-msgstr ""
+msgstr "Mapa Base"
 
 #: config_form.php:40
 msgid "The type of map to display"
@@ -106,43 +107,43 @@ msgstr "El tipo de mapa a mostrar"
 
 #: config_form.php:43
 msgid "OpenStreetMap"
-msgstr ""
+msgstr "OpenStreetMap"
 
 #: config_form.php:44
 msgid "Standard"
-msgstr ""
+msgstr "Standard"
 
 #: config_form.php:45
 msgid "Grayscale"
-msgstr ""
+msgstr "Escala de grises"
 
 #: config_form.php:46
 msgid "Humanitarian"
-msgstr ""
+msgstr "Humanitarian"
 
 #: config_form.php:48 config_form.php:49
 msgid "OpenTopoMap"
-msgstr ""
+msgstr "OpenTopoMap"
 
 #: config_form.php:51
 msgid "Stamen"
-msgstr ""
+msgstr "Stamen"
 
 #: config_form.php:52
 msgid "Toner"
-msgstr ""
+msgstr "Toner"
 
 #: config_form.php:53
 msgid "Toner (background)"
-msgstr ""
+msgstr "Toner (background)"
 
 #: config_form.php:54
 msgid "Toner (lite)"
-msgstr ""
+msgstr "Toner (lite)"
 
 #: config_form.php:55
 msgid "Watercolor"
-msgstr ""
+msgstr "Watercolor"
 
 #: config_form.php:56
 msgid "Terrain"
@@ -150,108 +151,108 @@ msgstr "Terreno"
 
 #: config_form.php:57
 msgid "Terrain (background)"
-msgstr ""
+msgstr "Terrain (background)"
 
 #: config_form.php:59
 msgid "Esri"
-msgstr ""
+msgstr "Esri"
 
 #: config_form.php:60
 msgid "World Street Map"
-msgstr ""
+msgstr "World Street Map"
 
 #: config_form.php:61
 msgid "DeLorme"
-msgstr ""
+msgstr "DeLorme"
 
 #: config_form.php:62
 msgid "World Topographic Map"
-msgstr ""
+msgstr "World Topographic Map"
 
 #: config_form.php:63
 msgid "World Imagery"
-msgstr ""
+msgstr "World Imagery"
 
 #: config_form.php:64
 msgid "World Terrain"
-msgstr ""
+msgstr "World Terrain"
 
 #: config_form.php:65
 msgid "World Shaded Relief"
-msgstr ""
+msgstr "World Shaded Relief"
 
 #: config_form.php:66
 msgid "World Physical Map"
-msgstr ""
+msgstr "World Physical Map"
 
 #: config_form.php:67
 msgid "Ocean Basemap"
-msgstr ""
+msgstr "Ocean Basemap"
 
 #: config_form.php:68
 msgid "National Geographic World Map"
-msgstr ""
+msgstr "National Geographic World Map"
 
 #: config_form.php:69
 msgid "Light Gray Canvas"
-msgstr ""
+msgstr "Light Gray Canvas"
 
 #: config_form.php:71
 msgid "CartoDB"
-msgstr ""
+msgstr "CartoDB"
 
 #: config_form.php:72
 msgid "Voyager"
-msgstr ""
+msgstr "Voyager"
 
 #: config_form.php:73
 msgid "Voyager (no labels)"
-msgstr ""
+msgstr "Voyager (sin etiquetas)"
 
 #: config_form.php:74
 msgid "Positron"
-msgstr ""
+msgstr "Positron"
 
 #: config_form.php:75
 msgid "Positron (no labels)"
-msgstr ""
+msgstr "Positron (sin etiquetas)"
 
 #: config_form.php:76
 msgid "Dark Matter"
-msgstr ""
+msgstr "Dark Matter"
 
 #: config_form.php:77
 msgid "Dark Matter (no labels)"
-msgstr ""
+msgstr "Dark Matter (sin etiquetas)"
 
 #: config_form.php:79
 msgid "Mapbox"
-msgstr ""
+msgstr "Mapbox"
 
 #: config_form.php:80
 msgid "Mapbox (see settings below)"
-msgstr ""
+msgstr "Mapbox (vea las configuraciones abajo)"
 
 #: config_form.php:89
 msgid "Mapbox Access Token"
-msgstr ""
+msgstr "Mapbox Access Token"
 
 #: config_form.php:94
 #, php-format
 msgid ""
 "Mapbox access token. A token is required when Mapbox is selected as the "
 "basemap. Get your token at %s."
-msgstr ""
+msgstr "Mapbox access token. Un token es requerido cuando Mapbox ha sido seleccionado como mapa base. Consiga su token en %s."
 
 #: config_form.php:105
 msgid "Mapbox Map ID"
-msgstr ""
+msgstr "Mapbox Map ID"
 
 #: config_form.php:110
 msgid ""
 "Mapbox Map ID for the map to display as the basemap. The default "
 "\"mapbox.streets\" map will be used if nothing is entered here."
-msgstr ""
+msgstr "Mapbox Map ID para el mapa a mostrar como el mapa base.  El mapa por omisión \"mapbox.streets\" será usado si nada se introduce aquí"
 
 #: config_form.php:119
 msgid "Browse Map Settings"
@@ -296,11 +297,11 @@ msgstr "Utilizar distancias métricas en búsqueda de proximidad."
 
 #: config_form.php:170
 msgid "Enable marker clustering"
-msgstr ""
+msgstr "Habilitar agrupamiento de marcadores"
 
 #: config_form.php:173
 msgid "Show close or overlapping markers as clusters."
-msgstr ""
+msgstr "Mostrar marcadores solapados o cercanos como agrupamientos"
 
 #: config_form.php:183
 msgid "Item Map Settings"
