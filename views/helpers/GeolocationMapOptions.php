@@ -45,7 +45,8 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
 
         $mapId = get_option('geolocation_mapbox_map_id');
         if (!$mapId) {
-            return 'mapbox.streets';
+            $mapId = 'mapbox.streets';
         }
+        return $mapId;
     }
 }
