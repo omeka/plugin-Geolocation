@@ -113,6 +113,23 @@
         <?php echo $view->formText('mapbox_map_id', get_option('geolocation_mapbox_map_id')); ?>
     </div>
 </div>
+
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geocoder"><?php echo __('Geocoder'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+            <?php echo __('Service to use for looking up coordinates from addresses.'); ?>
+        </p>
+        <?php
+        echo $view->formSelect('geocoder', get_option('geolocation_geocoder'), array(), array(
+            'nominatim' => __('OpenStreetMap Nominatim'),
+            'photon' => __('Photon'),
+        ));
+        ?>
+    </div>
+</div>
 </fieldset>
 
 <fieldset>

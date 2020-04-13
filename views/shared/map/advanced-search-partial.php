@@ -40,11 +40,14 @@ if (get_option('geolocation_use_metric_distances')) {
     </div>
 </div>
 
-<?php echo js_tag('geocoder'); ?>
+<?php
+echo js_tag('geocoder');
+$geocoder = json_encode(get_option('geolocation_geocoder'));
+?>
 <script type="text/javascript">
 (function ($) {
     $(document).ready(function() {
-        var geocoder = new OmekaGeocoder('photon');
+        var geocoder = new OmekaGeocoder(<?php echo $geocoder; ?>);
         var pauseForm = true;
         $('#geolocation-address-input').parents('form').submit(function(event) {
             // Find the geolocation for the address

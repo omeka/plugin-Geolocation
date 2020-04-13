@@ -19,10 +19,13 @@ $options = $this->geolocationMapOptions($options);
 </div>
 <div id="omeka-map-form"></div>
 
-<?php echo js_tag('geocoder'); ?>
+<?php
+echo js_tag('geocoder');
+$geocoder = json_encode(get_option('geolocation_geocoder'));
+?>
 <script type="text/javascript">
 var omekaGeolocationForm = new OmekaMapForm('omeka-map-form', <?php echo $center; ?>, <?php echo $options; ?>);
-var geocoder = new OmekaGeocoder('photon');
+var geocoder = new OmekaGeocoder(<?php echo $geocoder; ?>);
 jQuery(document).on('omeka:tabselected', function () {
     omekaGeolocationForm.resize();
 });
