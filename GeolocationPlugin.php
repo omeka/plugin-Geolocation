@@ -306,7 +306,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $db = $this->_db;
         $select = $args['select'];
         $alias = $this->_db->getTable('Location')->getTableAlias();
-        if (!empty($args['params']['only_map_items'])
+        $isMapped = null;
+        if (array_key_exists('geolocation-mapped', $args['params'])
+            && $args['params']['geolocation-mapped'] !== ''
+        ) {
+            $isMapped = (bool) $args['params']['geolocation-mapped'];
+        }
+
+        if ($isMapped === true
             || !empty($args['params']['geolocation-address'])
         ) {
             $select->joinInner(
@@ -314,6 +321,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 "$alias.item_id = items.id",
                 array()
             );
+        } else if ($isMapped === false) {
+            $select->joinLeft(
+                array($alias => $db->Location),
+                "$alias.item_id = items.id",
+                array()
+            );
+            $select->where("$alias.id IS NULL");
         }
         if (!empty($args['params']['geolocation-address'])) {
             // Get the address, latitude, longitude, and the radius from parameters
@@ -392,6 +406,15 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 $unit,
                 $requestArray['geolocation-address']
             );
+        }
+        if (array_key_exists('geolocation-mapped', $requestArray)
+            && $requestArray['geolocation-mapped'] !== ''
+        ) {
+            if ($requestArray['geolocation-mapped']) {
+                $displayArray['Geolocation Status'] = __('Only Items with Locations');
+            } else {
+                $displayArray['Geolocation Status'] = __('Only Items without Locations');
+            }
         }
         return $displayArray;
     }
