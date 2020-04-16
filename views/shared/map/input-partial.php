@@ -17,7 +17,7 @@ $options = $this->geolocationMapOptions($options);
         <button type="button" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address"><?php echo __('Find'); ?></button>
     </div>
 </div>
-<div id="omeka-map-form"></div>
+<div id="omeka-map-form" class="geolocation-map"></div>
 
 <?php
 echo js_tag('geocoder');
