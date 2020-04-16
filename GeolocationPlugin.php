@@ -202,14 +202,17 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     private function _head()
     {
-        queue_css_file('leaflet/leaflet', null, null, 'javascripts');
-        queue_css_file('geolocation-marker');
-        queue_js_file(array('leaflet/leaflet', 'leaflet/leaflet-providers', 'map'));
+        $pluginLoader = Zend_Registry::get('plugin_loader');
+        $geolocation = $pluginLoader->getPlugin('Geolocation');
+        $version = $geolocation->getIniVersion();
+        queue_css_file('leaflet/leaflet', null, null, 'javascripts', $version);
+        queue_css_file('geolocation-marker', null, null, 'css', $version);
+        queue_js_file(array('leaflet/leaflet', 'leaflet/leaflet-providers', 'map'), 'javascripts', array(), $version);
 
         if (get_option('geolocation_cluster')) {
             queue_css_file(array('MarkerCluster', 'MarkerCluster.Default'), null, null,
-                'javascripts/leaflet-markercluster');
-            queue_js_file('leaflet-markercluster/leaflet.markercluster');
+                'javascripts/leaflet-markercluster', $version);
+            queue_js_file('leaflet-markercluster/leaflet.markercluster', 'javascripts', array(), $version);
         }
     }
 
