@@ -118,6 +118,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         if (version_compare($args['old_version'], '3.1', '<')) {
             set_option('geolocation_geocoder', self::DEFAULT_GEOCODER);
+
+            if (get_option('geolocation_basemap') == 'OpenStreetMap.BlackAndWhite') {
+                set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
+            }
         }
     }
 

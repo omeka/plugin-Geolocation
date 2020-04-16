@@ -42,7 +42,6 @@
         echo $view->formSelect('basemap', get_option('geolocation_basemap'), array(), array(
             __('OpenStreetMap') => array(
                 'OpenStreetMap' => __('Standard'),
-                'OpenStreetMap.BlackAndWhite' => __('Grayscale'),
                 'OpenStreetMap.HOT' => __('Humanitarian'),
             ),
             __('OpenTopoMap') => array(
