@@ -242,7 +242,7 @@ function OmekaMapForm(mapDivId, center, options) {
     // Make the map clickable to add a location point.
     this.map.on('click', function (event) {
         // If we are clicking a new spot on the map
-        var marker = that.setMarker(event.latlng);
+        var marker = that.setMarker(event.latlng.wrap());
         if (marker) {
             jQuery('#geolocation_address').val('');
         }
