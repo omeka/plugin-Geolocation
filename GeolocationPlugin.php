@@ -686,6 +686,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $center = $options['point'];
         }
         $options['confirmLocationChange'] = $confirmLocationChange;
+        $options['cluster'] = false;
 
         return $view->partial('map/input-partial.php', array(
             'label' => $label,
