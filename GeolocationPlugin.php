@@ -123,6 +123,21 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
             }
         }
+        if (version_compare($args['old_version'], '3.2', '<')) {
+            $newMapboxIds = array(
+                'mapbox.streets' => 'mapbox/streets-v11',
+                'mapbox.outdoors' => 'mapbox/outdoors-v11',
+                'mapbox.light' => 'mapbox/light-v10',
+                'mapbox.dark' => 'mapbox/dark-v10',
+                'mapbox.satellite' => 'mapbox/satellite-v9',
+                'mapbox.streets-satellite' => 'mapbox/satellite-streets-v11',
+            );
+
+            $oldMapboxId = get_option('geolocation_mapbox_map_id');
+            if ($oldMapboxId && isset($newMapboxIds[$oldMapboxId])) {
+                set_option('geolocation_mapbox_map_id', $newMapboxIds[$oldMapboxId]);
+            }
+        }
     }
 
     /**
