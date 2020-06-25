@@ -203,7 +203,7 @@ OmekaMapBrowse.prototype = {
             link.attr('href', 'javascript:void(0);');
 
             // Each <li> starts with the title of the item            
-            link.html(marker.options.title);
+            link.text(marker.options.title);
 
             // Clicking the link should take us to the map
             link.bind('click', {}, function (event) {
