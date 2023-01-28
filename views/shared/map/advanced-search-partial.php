@@ -40,7 +40,7 @@ if (get_option('geolocation_use_metric_distances')) {
 
 <div class="field">
     <div class="two columns alpha">
-        <?php echo $this->formLabel('geolocation-address', __('Geographic Address')); ?>
+        <?php echo $this->formLabel('geolocation-address-input', __('Geographic Address')); ?>
     </div>
     <div class="five columns omega inputs">
         <?php echo $this->formText('geolocation-address',  $address, array('size' => '40', 'id' => 'geolocation-address-input')); ?>
