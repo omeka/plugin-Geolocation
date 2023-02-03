@@ -24,7 +24,7 @@ if (get_option('geolocation_use_metric_distances')) {
 ?>
 
 <?php if (!$isMapRequest): ?>
-<div class="field">
+<div id="search-by-geolocation-status" class="field">
     <div class="two columns alpha">
         <?php echo $this->formLabel('geolocation-mapped', __('Geolocation Status')); ?>
     </div>
@@ -38,7 +38,7 @@ if (get_option('geolocation_use_metric_distances')) {
 </div>
 <?php endif; ?>
 
-<div class="field">
+<div id="search-by-geolocation-address" class="field">
     <div class="two columns alpha">
         <?php echo $this->formLabel('geolocation-address-input', __('Geographic Address')); ?>
     </div>
@@ -49,7 +49,7 @@ if (get_option('geolocation_use_metric_distances')) {
     </div>
 </div>
 
-<div class="field">
+<div id="search-by-geolocation-radius" class="field">
     <div class="two columns alpha">
         <?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
     </div>
