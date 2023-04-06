@@ -23,12 +23,10 @@ if (get_option('geolocation_use_metric_distances')) {
 
 ?>
 
-<?php if (!$isMapRequest): ?>
+
 <div id="search-by-geolocation-status" class="field">
-    <div class="two columns alpha">
-        <?php echo $this->formLabel('geolocation-mapped', __('Geolocation Status')); ?>
-    </div>
-    <div class="five columns omega inputs">
+    <?php echo $this->formLabel('geolocation-mapped', __('Geolocation Status')); ?>
+    <div class="inputs">
         <?php echo $this->formSelect('geolocation-mapped',  $mapped, array(), array(
             '' => __('Select Below'),
             '1' => __('Only Items with Locations'),
@@ -36,13 +34,11 @@ if (get_option('geolocation_use_metric_distances')) {
         )); ?>
     </div>
 </div>
-<?php endif; ?>
+
 
 <div id="search-by-geolocation-address" class="field">
-    <div class="two columns alpha">
-        <?php echo $this->formLabel('geolocation-address-input', __('Geographic Address')); ?>
-    </div>
-    <div class="five columns omega inputs">
+    <?php echo $this->formLabel('geolocation-address-input', __('Geographic Address')); ?>
+    <div class="inputs">
         <?php echo $this->formText('geolocation-address',  $address, array('size' => '40', 'id' => 'geolocation-address-input')); ?>
         <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('id' => 'geolocation-latitude-input')); ?>
         <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('id' => 'geolocation-longitude-input')); ?>
@@ -50,10 +46,8 @@ if (get_option('geolocation_use_metric_distances')) {
 </div>
 
 <div id="search-by-geolocation-radius" class="field">
-    <div class="two columns alpha">
-        <?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
-    </div>
-    <div class="five columns omega inputs">
+    <?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
+    <div class="inputs">
         <?php echo $this->formText('geolocation-radius', $radius, array('size' => '40')); ?>
     </div>
 </div>
