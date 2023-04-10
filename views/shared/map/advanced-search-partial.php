@@ -25,7 +25,7 @@ if (get_option('geolocation_use_metric_distances')) {
 
 
 <div id="search-by-geolocation-status" class="field">
-    <?php echo $this->formLabel('geolocation-mapped', __('Geolocation Status')); ?>
+    <div class="field-meta"><?php echo $this->formLabel('geolocation-mapped', __('Geolocation Status')); ?></div>
     <div class="inputs">
         <?php echo $this->formSelect('geolocation-mapped',  $mapped, array(), array(
             '' => __('Select Below'),
@@ -37,7 +37,7 @@ if (get_option('geolocation_use_metric_distances')) {
 
 
 <div id="search-by-geolocation-address" class="field">
-    <?php echo $this->formLabel('geolocation-address-input', __('Geographic Address')); ?>
+    <div class="field-meta"><?php echo $this->formLabel('geolocation-address-input', __('Geographic Address')); ?></div>
     <div class="inputs">
         <?php echo $this->formText('geolocation-address',  $address, array('size' => '40', 'id' => 'geolocation-address-input')); ?>
         <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('id' => 'geolocation-latitude-input')); ?>
@@ -46,7 +46,7 @@ if (get_option('geolocation_use_metric_distances')) {
 </div>
 
 <div id="search-by-geolocation-radius" class="field">
-    <?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
+    <div class="field-meta"><?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?></div>
     <div class="inputs">
         <?php echo $this->formText('geolocation-radius', $radius, array('size' => '40')); ?>
     </div>
