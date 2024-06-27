@@ -201,6 +201,7 @@ OmekaMapBrowse.prototype = {
 
             // Links open up the markers on the map, clicking them doesn't actually go anywhere
             link.attr('href', 'javascript:void(0);');
+            link.attr('role', 'button');
 
             // Each <li> starts with the title of the item            
             link.text(marker.options.title);
