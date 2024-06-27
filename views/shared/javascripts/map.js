@@ -183,7 +183,7 @@ OmekaMapBrowse.prototype = {
         balloon = balloon.replace('$[namewithlink]', titleWithLink).replace('$[description]', body).replace('$[Snippet]', snippet);
 
         // Build a marker, add HTML for it
-        this.addMarker([latitude, longitude], {title: title}, balloon);
+        this.addMarker([latitude, longitude], {title: title, alt: title + ' marker'}, balloon);
     },
     
     buildListLinks: function (container) {
