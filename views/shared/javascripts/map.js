@@ -194,6 +194,9 @@ OmekaMapBrowse.prototype = {
         // Loop through all the markers
         jQuery.each(this.markers, function (index, marker) {
             var listElement = jQuery('<li></li>');
+            var srAlerts = jQuery('#geolocation-sr-alerts');
+            var openedMessage = srAlerts.data('openedMessage');
+            var closedMessage = srAlerts.data('closedMessage');
 
             // Make an <a> tag, give it a class for styling
             var link = jQuery('<a></a>');
@@ -208,6 +211,12 @@ OmekaMapBrowse.prototype = {
 
             // Clicking the link should take us to the map
             link.bind('click', {}, function (event) {
+                link.toggleClass('current');
+                if (link.hasClass('current')) {
+                    srAlerts.text(marker.options.title + ' ' + openedMessage);
+                } else {
+                    srAlerts.text(marker.options.title + ' ' + closedMessage);
+                }
                 if (that.clusterGroup) {
                     that.clusterGroup.zoomToShowLayer(marker, function () {
                         marker.fire('click');
