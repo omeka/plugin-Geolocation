@@ -44,7 +44,6 @@ jQuery(document).ready(function () {
                 jQuery('#geolocation_address').focus();
             } else {
                 jQuery('#geolocation-sr-alerts').text(successMessage + ' ' + address);
-                jQuery('#omeka-map-form').focus();
             }
         }, function () {
             alert('Error: "' + address + '" was not found!');
