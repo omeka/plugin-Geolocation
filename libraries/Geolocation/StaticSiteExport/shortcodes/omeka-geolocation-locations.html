@@ -1,0 +1,7 @@
+{{ $page := site.GetPage (.Get "page") }}
+{{ $locationsResource := $page.Resources.Get (.Get "locationsResource") }}
+<div class="geolocation-locations-map"
+    style="width: 100%; height: 300px;"
+    data-rel-url="{{ relURL "" }}"
+    data-locations-url="{{ $locationsResource.RelPermalink }}">
+</div>

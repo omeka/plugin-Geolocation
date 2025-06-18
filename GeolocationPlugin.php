@@ -765,12 +765,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function filterStaticSiteExportShortcodes($shortcodes, $args)
     {
-        $shortcodes['omeka-geolocation'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/shortcodes/omeka-geolocation.html', PLUGIN_DIR);
+        $shortcodes['omeka-geolocation-locations'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/shortcodes/omeka-geolocation-locations.html', PLUGIN_DIR);
         return $shortcodes;
     }
 
     public function hookStaticSiteExportItemBundle($args)
     {
+        $job = $args['job'];
         $item = $args['item'];
         $frontMatterPage = $args['front_matter_page'];
         $blocks = $args['blocks'];
@@ -780,23 +781,34 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             return;
         }
 
-        $frontMatterBlock = new ArrayObject([
+        $frontMatterPage['css'][] = 'vendor/leaflet/leaflet.css';
+        $frontMatterPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterPage['js'][] = 'vendor/jquery/jquery.js';
+        $frontMatterPage['js'][] = 'vendor/leaflet/leaflet.js';
+        $frontMatterPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
+
+        // Make the locations file.
+        $locationsJson = [[
             'latitude' => $location->latitude,
             'longitude' => $location->longitude,
             'zoomLevel' => $location->zoomLevel,
             'mapType' => $location->mapType,
             'address' => $location->address,
-        ]);
+        ]];
+        $job->makeFile(
+            sprintf('content/items/%s/geolocation_locations.json', $item->id),
+            json_encode($locationsJson)
+        );
 
-        $frontMatterPage['css'][] = 'vendor/leaflet/leaflet.css';
-        $frontMatterPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
-        $frontMatterPage['js'][] = 'vendor/leaflet/leaflet.js';
-        $frontMatterPage['js'][] = 'vendor/omeka-geolocation/map.js';
+        // Make the markdown.
+        $markdown = [];
+        $markdown[] = sprintf('## %s', __('Geolocation'));
+        $markdown[] = sprintf('{{< omeka-geolocation-locations page="items/%s" locationsResource="geolocation_locations.json" >}}', $item->id);
 
         $blocks[] = [
             'name' => 'geolocation',
-            'frontMatter' => $frontMatterBlock,
-            'markdown' => sprintf('{{< omeka-geolocation >}}'),
+            'frontMatter' => new ArrayObject,
+            'markdown' => implode("\n", $markdown),
         ];
     }
 }
