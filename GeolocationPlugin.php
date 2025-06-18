@@ -43,6 +43,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'item_search_filters',
         'static_site_export_vendor_packages',
         'static_site_export_shortcodes',
+        'exhibit_builder_static_site_export_exhibit_page_block',
     );
 
     public function hookInstall()
@@ -788,7 +789,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $frontMatterPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
 
         // Make the locations file.
-        $locationsJson = [[
+        $locations = [[
             'latitude' => $location->latitude,
             'longitude' => $location->longitude,
             'zoomLevel' => $location->zoom_level,
@@ -801,7 +802,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         ]];
         $job->makeFile(
             sprintf('content/items/%s/geolocation_locations.json', $item->id),
-            json_encode($locationsJson)
+            json_encode($locations)
         );
 
         // Make the markdown.
@@ -814,5 +815,57 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'frontMatter' => new ArrayObject,
             'markdown' => implode("\n", $markdown),
         ];
+    }
+
+    public function filterExhibitBuilderStaticSiteExportExhibitPageBlock($markdown, $args)
+    {
+        $job = $args['job'];
+        $frontMatterExhibitPage = $args['frontMatterExhibitPage'];
+        $frontMatterExhibitPageBlock = $args['frontMatterExhibitPageBlock'];
+        $exhibitPageBlock = $args['block'];
+
+        if ('geolocation-map' !== $exhibitPageBlock->layout) {
+            return $markdown;
+        }
+
+        $exhibitPage = $exhibitPageBlock->getPage();
+        $exhibit = $exhibitPage->getExhibit();
+        $attachments = $exhibitPageBlock->getAttachments();
+
+        $frontMatterExhibitPage['css'][] = 'vendor/leaflet/leaflet.css';
+        $frontMatterExhibitPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterExhibitPage['js'][] = 'vendor/jquery/jquery.js';
+        $frontMatterExhibitPage['js'][] = 'vendor/leaflet/leaflet.js';
+        $frontMatterExhibitPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
+
+        $locations = [];
+        foreach ($attachments as $attachment) {
+            $item = $attachment->getItem();
+            $location = get_db()->getTable('Location')->findLocationByItem($item, true);
+            if (!$location) {
+                continue;
+            }
+            $locations[] = [
+                'latitude' => $location->latitude,
+                'longitude' => $location->longitude,
+                'zoomLevel' => $location->zoom_level,
+                'mapType' => $location->map_type,
+                'address' => $location->address,
+                'itemID' => $item->id,
+                'itemTitle' => $item->getDisplayTitle(),
+                'fileID' => $item->getFile() ? $item->getFile()->id : null,
+                'hasThumbnail' => $item->hasThumbnail(),
+            ];
+        }
+        $job->makeFile(
+            sprintf('content/exhibits/%s/%s/geolocation_locations.json', $exhibit->slug, $exhibitPage->slug),
+            json_encode($locations)
+        );
+
+        return sprintf(
+            '{{< omeka-geolocation-locations page="exhibits/%s/%s" locationsResource="geolocation_locations.json" >}}',
+            $exhibit->slug,
+            $exhibitPage->slug
+        );
     }
 }
