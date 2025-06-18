@@ -794,6 +794,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'zoomLevel' => $location->zoomLevel,
             'mapType' => $location->mapType,
             'address' => $location->address,
+            'itemID' => $item->id,
+            'itemTitle' => $item->getDisplayTitle(),
+            'fileID' => $item->getFile() ? $item->getFile()->id : null,
+            'hasThumbnail' => $item->hasThumbnail(),
         ]];
         $job->makeFile(
             sprintf('content/items/%s/geolocation_locations.json', $item->id),

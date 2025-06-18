@@ -13,7 +13,22 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
         // Get the locations data and add the locations to the map.
         locationsData.forEach((locationData) => {
+            const popupDiv = document.createElement('div');
+            const popupHeading = document.createElement('h2');
+            const popupHeadingLink = document.createElement('a');
+            const popupHeadingText = document.createTextNode(locationData.itemTitle);
+            popupHeadingLink.href =  relUrl + 'items/' + locationData.itemID
+            popupHeadingLink.appendChild(popupHeadingText);
+            popupHeading.appendChild(popupHeadingLink);
+            popupDiv.appendChild(popupHeading);
+            if (locationData.hasThumbnail) {
+                const popupImg = document.createElement('img');
+                popupImg.src = relUrl + 'files/' + locationData.fileID + '/thumbnail.jpg';
+                popupDiv.appendChild(popupImg);
+            }
+
             const marker = L.marker([locationData.latitude, locationData.longitude]);
+            marker.bindPopup(popupDiv);
             marker.addTo(featureGroup);
         });
 
