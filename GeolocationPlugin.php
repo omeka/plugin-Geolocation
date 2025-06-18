@@ -791,8 +791,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $locationsJson = [[
             'latitude' => $location->latitude,
             'longitude' => $location->longitude,
-            'zoomLevel' => $location->zoomLevel,
-            'mapType' => $location->mapType,
+            'zoomLevel' => $location->zoom_level,
+            'mapType' => $location->map_type,
             'address' => $location->address,
             'itemID' => $item->id,
             'itemTitle' => $item->getDisplayTitle(),
