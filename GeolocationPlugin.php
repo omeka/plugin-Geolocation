@@ -749,6 +749,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         return $length;
     }
 
+    /**
+     * StaticSiteExport plugin: Add "Map" link to static site menu.
+     */
     public function hookStaticSiteExportSiteConfig($args)
     {
         $args['site_config']['menus']['main'][] = [
@@ -758,6 +761,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         ];
     }
 
+    /**
+     * StaticSiteExport plugin: Add vendor packages to static site.
+     */
     function filterStaticSiteExportVendorPackages($vendorPackages, $args)
     {
         $vendorPackages['leaflet'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/leaflet', PLUGIN_DIR);
@@ -765,12 +771,18 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         return $vendorPackages;
     }
 
+    /**
+     * StaticSiteExport plugin: Add shortcodes to static site.
+     */
     public function filterStaticSiteExportShortcodes($shortcodes, $args)
     {
         $shortcodes['omeka-geolocation-locations'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/shortcodes/omeka-geolocation-locations.html', PLUGIN_DIR);
         return $shortcodes;
     }
 
+    /**
+     * StaticSiteExport plugin: Add geolocation content to static site.
+     */
     public function hookStaticSiteExportSiteExportPost($args)
     {
         $job = $args['job'];
@@ -818,6 +830,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $job->makeFile('content/geolocation/geolocation_locations.json', json_encode($locations));
     }
 
+    /**
+     * StaticSiteExport plugin: Add map block to item pages.
+     */
     public function hookStaticSiteExportItemBundle($args)
     {
         $job = $args['job'];
@@ -865,6 +880,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         ];
     }
 
+    /**
+     * StaticSiteExport plugin: Add map block to exhibit builder pages.
+     */
     public function hookExhibitBuilderStaticSiteExportExhibitPageBlock($args)
     {
         $job = $args['job'];
