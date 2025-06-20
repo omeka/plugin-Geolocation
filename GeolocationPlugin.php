@@ -27,6 +27,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'contribution_save_form',
         'static_site_export_site_config',
         'static_site_export_item_bundle',
+        'exhibit_builder_static_site_export_exhibit_page_block',
     );
 
     protected $_filters = array(
@@ -43,7 +44,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'item_search_filters',
         'static_site_export_vendor_packages',
         'static_site_export_shortcodes',
-        'exhibit_builder_static_site_export_exhibit_page_block',
     );
 
     public function hookInstall()
@@ -817,15 +817,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         ];
     }
 
-    public function filterExhibitBuilderStaticSiteExportExhibitPageBlock($markdown, $args)
+    public function hookExhibitBuilderStaticSiteExportExhibitPageBlock($args)
     {
         $job = $args['job'];
         $frontMatterExhibitPage = $args['frontMatterExhibitPage'];
         $frontMatterExhibitPageBlock = $args['frontMatterExhibitPageBlock'];
         $exhibitPageBlock = $args['block'];
+        $markdown = $args['markdown'];
 
         if ('geolocation-map' !== $exhibitPageBlock->layout) {
-            return $markdown;
+            return;
         }
 
         $exhibitPage = $exhibitPageBlock->getPage();
@@ -862,7 +863,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             json_encode($locations)
         );
 
-        return sprintf(
+        $markdown[] = sprintf(
             '{{< omeka-geolocation-locations page="exhibits/%s/%s" locationsResource="geolocation_locations.json" >}}',
             $exhibit->slug,
             $exhibitPage->slug
