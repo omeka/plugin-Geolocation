@@ -26,6 +26,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'contribution_type_form',
         'contribution_save_form',
         'static_site_export_site_config',
+        'static_site_export_site_export_post',
         'static_site_export_item_bundle',
         'exhibit_builder_static_site_export_exhibit_page_block',
     );
@@ -752,7 +753,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $args['site_config']['menus']['main'][] = [
             'name' => __('Map'),
-            'pageRef' => '/map',
+            'pageRef' => '/geolocation',
             'weight' => 40,
         ];
     }
@@ -768,6 +769,53 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $shortcodes['omeka-geolocation-locations'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/shortcodes/omeka-geolocation-locations.html', PLUGIN_DIR);
         return $shortcodes;
+    }
+
+    public function hookStaticSiteExportSiteExportPost($args)
+    {
+        $job = $args['job'];
+
+        // Create the geolocation section.
+        $frontMatter = new ArrayObject([
+            'title' => __('Map'),
+            'css' => [
+                'vendor/leaflet/leaflet.css',
+                'vendor/omeka-geolocation/geolocation-marker.css',
+            ],
+            'js' => [
+                'vendor/jquery/jquery.js',
+                'vendor/leaflet/leaflet.js',
+                'vendor/omeka-geolocation/geolocation-locations.js',
+            ],
+        ]);
+        $job->makeDirectory('content/geolocation');
+        $job->makeFile(
+            'content/geolocation/index.md',
+            sprintf(
+                "%s\n%s",
+                json_encode($frontMatter, JSON_PRETTY_PRINT),
+                '{{< omeka-geolocation-locations page="geolocation" locationsResource="geolocation_locations.json" >}}'
+            )
+        );
+
+        // Make the locations file.
+        $locationRows = get_db()->getTable('Location')->findAll();
+        $locations = [];
+        foreach ($locationRows as $locationRow) {
+            $item = get_db()->getTable('Item')->find($locationRow->item_id);
+            $locations[] = [
+                'latitude' => $locationRow->latitude,
+                'longitude' => $locationRow->longitude,
+                'zoomLevel' => $locationRow->zoom_level,
+                'mapType' => $locationRow->map_type,
+                'address' => $locationRow->address,
+                'itemID' => $item->id,
+                'itemTitle' => $item->getDisplayTitle(),
+                'fileID' => $item->getFile() ? $item->getFile()->id : null,
+                'hasThumbnail' => $item->hasThumbnail(),
+            ];
+        }
+        $job->makeFile('content/geolocation/geolocation_locations.json', json_encode($locations));
     }
 
     public function hookStaticSiteExportItemBundle($args)
