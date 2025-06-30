@@ -17,6 +17,20 @@ $options = $this->geolocationMapOptions($options);
         <button type="button" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address" data-success-message="<?php echo __('Location found.'); ?>"><?php echo __('Find'); ?></button>
     </div>
 </div>
+
+<div class="metadata-location-picker">
+  <label for="metadata-location-select">Get location from metadata: </label>
+  <select id="metadata-location-select">
+    <!-- TODO: get metadata -->
+    <?php foreach ($metadata as $md): ?>
+      <option value="<?php echo html_escape($md); ?>">
+        <?php echo html_escape($md); ?>
+      </option>
+    <?php endforeach; ?>
+  </select>
+  <button type="button" id="metadata-load-btn">Load</button>
+</div>
+
 <div id="geolocation-sr-alerts" class="sr-only" aria-live="polite" aria-atomic="true"></div>
 <div id="omeka-map-form" class="geolocation-map"></div>
 
@@ -56,6 +70,13 @@ jQuery(document).ready(function () {
             event.preventDefault();
             jQuery('#geolocation_find_location_by_address').click();
         }
+    });
+
+    // Make the metadata load button set the hidden form fields the plugin uses.
+    jQuery('#metadata-load-btn').on('click', function (event) {
+        var metadata = $('#metadata-location-select').val();
+        if (!metadata) return;
+        $('input[name="location]').val(metadata);
     });
 });
 </script>
