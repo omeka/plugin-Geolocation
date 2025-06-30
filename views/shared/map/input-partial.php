@@ -37,6 +37,14 @@ jQuery(document).ready(function () {
         event.preventDefault();
         var address = jQuery('#geolocation_address').val();
         var successMessage = jQuery(this).data('successMessage');
+
+        // If no address is entered, alert the user instead of throwing an error later.
+        if (!address) {
+            alert('Please enter an address.');
+            jQuery('#geolocation_address').focus();
+            return;
+        }
+
         geocoder.geocode(address).then(function (coords) {
             var marker = omekaGeolocationForm.setMarker(L.latLng(coords));
             if (marker === false) {
