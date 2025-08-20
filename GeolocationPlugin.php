@@ -633,6 +633,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         if (isset($args['tags'])) {
             $options['params']['tags'] = $args['tags'];
         }
+        
+        if (isset($args['range'])) {
+            $options['params']['range'] = $args['range'];
+        }
 
         $height = $this->_filterCssLength(isset($args['height']) ? $args['height'] : '', '436px');
         $width = $this->_filterCssLength(isset($args['width']) ? $args['width'] : '', '100%');
