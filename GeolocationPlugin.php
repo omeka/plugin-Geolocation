@@ -612,7 +612,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $zoomLevel = get_option('geolocation_default_zoom_level');
         }
 
-        $center = array('latitude' => (double) $latitude, 'longitude' => (double) $longitude, 'zoomLevel' => (double) $zoomLevel);
+        $center = array('latitude' => (float) $latitude, 'longitude' => (float) $longitude, 'zoomLevel' => (float) $zoomLevel);
 
         $options = array();
 
@@ -682,14 +682,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                     && $post['geolocation']['longitude'] != ''
                     && $post['geolocation']['latitude'] != '';
         if ($usePost) {
-            $lng  = empty($post['geolocation']['longitude']) ? '' : (double) $post['geolocation']['longitude'];
-            $lat  = empty($post['geolocation']['latitude']) ? '' : (double) $post['geolocation']['latitude'];
+            $lng  = empty($post['geolocation']['longitude']) ? '' : (float) $post['geolocation']['longitude'];
+            $lat  = empty($post['geolocation']['latitude']) ? '' : (float) $post['geolocation']['latitude'];
             $zoom = empty($post['geolocation']['zoom_level']) ? '' : (int) $post['geolocation']['zoom_level'];
             $address = html_escape($post['geolocation']['address']);
         } else {
             if ($location) {
-                $lng  = (double) $location['longitude'];
-                $lat  = (double) $location['latitude'];
+                $lng  = (float) $location['longitude'];
+                $lat  = (float) $location['latitude'];
                 $zoom = (int) $location['zoom_level'];
                 $address = html_escape($location['address']);
             } else {
@@ -725,9 +725,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     protected function _getCenter()
     {
         return array(
-            'latitude'=>  (double) get_option('geolocation_default_latitude'),
-            'longitude'=> (double) get_option('geolocation_default_longitude'),
-            'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'),
+            'latitude'=>  (float) get_option('geolocation_default_latitude'),
+            'longitude'=> (float) get_option('geolocation_default_longitude'),
+            'zoomLevel'=> (float) get_option('geolocation_default_zoom_level'),
         );
     }
 

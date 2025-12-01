@@ -1,8 +1,8 @@
 <?php
 $divId = "geolocation_map_$index";
 $center = array(
-    'latitude' => (double) get_option('geolocation_default_latitude'),
-    'longitude' => (double) get_option('geolocation_default_longitude'),
+    'latitude' => (float) get_option('geolocation_default_latitude'),
+    'longitude' => (float) get_option('geolocation_default_longitude'),
     'zoomLevel' => (int) get_option('geolocation_default_zoom_level')
 );
 $locationTable = get_db()->getTable('Location');

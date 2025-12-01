@@ -156,7 +156,7 @@
         </p>
         <?php
         echo $view->formCheckbox('auto_fit_browse', true,
-            array('checked' => (boolean) get_option('geolocation_auto_fit_browse')));
+            array('checked' => (bool) get_option('geolocation_auto_fit_browse')));
         ?>
     </div>
 </div>
@@ -177,7 +177,7 @@
         <p class="explanation"><?php echo __('Use metric distances in proximity search.'); ?></p>
         <?php
         echo $view->formCheckbox('geolocation_use_metric_distances', true,
-            array('checked' => (boolean) get_option('geolocation_use_metric_distances')));
+            array('checked' => (bool) get_option('geolocation_use_metric_distances')));
         ?>
     </div>
 </div>
@@ -189,7 +189,7 @@
         <p class="explanation"><?php echo __('Show close or overlapping markers as clusters.'); ?></p>
         <?php
         echo $view->formCheckbox('cluster', true,
-            array('checked' => (boolean) get_option('geolocation_cluster')));
+            array('checked' => (bool) get_option('geolocation_cluster')));
         ?>
     </div>
 </div>
@@ -228,7 +228,7 @@
         <p class="explanation"><?php echo __('Add a link to the items map on all the items/browse pages.'); ?></p>
         <?php
         echo get_view()->formCheckbox('geolocation_link_to_nav', true,
-            array('checked' => (boolean) get_option('geolocation_link_to_nav')));
+            array('checked' => (bool) get_option('geolocation_link_to_nav')));
         ?>
     </div>
 </div>
@@ -241,7 +241,7 @@
         <p class="explanation"><?php echo __('If the Contribution plugin is installed and activated, Geolocation  will add a geolocation map field to the contribution form to associate a location to a contributed item.'); ?></p>
         <?php
         echo get_view()->formCheckbox('geolocation_add_map_to_contribution_form', true,
-            array('checked' => (boolean) get_option('geolocation_add_map_to_contribution_form')));
+            array('checked' => (bool) get_option('geolocation_add_map_to_contribution_form')));
         ?>
     </div>
 </div>
