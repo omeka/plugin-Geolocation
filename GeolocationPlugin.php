@@ -86,6 +86,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_mapbox_map_id');
         delete_option('geolocation_cluster');
         delete_option('geolocation_item_map_enable');
+        delete_option('geolocation_custom_map');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
