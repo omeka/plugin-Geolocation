@@ -161,6 +161,18 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookConfigForm($args)
     {
         $view = $args['view'];
+        $customMap = [
+            'type' => 'none',
+            'tile_url' => '',
+            'wms_url' => '',
+            'layers' => '',
+            'styles' => '',
+            'transparent' => false,
+            'minNativeZoom' => '',
+            'maxNativeZoom' => '',
+            'attribution' => '',
+        ];
+        $customMap = array_merge($customMap, (array) json_decode((string) get_option('geolocation_custom_map'), true));
         include 'config_form.php';
     }
 
@@ -192,6 +204,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_mapbox_map_id', $_POST['mapbox_map_id']);
         set_option('geolocation_cluster', $_POST['cluster']);
         set_option('geolocation_geocoder', $_POST['geocoder']);
+
+        $customMap = array_filter(array_map('trim', $_POST['custom_map']), 'strlen');
+        if (isset($customMap['minNativeZoom'])) {
+            $customMap['minNativeZoom'] = (int) $customMap['minNativeZoom'];
+        }
+        if (isset($customMap['maxNativeZoom'])) {
+            $customMap['maxNativeZoom'] = (int) $customMap['maxNativeZoom'];
+        }
+        $customMap['transparent'] = (bool) $customMap['transparent'];
+        set_option('geolocation_custom_map', json_encode($customMap));
     }
 
     public function hookDefineAcl($args)

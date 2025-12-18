@@ -131,6 +131,103 @@
 </div>
 </fieldset>
 
+<fieldset id="custom-map-settings">
+<legend><?php echo __('Custom Map Overlay'); ?></legend>
+<div class="field custom-map-always">
+    <div class="field-meta">
+        <label for="custom_map-type"><?php echo __('Map Type'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation"><?php echo __('Type of custom map to overlay.'); ?></p>
+        <?php
+        echo $view->formSelect('custom_map[type]', $customMap['type'], [], [
+            'none' => __('None'),
+            'tiled' => __('Tiled web map'),
+            'wms' => __('WMS'),
+        ]);
+    ?>
+    </div>
+</div>
+<div class="field custom-map-tiled">
+    <div class="field-meta">
+        <label for="custom_map-tile_url"><?php echo __('Tile URL Template'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation">
+        <?php echo __('URL template for map tiles. Should contain {x}, {y}, and {z}'); ?>
+        </p>
+        <?php echo $view->formText('custom_map[tile_url]', $customMap['tile_url']); ?>
+    </div>
+</div>
+<div class="field custom-map-wms">
+    <div class="field-meta">
+        <label for="custom_map-wms_url"><?php echo __('WMS Base URL'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation">
+        <?php echo __('Base URL for the WMS layer.'); ?>
+        </p>
+        <?php echo $view->formText('custom_map[wms_url]', $customMap['wms_url']); ?>
+    </div>
+</div>
+<div class="field custom-map-wms">
+    <div class="field-meta">
+        <label for="custom_map-layers"><?php echo __('WMS Layers'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation">
+        <?php echo __('WMS layers to display (separate by comma for multiple)'); ?>
+        </p>
+        <?php echo $view->formText('custom_map[layers]', $customMap['layers']); ?>
+    </div>
+</div>
+<div class="field custom-map-wms">
+    <div class="field-meta">
+        <label for="custom_map-styles"><?php echo __('WMS Styles'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation">
+        <?php echo __('WMS styles (optional, separate by comma for multiple)'); ?>
+        </p>
+        <?php echo $view->formText('custom_map[styles]', $customMap['styles']); ?>
+    </div>
+</div>
+<div class="field custom-map-wms">
+    <div class="field-meta">
+        <label for="custom_map-transparent"><?php echo __('Transparent'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation">
+        <?php echo __('Request transparent tiles from the WMS server'); ?>
+        </p>
+        <?php echo $view->formCheckbox('custom_map[transparent]', true, ['checked' => $customMap['transparent']]); ?>
+    </div>
+</div>
+<div class="field custom-map-wms custom-map-tiled">
+    <div class="field-meta">
+        <label id="zoom-group-id"><?php echo __('Zoom Range'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation">
+        <?php echo __('Zoom levels valid for the custom map. Leave blank if the tiles are available at all zoom levels. 0 is the most zoomed out and 18 is the most zoomed in.'); ?>
+        </p>
+        <div class="zoom-group" role="group" aria-labelledby="zoom-group-id">
+            <label><?php echo __('Min Zoom'); ?><?php echo $view->formText('custom_map[minNativeZoom]', $customMap['minNativeZoom'], ['size' => 2, 'inputmode' => 'numeric']); ?></label>
+            <label><?php echo __('Max Zoom'); ?><?php echo $view->formText('custom_map[maxNativeZoom]', $customMap['maxNativeZoom'], ['size' => 2, 'inputmode' => 'numeric']); ?></label>
+        </div>
+    </div>
+</div>
+<div class="field custom-map-wms custom-map-tiled">
+    <div class="field-meta">
+        <label for="custom_map-attribution"><?php echo __('Attribution'); ?></label>
+    </div>
+    <div class="inputs">
+        <p class="explanation"><?php echo __('Attribution text for the custom map.'); ?></p>
+        <?php echo $view->formText('custom_map[attribution]', $customMap['attribution']); ?>
+    </div>
+</div>
+</fieldset>
+
 <fieldset>
 <legend><?php echo __('Browse Map Settings'); ?></legend>
 <div class="field">
@@ -250,8 +347,33 @@
 function toggleMapboxSettings() {
     jQuery('.mapbox-settings').toggle(jQuery('#basemap').val() === 'MapBox');
 }
+function toggleCustomMapSettings() {
+    var mapType = jQuery('#custom_map-type').val();
+    jQuery('#custom-map-settings .field:not(.custom-map-always)').hide();
+    if (mapType === 'tiled') {
+        jQuery('#custom-map-settings .field.custom-map-tiled').show();
+    } else if (mapType === 'wms') {
+        jQuery('#custom-map-settings .field.custom-map-wms').show();
+    }
+}
 jQuery(document).ready(function () {
     toggleMapboxSettings();
+    toggleCustomMapSettings();
     jQuery('#basemap').on('change', toggleMapboxSettings);
+    jQuery('#custom_map-type').on('change', toggleCustomMapSettings);
 });
 </script>
+<style>
+.zoom-group {
+    display: flex;
+    gap: 1em;
+}
+.zoom-group label {
+    display: flex;
+    align-items: center;
+}
+.zoom-group input[type="text"] {
+    width: auto;
+    flex-grow: 1;
+}
+</style>

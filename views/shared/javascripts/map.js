@@ -73,6 +73,8 @@ OmekaMap.prototype = {
     },
     
     initMap: function () {
+        var customMap = this.options.custom_map;
+
         if (!this.center) {
             alert('Error: The center of the map has not been set!');
             return;
@@ -82,6 +84,17 @@ OmekaMap.prototype = {
         this.markerBounds = L.latLngBounds();
 
         L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
+
+        if (customMap) {
+            if (customMap.type === 'tiled' && customMap.tile_url) {
+                L.tileLayer(customMap.tile_url, customMap).addTo(this.map);
+            } else if (customMap.type === 'wms' && customMap.wms_url && customMap.layers) {
+                if (customMap.transparent) {
+                    customMap.format = 'image/png';
+                }
+                L.tileLayer.wms(customMap.wms_url, customMap).addTo(this.map);
+            }
+        }
 
         if (this.options.cluster) {
             this.clusterGroup = L.markerClusterGroup({
