@@ -326,7 +326,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookPublicItemsShow($args)
     {
-        if(!get_option('geolocation_item_map_enable')) return;
+        if (!get_option('geolocation_item_map_enable')) {
+            return;
+        }
+
         $view = $args['view'];
         $item = $args['item'];
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);

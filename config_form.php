@@ -302,7 +302,7 @@
         <p class="explanation"><?php echo __('Display map on the items/show page.'); ?></p>
         <?php
         echo $view->formCheckbox('geolocation_item_map_enable', true,
-            array('checked' => (boolean) get_option('geolocation_item_map_enable')));
+            array('checked' => (bool) get_option('geolocation_item_map_enable')));
         ?>
     </div>
 </div>
