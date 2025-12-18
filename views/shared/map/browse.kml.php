@@ -15,16 +15,16 @@
             </BalloonStyle>
         </Style>
         <?php
-        foreach(loop('item') as $item):
-        $location = $locations[$item->id];
+        foreach (loop('item') as $item):
+            $location = $locations[$item->id];
         ?>
         <Placemark>
-            <name><?php echo xml_escape(metadata('item', 'display_title', array('no_escape' => true))); ?></name>
-            <namewithlink><?php echo xml_escape(link_to_item(metadata('item' , array('Dublin Core', 'Title')), array('class' => 'view-item'))); ?></namewithlink>
-            <Snippet maxLines="2"><?php echo xml_escape(metadata('item', array('Dublin Core', 'Description'), array('snippet' => 150))); ?></Snippet>
+            <name><?php echo xml_escape(metadata('item', 'display_title', ['no_escape' => true])); ?></name>
+            <namewithlink><?php echo xml_escape(link_to_item(metadata('item', ['Dublin Core', 'Title']), ['class' => 'view-item'])); ?></namewithlink>
+            <Snippet maxLines="2"><?php echo xml_escape(metadata('item', ['Dublin Core', 'Description'], ['snippet' => 150])); ?></Snippet>
             <description><?php
             if (metadata($item, 'has thumbnail')) {
-                echo xml_escape(link_to_item(item_image('thumbnail', array('alt' => '')), array('class' => 'view-item')));
+                echo xml_escape(link_to_item(item_image('thumbnail', ['alt' => '']), ['class' => 'view-item']));
             }
             ?></description>
             <Point>

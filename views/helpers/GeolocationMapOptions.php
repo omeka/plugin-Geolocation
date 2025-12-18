@@ -8,7 +8,7 @@
  */
 class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abstract
 {
-    public function geolocationMapOptions($options = array())
+    public function geolocationMapOptions($options = [])
     {
         if (!array_key_exists('basemap', $options)) {
             $options['basemap'] = get_option('geolocation_basemap');

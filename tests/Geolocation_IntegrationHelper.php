@@ -8,14 +8,14 @@
 class Geolocation_IntegrationHelper
 {
     const PLUGIN_NAME = 'Geolocation';
-    
+
     public function setUpPlugin()
-    {        
+    {
         $pluginHelper = new Omeka_Test_Helper_Plugin;
         $this->_addPluginHooksAndFilters($pluginHelper->pluginBroker, self::PLUGIN_NAME);
         $pluginHelper->setUp(self::PLUGIN_NAME);
     }
-        
+
     public function _addPluginHooksAndFilters($pluginBroker, $pluginName)
     {
         // Set the current plugin so the add_plugin_hook function works

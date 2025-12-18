@@ -16,9 +16,9 @@ if (empty($radius)) {
 }
 
 if (get_option('geolocation_use_metric_distances')) {
-   $distanceLabel =  __('Geographic Radius (kilometers)');
-   } else {
-   $distanceLabel =  __('Geographic Radius (miles)');
+    $distanceLabel = __('Geographic Radius (kilometers)');
+} else {
+    $distanceLabel = __('Geographic Radius (miles)');
 }
 
 ?>
@@ -27,11 +27,11 @@ if (get_option('geolocation_use_metric_distances')) {
 <div id="search-by-geolocation-status" class="field">
     <?php echo $this->formLabel('geolocation-mapped', __('Geolocation Status')); ?>
     <div class="inputs">
-        <?php echo $this->formSelect('geolocation-mapped',  $mapped, array(), array(
+        <?php echo $this->formSelect('geolocation-mapped', $mapped, [], [
             '' => __('Select Below'),
             '1' => __('Only Items with Locations'),
             '0' => __('Only Items without Locations'),
-        )); ?>
+        ]); ?>
     </div>
 </div>
 
@@ -39,16 +39,16 @@ if (get_option('geolocation_use_metric_distances')) {
 <div id="search-by-geolocation-address" class="field">
     <?php echo $this->formLabel('geolocation-address-input', __('Geographic Address')); ?>
     <div class="inputs">
-        <?php echo $this->formText('geolocation-address',  $address, array('size' => '40', 'id' => 'geolocation-address-input')); ?>
-        <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('id' => 'geolocation-latitude-input')); ?>
-        <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('id' => 'geolocation-longitude-input')); ?>
+        <?php echo $this->formText('geolocation-address', $address, ['size' => '40', 'id' => 'geolocation-address-input']); ?>
+        <?php echo $this->formHidden('geolocation-latitude', $currentLat, ['id' => 'geolocation-latitude-input']); ?>
+        <?php echo $this->formHidden('geolocation-longitude', $currentLng, ['id' => 'geolocation-longitude-input']); ?>
     </div>
 </div>
 
 <div id="search-by-geolocation-radius" class="field">
     <?php echo $this->formLabel('geolocation-radius', $distanceLabel); ?>
     <div class="inputs">
-        <?php echo $this->formText('geolocation-radius', $radius, array('size' => '40')); ?>
+        <?php echo $this->formText('geolocation-radius', $radius, ['size' => '40']); ?>
     </div>
 </div>
 

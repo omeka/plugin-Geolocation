@@ -6,12 +6,12 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
     {
         $this->_helper->db->setDefaultModelName('Item');
     }
-    
+
     public function browseAction()
     {
         $table = $this->_helper->db->getTable();
         $locationTable = $this->_helper->db->getTable('Location');
-        
+
         $params = $this->getAllParams();
         $params['geolocation-mapped'] = true;
         $limit = (int) get_option('geolocation_per_page');
@@ -26,12 +26,12 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         } else {
             $this->view->totalItems = $table->count($params);
             $this->view->params = $params;
-        
-            $pagination = array(
-                'page'          => $currentPage,
-                'per_page'      => $limit,
-                'total_results' => $this->view->totalItems
-            );
+
+            $pagination = [
+                'page' => $currentPage,
+                'per_page' => $limit,
+                'total_results' => $this->view->totalItems,
+            ];
             Zend_Registry::set('pagination', $pagination);
         }
     }

@@ -39,23 +39,23 @@
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The type of map to display'); ?></p>
         <?php
-        echo $view->formSelect('basemap', get_option('geolocation_basemap'), array(), array(
-            __('OpenStreetMap') => array(
+        echo $view->formSelect('basemap', get_option('geolocation_basemap'), [], [
+            __('OpenStreetMap') => [
                 'OpenStreetMap' => __('Standard'),
                 'OpenStreetMap.HOT' => __('Humanitarian'),
-            ),
-            __('OpenTopoMap') => array(
+            ],
+            __('OpenTopoMap') => [
                 'OpenTopoMap' => __('OpenTopoMap'),
-            ),
-            __('Stamen') => array(
+            ],
+            __('Stamen') => [
                 'Stadia.StamenToner' => __('Toner'),
                 'Stadia.StamenTonerBackground' => __('Toner (background)'),
                 'Stadia.StamenTonerLite' => __('Toner (lite)'),
                 'Stadia.StamenWatercolor' => __('Watercolor'),
                 'Stadia.StamenTerrain' => __('Terrain'),
                 'Stadia.StamenTerrainBackground' => __('Terrain (background)'),
-            ),
-            __('Esri') => array(
+            ],
+            __('Esri') => [
                 'Esri.WorldStreetMap' => __('World Street Map'),
                 'Esri.DeLorme' => __('DeLorme'),
                 'Esri.WorldTopoMap' => __('World Topographic Map'),
@@ -66,19 +66,19 @@
                 'Esri.OceanBasemap' => __('Ocean Basemap'),
                 'Esri.NatGeoWorldMap' => __('National Geographic World Map'),
                 'Esri.WorldGrayCanvas' => __('Light Gray Canvas'),
-            ),
-            __('CartoDB') => array(
+            ],
+            __('CartoDB') => [
                 'CartoDB.Voyager' => __('Voyager'),
                 'CartoDB.VoyagerNoLabels' => __('Voyager (no labels)'),
                 'CartoDB.Positron' => __('Positron'),
                 'CartoDB.PositronNoLabels' => __('Positron (no labels)'),
                 'CartoDB.DarkMatter' => __('Dark Matter'),
                 'CartoDB.DarkMatterNoLabels' => __('Dark Matter (no labels)'),
-            ),
-            __('Mapbox') => array(
-                'MapBox' => __('Mapbox (see settings below)')
-            ),
-        ));
+            ],
+            __('Mapbox') => [
+                'MapBox' => __('Mapbox (see settings below)'),
+            ],
+        ]);
         ?>
     </div>
 </div>
@@ -92,7 +92,6 @@
         <?php
         echo __('Mapbox access token. A token is required when Mapbox is selected as the basemap. Get your token at %s.',
             '<a target="_blank" href="https://www.mapbox.com/account/access-tokens/">https://www.mapbox.com/account/access-tokens/</a>'
-
         );
         ?>
         </p>
@@ -104,11 +103,7 @@
         <label for="mapbox_map_id"><?php echo __('Mapbox Map ID'); ?></label>
     </div>
     <div class="inputs five columns omega">
-        <p class="explanation">
-        <?php
-        echo __('Mapbox Map ID for the map to display as the basemap. The default street map will be used if nothing is entered here.');
-        ?>
-        </p>
+        <p class="explanation"><?php echo __('Mapbox Map ID for the map to display as the basemap. The default street map will be used if nothing is entered here.'); ?></p>
         <?php echo $view->formText('mapbox_map_id', get_option('geolocation_mapbox_map_id')); ?>
     </div>
 </div>
@@ -118,14 +113,12 @@
         <label for="geocoder"><?php echo __('Geocoder'); ?></label>
     </div>
     <div class="inputs five columns omega">
-        <p class="explanation">
-            <?php echo __('Service to use for looking up coordinates from addresses.'); ?>
-        </p>
+        <p class="explanation"><?php echo __('Service to use for looking up coordinates from addresses.'); ?></p>
         <?php
-        echo $view->formSelect('geocoder', get_option('geolocation_geocoder'), array(), array(
+        echo $view->formSelect('geocoder', get_option('geolocation_geocoder'), [], [
             'nominatim' => __('OpenStreetMap Nominatim'),
             'photon' => __('Photon'),
-        ));
+        ]);
         ?>
     </div>
 </div>
@@ -145,7 +138,7 @@
             'tiled' => __('Tiled web map'),
             'wms' => __('WMS'),
         ]);
-    ?>
+        ?>
     </div>
 </div>
 <div class="field custom-map-tiled">
@@ -153,9 +146,7 @@
         <label for="custom_map-tile_url"><?php echo __('Tile URL Template'); ?></label>
     </div>
     <div class="inputs">
-        <p class="explanation">
-        <?php echo __('URL template for map tiles. Should contain {x}, {y}, and {z}'); ?>
-        </p>
+        <p class="explanation"><?php echo __('URL template for map tiles. Should contain {x}, {y}, and {z}'); ?></p>
         <?php echo $view->formText('custom_map[tile_url]', $customMap['tile_url']); ?>
     </div>
 </div>
@@ -164,9 +155,7 @@
         <label for="custom_map-wms_url"><?php echo __('WMS Base URL'); ?></label>
     </div>
     <div class="inputs">
-        <p class="explanation">
-        <?php echo __('Base URL for the WMS layer.'); ?>
-        </p>
+        <p class="explanation"><?php echo __('Base URL for the WMS layer.'); ?></p>
         <?php echo $view->formText('custom_map[wms_url]', $customMap['wms_url']); ?>
     </div>
 </div>
@@ -175,9 +164,7 @@
         <label for="custom_map-layers"><?php echo __('WMS Layers'); ?></label>
     </div>
     <div class="inputs">
-        <p class="explanation">
-        <?php echo __('WMS layers to display (separate by comma for multiple)'); ?>
-        </p>
+        <p class="explanation"><?php echo __('WMS layers to display (separate by comma for multiple)'); ?></p>
         <?php echo $view->formText('custom_map[layers]', $customMap['layers']); ?>
     </div>
 </div>
@@ -186,9 +173,7 @@
         <label for="custom_map-styles"><?php echo __('WMS Styles'); ?></label>
     </div>
     <div class="inputs">
-        <p class="explanation">
-        <?php echo __('WMS styles (optional, separate by comma for multiple)'); ?>
-        </p>
+        <p class="explanation"><?php echo __('WMS styles (optional, separate by comma for multiple)'); ?></p>
         <?php echo $view->formText('custom_map[styles]', $customMap['styles']); ?>
     </div>
 </div>
@@ -197,9 +182,7 @@
         <label for="custom_map-transparent"><?php echo __('Transparent'); ?></label>
     </div>
     <div class="inputs">
-        <p class="explanation">
-        <?php echo __('Request transparent tiles from the WMS server'); ?>
-        </p>
+        <p class="explanation"><?php echo __('Request transparent tiles from the WMS server'); ?></p>
         <?php echo $view->formCheckbox('custom_map[transparent]', true, ['checked' => $customMap['transparent']]); ?>
     </div>
 </div>
@@ -245,16 +228,14 @@
     </div>
     <div class="inputs five columns omega">
         <p class="explanation">
-            <?php echo __('If checked, the default location and zoom settings '
-                . 'will be ignored on the browse map. Instead, the map will '
-                . 'automatically pan and zoom to fit the locations displayed '
-                . 'on each page.');
-            ?>
-        </p>
         <?php
-        echo $view->formCheckbox('auto_fit_browse', true,
-            array('checked' => (bool) get_option('geolocation_auto_fit_browse')));
+        echo __('If checked, the default location and zoom settings '
+            . 'will be ignored on the browse map. Instead, the map will '
+            . 'automatically pan and zoom to fit the locations displayed '
+            . 'on each page.');
         ?>
+        </p>
+        <?php echo $view->formCheckbox('auto_fit_browse', true, ['checked' => (bool) get_option('geolocation_auto_fit_browse')]); ?>
     </div>
 </div>
 <div class="field">
@@ -272,10 +253,7 @@
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('Use metric distances in proximity search.'); ?></p>
-        <?php
-        echo $view->formCheckbox('geolocation_use_metric_distances', true,
-            array('checked' => (bool) get_option('geolocation_use_metric_distances')));
-        ?>
+        <?php echo $view->formCheckbox('geolocation_use_metric_distances', true, ['checked' => (bool) get_option('geolocation_use_metric_distances')]); ?>
     </div>
 </div>
 <div class="field">
@@ -284,10 +262,7 @@
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('Show close or overlapping markers as clusters.'); ?></p>
-        <?php
-        echo $view->formCheckbox('cluster', true,
-            array('checked' => (bool) get_option('geolocation_cluster')));
-        ?>
+        <?php echo $view->formCheckbox('cluster', true, ['checked' => (bool) get_option('geolocation_cluster')]); ?>
     </div>
 </div>
 </fieldset>
@@ -300,10 +275,7 @@
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('Display map on the items/show page.'); ?></p>
-        <?php
-        echo $view->formCheckbox('geolocation_item_map_enable', true,
-            array('checked' => (bool) get_option('geolocation_item_map_enable')));
-        ?>
+        <?php echo $view->formCheckbox('geolocation_item_map_enable', true, ['checked' => (bool) get_option('geolocation_item_map_enable')]); ?>
     </div>
 </div>
 <div class="field">
@@ -335,10 +307,7 @@
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('Add a link to the items map on all the items/browse pages.'); ?></p>
-        <?php
-        echo get_view()->formCheckbox('geolocation_link_to_nav', true,
-            array('checked' => (bool) get_option('geolocation_link_to_nav')));
-        ?>
+        <?php echo get_view()->formCheckbox('geolocation_link_to_nav', true, ['checked' => (bool) get_option('geolocation_link_to_nav')]); ?>
     </div>
 </div>
 
@@ -348,10 +317,7 @@
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('If the Contribution plugin is installed and activated, Geolocation  will add a geolocation map field to the contribution form to associate a location to a contributed item.'); ?></p>
-        <?php
-        echo get_view()->formCheckbox('geolocation_add_map_to_contribution_form', true,
-            array('checked' => (bool) get_option('geolocation_add_map_to_contribution_form')));
-        ?>
+        <?php echo get_view()->formCheckbox('geolocation_add_map_to_contribution_form', true, ['checked' => (bool) get_option('geolocation_add_map_to_contribution_form')]); ?>
     </div>
 </div>
 </fieldset>

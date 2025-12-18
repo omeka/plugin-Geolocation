@@ -1,7 +1,7 @@
 <?php
 
 class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abstract
-{    
+{
     public function geolocationMapSingle($item = null, $width = '200px', $height = '200px', $hasBalloonForMarker = false, $markerHtmlClassName = 'geolocation_balloon')
     {
         $divId = "item-map-{$item->id}";
@@ -9,32 +9,32 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         // Only set the center of the map if this item actually has a location
         // associated with it
         if ($location) {
-            $center['latitude']     = $location->latitude;
-            $center['longitude']    = $location->longitude;
-            $center['zoomLevel']    = $location->zoom_level;
-            $center['show']         = true;
+            $center['latitude'] = $location->latitude;
+            $center['longitude'] = $location->longitude;
+            $center['zoomLevel'] = $location->zoom_level;
+            $center['show'] = true;
             if ($hasBalloonForMarker) {
-                $titleLink = link_to_item(metadata($item, array('Dublin Core', 'Title'), array(), $item), array(), 'show', $item);
-                $thumbnailLink = !(item_image('thumbnail')) ? '' : link_to_item(item_image('thumbnail',array(), 0, $item), array(), 'show', $item);
-                $description = metadata($item, array('Dublin Core', 'Description'), array('snippet'=>150), $item);
+                $titleLink = link_to_item(metadata($item, ['Dublin Core', 'Title'], [], $item), [], 'show', $item);
+                $thumbnailLink = !(item_image('thumbnail')) ? '' : link_to_item(item_image('thumbnail', [], 0, $item), [], 'show', $item);
+                $description = metadata($item, ['Dublin Core', 'Description'], ['snippet' => 150], $item);
                 $center['markerHtml'] = '<div class="' . $markerHtmlClassName . '">'
                                       . '<div class="geolocation_balloon_title">' . $titleLink . '</div>'
                                       . '<div class="geolocation_balloon_thumbnail">' . $thumbnailLink . '</div>'
                                       . '<p class="geolocation_balloon_description">' . $description . '</p></div>';
             }
 
-            $options = array();
+            $options = [];
             $options['basemap'] = get_option('geolocation_basemap');
             $options = $this->view->geolocationMapOptions($options);
             $center = js_escape($center);
             $varDivId = Inflector::variablize($divId);
 
             $style = "width:$width;height:$height";
-            $divAttrs = array(
+            $divAttrs = [
                 'id' => $divId,
                 'class' => 'map geolocation-map',
                 'style' => $style,
-            );
+            ];
 
             $html = '<div ' . tag_attributes($divAttrs) .  '></div>';
             $js = "var $varDivId" . "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
@@ -42,6 +42,6 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         } else {
             $html = '<p class="map-notification">'.__('This item has no location info associated with it.').'</p>';
         }
-         return $html;   
-    }    
+        return $html;
+    }
 }

@@ -1,23 +1,23 @@
 <?php
 $divId = "geolocation_map_$index";
-$center = array(
+$center = [
     'latitude' => (float) get_option('geolocation_default_latitude'),
     'longitude' => (float) get_option('geolocation_default_longitude'),
-    'zoomLevel' => (int) get_option('geolocation_default_zoom_level')
-);
+    'zoomLevel' => (int) get_option('geolocation_default_zoom_level'),
+];
 $locationTable = get_db()->getTable('Location');
-$locations = array();
+$locations = [];
 foreach ($attachments as $attachment):
     $item = $attachment->getItem();
     $file = $attachment->getFile();
     $location = $locationTable->findLocationByItem($item, true);
     if ($location):
-        $titleLink = exhibit_builder_link_to_exhibit_item(null, array(), $item);
+        $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
 
         // Manually print just the caption as body when there's no file to avoid
         // double-printing the title link.
         if ($file):
-            $body = $this->exhibitAttachment($attachment, array(), array(), true);
+            $body = $this->exhibitAttachment($attachment, [], [], true);
         else:
             $body = $this->exhibitAttachmentCaption($attachment);
         endif;
@@ -26,11 +26,11 @@ foreach ($attachments as $attachment):
               . '<div class="geolocation_balloon_title">' . $titleLink . '</div>'
               . $body
               . '</div>';
-        $locations[] = array(
+        $locations[] = [
             'lat' => $location->latitude,
             'lng' => $location->longitude,
-            'html' => $html
-        );
+            'html' => $html,
+        ];
     endif;
 endforeach;
 ?>

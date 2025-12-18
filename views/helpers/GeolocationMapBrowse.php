@@ -2,18 +2,18 @@
 
 class Geolocation_View_Helper_GeolocationMapBrowse extends Zend_View_Helper_Abstract
 {
-    public function geolocationMapBrowse($divId = 'map', $options = array(), $attrs = array(), $center = array())
+    public function geolocationMapBrowse($divId = 'map', $options = [], $attrs = [], $center = [])
     {
         if (!$center) {
-            $center = array(
-                'latitude'  => (float) get_option('geolocation_default_latitude'),
+            $center = [
+                'latitude' => (float) get_option('geolocation_default_latitude'),
                 'longitude' => (float) get_option('geolocation_default_longitude'),
-                'zoomLevel' => (float) get_option('geolocation_default_zoom_level')
-            );
+                'zoomLevel' => (float) get_option('geolocation_default_zoom_level'),
+            ];
         }
 
         if (!array_key_exists('params', $options)) {
-            $options['params'] = array();
+            $options['params'] = [];
         }
 
         if (!array_key_exists('uri', $options)) {
@@ -34,13 +34,13 @@ class Geolocation_View_Helper_GeolocationMapBrowse extends Zend_View_Helper_Abst
         $options = $this->view->geolocationMapOptions($options);
         $center = js_escape($center);
         $varDivId = Inflector::variablize($divId);
-        $divAttrs = array_merge($attrs, array(
+        $divAttrs = array_merge($attrs, [
             'id' => $divId,
             'class' => $class,
             'aria-role' => 'region',
             'aria-roledescription' => 'map',
-            'aria-label' => 'Geolocation map'
-        ));
+            'aria-label' => 'Geolocation map',
+        ]);
 
         $html = '<div ' . tag_attributes($divAttrs) . '></div>';
         $js = "var $varDivId" . "OmekaMapBrowse = new OmekaMapBrowse(" . js_escape($divId) .", $center, $options); ";
