@@ -65,6 +65,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_use_metric_distances', '0');
         set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
         set_option('geolocation_geocoder', self::DEFAULT_GEOCODER);
+        set_option('geolocation_item_map_enable', '1');
     }
 
     public function hookUninstall()
@@ -84,6 +85,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_mapbox_access_token');
         delete_option('geolocation_mapbox_map_id');
         delete_option('geolocation_cluster');
+        delete_option('geolocation_item_map_enable');
 
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
@@ -187,6 +189,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_default_latitude', $_POST['default_latitude']);
         set_option('geolocation_default_longitude', $_POST['default_longitude']);
         set_option('geolocation_default_zoom_level', $_POST['default_zoom_level']);
+        set_option('geolocation_item_map_enable', $_POST['geolocation_item_map_enable']);
         set_option('geolocation_item_map_width', $_POST['item_map_width']);
         set_option('geolocation_item_map_height', $_POST['item_map_height']);
         $perPage = (int)$_POST['per_page'];
@@ -323,6 +326,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookPublicItemsShow($args)
     {
+        if(!get_option('geolocation_item_map_enable')) return;
         $view = $args['view'];
         $item = $args['item'];
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);

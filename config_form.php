@@ -296,6 +296,18 @@
 <legend><?php echo __('Item Map Settings'); ?></legend>
 <div class="field">
     <div class="two columns alpha">
+        <label for="geolocation_item_map_enable"><?php echo __('Enable Item Map'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Display map on the items/show page.'); ?></p>
+        <?php
+        echo $view->formCheckbox('geolocation_item_map_enable', true,
+            array('checked' => (boolean) get_option('geolocation_item_map_enable')));
+        ?>
+    </div>
+</div>
+<div class="field">
+    <div class="two columns alpha">
         <label for="item_map_width"><?php echo __('Width for Item Map'); ?></label>
     </div>
     <div class="inputs five columns omega">
