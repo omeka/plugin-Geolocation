@@ -45,6 +45,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'item_search_filters',
         'static_site_export_vendor_packages',
         'static_site_export_shortcodes',
+        'static_site_export_omeka_shortcode_callbacks',
     );
 
     public function hookInstall()
@@ -778,6 +779,21 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $shortcodes['omeka-geolocation-locations'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/shortcodes/omeka-geolocation-locations.html', PLUGIN_DIR);
         return $shortcodes;
+    }
+
+    public function filterStaticSiteExportOmekaShortcodeCallbacks($callbacks)
+    {
+        // @see GeolocationPlugin::geolocationShortcode()
+        $callbacks['geolocation'] = function ($args, $frontMatter, $job) {
+            $frontMatter['css'][] = 'vendor/leaflet/leaflet.css';
+            $frontMatter['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+            $frontMatter['js'][] = 'vendor/jquery/jquery.js';
+            $frontMatter['js'][] = 'vendor/leaflet/leaflet.js';
+            $frontMatter['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
+            return '{{< omeka-geolocation-locations page="geolocation" locationsResource="geolocation_locations.json" >}}';
+        };
+
+        return $callbacks;
     }
 
     /**
