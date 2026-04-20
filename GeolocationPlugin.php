@@ -25,6 +25,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'initialize',
         'contribution_type_form',
         'contribution_save_form',
+        'static_site_export_site_config',
+        'static_site_export_site_export_post',
+        'static_site_export_item_bundle',
+        'exhibit_builder_static_site_export_exhibit_page_block',
     ];
 
     protected $_filters = [
@@ -39,6 +43,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         'exhibit_layouts',
         'api_import_omeka_adapters',
         'item_search_filters',
+        'static_site_export_vendor_packages',
+        'static_site_export_shortcodes',
+        'static_site_export_omeka_shortcode_callbacks',
     ];
 
     public function hookInstall()
@@ -438,10 +445,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 // WHERE the distance is within radius miles/kilometers of the specified lat & long
                 $locationWithinRadius =
                     new Zend_Db_Expr(
-                        "(locations.latitude BETWEEN $lat - $radius / $denominator 
+                        "(locations.latitude BETWEEN $lat - $radius / $denominator
                             AND $lat + $radius / $denominator)
                             AND
-                        (locations.longitude BETWEEN $lng - $radius / $denominator 
+                        (locations.longitude BETWEEN $lng - $radius / $denominator
                             AND $lng + $radius / $denominator)"
                     );
                 $select->where($locationWithinRadius);
@@ -782,5 +789,207 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         return $length;
+    }
+
+    /**
+     * StaticSiteExport plugin: Add "Map" link to static site menu.
+     */
+    public function hookStaticSiteExportSiteConfig($args)
+    {
+        $args['site_config']['menus']['main'][] = [
+            'name' => __('Map'),
+            'pageRef' => '/geolocation',
+            'weight' => 40,
+        ];
+    }
+
+    /**
+     * StaticSiteExport plugin: Add vendor packages to static site.
+     */
+    function filterStaticSiteExportVendorPackages($vendorPackages, $args)
+    {
+        $vendorPackages['leaflet'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/leaflet', PLUGIN_DIR);
+        $vendorPackages['omeka-geolocation'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/omeka-geolocation', PLUGIN_DIR);
+        return $vendorPackages;
+    }
+
+    /**
+     * StaticSiteExport plugin: Add shortcodes to static site.
+     */
+    public function filterStaticSiteExportShortcodes($shortcodes, $args)
+    {
+        $shortcodes['omeka-geolocation-locations'] = sprintf('%s/Geolocation/libraries/Geolocation/StaticSiteExport/shortcodes/omeka-geolocation-locations.html', PLUGIN_DIR);
+        return $shortcodes;
+    }
+
+    public function filterStaticSiteExportOmekaShortcodeCallbacks($callbacks)
+    {
+        // @see GeolocationPlugin::geolocationShortcode()
+        $callbacks['geolocation'] = function ($args, $frontMatter, $job) {
+            $frontMatter['css'][] = 'vendor/leaflet/leaflet.css';
+            $frontMatter['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+            $frontMatter['js'][] = 'vendor/jquery/jquery.js';
+            $frontMatter['js'][] = 'vendor/leaflet/leaflet.js';
+            $frontMatter['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
+            return '{{< omeka-geolocation-locations page="geolocation" locationsResource="geolocation_locations.json" >}}';
+        };
+
+        return $callbacks;
+    }
+
+    /**
+     * StaticSiteExport plugin: Add geolocation content to static site.
+     */
+    public function hookStaticSiteExportSiteExportPost($args)
+    {
+        $job = $args['job'];
+
+        // Create the geolocation section.
+        $frontMatter = new ArrayObject([
+            'title' => __('Map'),
+            'css' => [
+                'vendor/leaflet/leaflet.css',
+                'vendor/omeka-geolocation/geolocation-marker.css',
+            ],
+            'js' => [
+                'vendor/jquery/jquery.js',
+                'vendor/leaflet/leaflet.js',
+                'vendor/omeka-geolocation/geolocation-locations.js',
+            ],
+        ]);
+        $job->makeDirectory('content/geolocation');
+        $job->makeFile(
+            'content/geolocation/index.md',
+            sprintf(
+                "%s\n%s",
+                json_encode($frontMatter, JSON_PRETTY_PRINT),
+                '{{< omeka-geolocation-locations page="geolocation" locationsResource="geolocation_locations.json" >}}'
+            )
+        );
+
+        // Make the locations file.
+        $locationRows = get_db()->getTable('Location')->findAll();
+        $locations = [];
+        foreach ($locationRows as $locationRow) {
+            $item = get_db()->getTable('Item')->find($locationRow->item_id);
+            $locations[] = [
+                'latitude' => $locationRow->latitude,
+                'longitude' => $locationRow->longitude,
+                'zoomLevel' => $locationRow->zoom_level,
+                'mapType' => $locationRow->map_type,
+                'address' => $locationRow->address,
+                'itemID' => $item->id,
+                'itemTitle' => $item->getDisplayTitle(),
+                'fileID' => $item->getFile() ? $item->getFile()->id : null,
+                'hasThumbnail' => $item->hasThumbnail(),
+            ];
+        }
+        $job->makeFile('content/geolocation/geolocation_locations.json', json_encode($locations));
+    }
+
+    /**
+     * StaticSiteExport plugin: Add map block to item pages.
+     */
+    public function hookStaticSiteExportItemBundle($args)
+    {
+        $job = $args['job'];
+        $item = $args['item'];
+        $frontMatterPage = $args['front_matter_page'];
+        $blocks = $args['blocks'];
+
+        $location = get_db()->getTable('Location')->findLocationByItem($item, true);
+        if (!$location) {
+            return;
+        }
+
+        $frontMatterPage['css'][] = 'vendor/leaflet/leaflet.css';
+        $frontMatterPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterPage['js'][] = 'vendor/jquery/jquery.js';
+        $frontMatterPage['js'][] = 'vendor/leaflet/leaflet.js';
+        $frontMatterPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
+
+        // Make the locations file.
+        $locations = [[
+            'latitude' => $location->latitude,
+            'longitude' => $location->longitude,
+            'zoomLevel' => $location->zoom_level,
+            'mapType' => $location->map_type,
+            'address' => $location->address,
+            'itemID' => $item->id,
+            'itemTitle' => $item->getDisplayTitle(),
+            'fileID' => $item->getFile() ? $item->getFile()->id : null,
+            'hasThumbnail' => $item->hasThumbnail(),
+        ]];
+        $job->makeFile(
+            sprintf('content/items/%s/geolocation_locations.json', $item->id),
+            json_encode($locations)
+        );
+
+        // Make the markdown.
+        $markdown = [];
+        $markdown[] = sprintf('## %s', __('Geolocation'));
+        $markdown[] = sprintf('{{< omeka-geolocation-locations page="items/%s" locationsResource="geolocation_locations.json" >}}', $item->id);
+
+        $blocks[] = [
+            'name' => 'geolocation',
+            'frontMatter' => new ArrayObject,
+            'markdown' => implode("\n", $markdown),
+        ];
+    }
+
+    /**
+     * StaticSiteExport plugin: Add map block to exhibit builder pages.
+     */
+    public function hookExhibitBuilderStaticSiteExportExhibitPageBlock($args)
+    {
+        $job = $args['job'];
+        $frontMatterExhibitPage = $args['frontMatterExhibitPage'];
+        $frontMatterExhibitPageBlock = $args['frontMatterExhibitPageBlock'];
+        $exhibitPageBlock = $args['block'];
+        $markdown = $args['markdown'];
+
+        if ('geolocation-map' !== $exhibitPageBlock->layout) {
+            return;
+        }
+
+        $exhibitPage = $exhibitPageBlock->getPage();
+        $exhibit = $exhibitPage->getExhibit();
+        $attachments = $exhibitPageBlock->getAttachments();
+
+        $frontMatterExhibitPage['css'][] = 'vendor/leaflet/leaflet.css';
+        $frontMatterExhibitPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterExhibitPage['js'][] = 'vendor/jquery/jquery.js';
+        $frontMatterExhibitPage['js'][] = 'vendor/leaflet/leaflet.js';
+        $frontMatterExhibitPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
+
+        $locations = [];
+        foreach ($attachments as $attachment) {
+            $item = $attachment->getItem();
+            $location = get_db()->getTable('Location')->findLocationByItem($item, true);
+            if (!$location) {
+                continue;
+            }
+            $locations[] = [
+                'latitude' => $location->latitude,
+                'longitude' => $location->longitude,
+                'zoomLevel' => $location->zoom_level,
+                'mapType' => $location->map_type,
+                'address' => $location->address,
+                'itemID' => $item->id,
+                'itemTitle' => $item->getDisplayTitle(),
+                'fileID' => $item->getFile() ? $item->getFile()->id : null,
+                'hasThumbnail' => $item->hasThumbnail(),
+            ];
+        }
+        $job->makeFile(
+            sprintf('content/exhibits/%s/%s/geolocation_locations.json', $exhibit->slug, $exhibitPage->slug),
+            json_encode($locations)
+        );
+
+        $markdown[] = sprintf(
+            '{{< omeka-geolocation-locations page="exhibits/%s/%s" locationsResource="geolocation_locations.json" >}}',
+            $exhibit->slug,
+            $exhibitPage->slug
+        );
     }
 }
