@@ -10,6 +10,13 @@
 button#geolocation_find_location_by_address {
     float: none;
 }
+#geolocation_metadata_select {
+    width: 80%;
+}
+#geolocation_metadata_select_label {
+    font-weight: bold;
+    margin-right: 5px;
+}
 
 div#geolocation {
     clear: both;
