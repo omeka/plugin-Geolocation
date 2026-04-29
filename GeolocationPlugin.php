@@ -263,9 +263,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookAdminHead($args)
     {
         $this->_head();
-        $version = $this->_getVersion();
-        queue_css_file('leaflet-draw/leaflet.draw', null, null, 'javascripts', $version);
-        queue_js_file('leaflet-draw/leaflet.draw', 'javascripts', [], $version);
     }
 
     public function hookPublicHead($args)
@@ -283,8 +280,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $version = $this->_getVersion();
         queue_css_file('leaflet/leaflet', null, null, 'javascripts', $version);
+        queue_css_file('leaflet-draw/leaflet.draw', null, null, 'javascripts', $version);
         queue_css_file('geolocation-marker', null, null, 'css', $version);
-        queue_js_file(['leaflet/leaflet', 'leaflet/leaflet-providers', 'map'], 'javascripts', [], $version);
+        queue_js_file(['leaflet/leaflet', 'leaflet/leaflet-providers', 'leaflet-draw/leaflet.draw', 'map'], 'javascripts', [], $version);
 
         if (get_option('geolocation_cluster')) {
             queue_css_file(['MarkerCluster', 'MarkerCluster.Default'], null, null, 'javascripts/leaflet-markercluster', $version);
