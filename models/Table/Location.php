@@ -39,14 +39,6 @@ class Table_Location extends Omeka_Db_Table
         return $grouped;
     }
 
-    public function applySearchFilters($select, $params)
-    {
-        if (isset($params['item_id'])) {
-            $alias = $this->getTableAlias();
-            $select->where("$alias.item_id = ?", (int) $params['item_id']);
-        }
-    }
-
     /**
      * Join items so that public permissions on items are enforced for locations.
      *
