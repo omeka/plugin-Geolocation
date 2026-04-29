@@ -164,7 +164,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 set_option('geolocation_basemap', $stamenBasemaps[$currentBasemap]);
             }
         }
-        if (version_compare($args['old_version'], '3.4', '<')) {
+        if (version_compare($args['old_version'], '4.0', '<')) {
             $db = get_db();
             $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`");
         }
