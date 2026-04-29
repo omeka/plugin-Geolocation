@@ -55,6 +55,7 @@ jQuery(document).ready(function () {
         geocoder.geocode(address).then(function (coords) {
             var latlng = L.latLng(coords);
             omekaGeolocationForm.addLocation(latlng.lat, latlng.lng, omekaGeolocationForm.map.getZoom(), null, address, '');
+            omekaGeolocationForm.map.panTo(latlng);
             jQuery('#geolocation-sr-alerts').text(successMessage + ' ' + address);
         }, function () {
             alert('Error: "' + address + '" was not found!');
