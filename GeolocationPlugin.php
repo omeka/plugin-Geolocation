@@ -304,6 +304,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             return;
         }
 
+        // Build an index of existing locations. As POST entries are matched to existing
+        // records, they are removed from $remaining. Whatever is left at the end was
+        // not in the POST and gets deleted.
         $remaining = [];
         foreach ($this->_db->getTable('Location')->findBy(['item_id' => $item->id]) as $loc) {
             $remaining[$loc->id] = $loc;
@@ -582,6 +585,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $apiResources['geolocations'] = [
             'record_type'  => 'Location',
             'actions'      => ['get', 'index', 'post', 'put', 'delete'],
+            // Whitelist item_id as an allowed GET param on the index action;
+            // without this the API router rejects ?item_id=X requests.
             'index_params' => ['item_id'],
         ];
         return $apiResources;
@@ -601,6 +606,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         if (!$locations) {
             return $extend;
         }
+        // count+url is the Omeka API format for multi-resource references;
+        // ApiController validates this shape and rejects plain arrays of objects.
         $extend['geolocations'] = [
             'count'    => count($locations),
             'url'      => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl('/geolocations') . '?item_id=' . $item->id,
@@ -709,9 +716,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      * @param Item $item
      * @param string $label if empty string, a default string will be used. Set
      * null if you don't want a label.
-     * @param boolean $confirmLocationChange
      * @param Omeka_View $view
-     * @param array $post
      * @return string Html string.
      */
     protected function _mapForm($item, $label = '', $view = null)

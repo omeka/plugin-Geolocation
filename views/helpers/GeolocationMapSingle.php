@@ -11,6 +11,8 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
             return '<p class="map-notification">' . __('This item has no location info associated with it.') . '</p>';
         }
 
+        // For single-location items this sets the initial zoom correctly.
+        // For multi-location items fitMarkers() overrides the center after all points are added.
         $center = [
             'latitude'  => $locations[0]->latitude,
             'longitude' => $locations[0]->longitude,

@@ -303,6 +303,7 @@ function OmekaMapForm(mapDivId, center, options) {
     this.markerMap = {};
     this.locationsContainer = document.getElementById('geolocation-locations-container');
 
+    // Leaflet.draw's edit and delete toolbars require a FeatureGroup to operate on.
     this.drawnItems = new L.FeatureGroup();
     this.map.addLayer(this.drawnItems);
 
@@ -364,7 +365,7 @@ OmekaMapForm.prototype = {
         var index = this.locationCounter++;
 
         var marker = L.marker([lat, lng]);
-        marker._geolocationIndex = index;
+        marker._geolocationIndex = index; // links this layer to its hidden form inputs
         this.drawnItems.addLayer(marker);
         this.markers.push(marker);
         this.markerBounds.extend([lat, lng]);
