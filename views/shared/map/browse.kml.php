@@ -16,11 +16,18 @@
         </Style>
         <?php
         foreach (loop('item') as $item):
-            $location = $locations[$item->id];
+            $itemLocations = $locations[$item->id] ?? [];
+            foreach ($itemLocations as $location):
         ?>
         <Placemark>
-            <name><?php echo xml_escape(metadata('item', 'display_title', ['no_escape' => true])); ?></name>
-            <namewithlink><?php echo xml_escape(link_to_item(metadata('item', ['Dublin Core', 'Title']), ['class' => 'view-item'])); ?></namewithlink>
+            <name><?php
+                $title = metadata('item', 'display_title', ['no_escape' => true]);
+                echo xml_escape($location->label ? "$title — {$location->label}" : $title);
+            ?></name>
+            <namewithlink><?php
+                $link = xml_escape(link_to_item(metadata('item', ['Dublin Core', 'Title']), ['class' => 'view-item']));
+                echo $location->label ? $link . ' — ' . xml_escape($location->label) : $link;
+            ?></namewithlink>
             <Snippet maxLines="2"><?php echo xml_escape(metadata('item', ['Dublin Core', 'Description'], ['snippet' => 150])); ?></Snippet>
             <description><?php
             if (metadata($item, 'has thumbnail')) {
@@ -28,12 +35,14 @@
             }
             ?></description>
             <Point>
-                <coordinates><?php echo $location['longitude']; ?>,<?php echo $location['latitude']; ?></coordinates>
+                <coordinates><?php echo $location->longitude; ?>,<?php echo $location->latitude; ?></coordinates>
             </Point>
-            <?php if ($location['address']): ?>
-            <address><?php echo xml_escape($location['address']); ?></address>
+            <?php if ($location->address): ?>
+            <address><?php echo xml_escape($location->address); ?></address>
             <?php endif; ?>
         </Placemark>
-        <?php endforeach; ?>
+        <?php
+            endforeach;
+        endforeach; ?>
     </Document>
 </kml>

@@ -22,7 +22,7 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
         if ($this->_helper->contextSwitch->getCurrentContext() == 'kml') {
             $items = $table->findBy($params, $limit, $currentPage);
             $this->view->items = $items;
-            $this->view->locations = $locationTable->findLocationByItem($items);
+            $this->view->locations = $locationTable->findLocationsByItem($items);
         } else {
             $this->view->totalItems = $table->count($params);
             $this->view->params = $params;

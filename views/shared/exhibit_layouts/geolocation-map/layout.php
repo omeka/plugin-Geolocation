@@ -10,20 +10,19 @@ $locations = [];
 foreach ($attachments as $attachment):
     $item = $attachment->getItem();
     $file = $attachment->getFile();
-    $location = $locationTable->findLocationByItem($item, true);
-    if ($location):
-        $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
+    $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
 
-        // Manually print just the caption as body when there's no file to avoid
-        // double-printing the title link.
-        if ($file):
-            $body = $this->exhibitAttachment($attachment, [], [], true);
-        else:
-            $body = $this->exhibitAttachmentCaption($attachment);
-        endif;
+    if ($file):
+        $body = $this->exhibitAttachment($attachment, [], [], true);
+    else:
+        $body = $this->exhibitAttachmentCaption($attachment);
+    endif;
 
+    $itemLocations = $locationTable->findBy(['item_id' => $item->id]);
+    foreach ($itemLocations as $location):
+        $title = $titleLink . ($location->label ? ' — ' . html_escape($location->label) : '');
         $html = '<div class="geolocation_balloon">'
-              . '<div class="geolocation_balloon_title">' . $titleLink . '</div>'
+              . '<div class="geolocation_balloon_title">' . $title . '</div>'
               . $body
               . '</div>';
         $locations[] = [
@@ -31,7 +30,7 @@ foreach ($attachments as $attachment):
             'lng' => $location->longitude,
             'html' => $html,
         ];
-    endif;
+    endforeach;
 endforeach;
 ?>
 <script type="text/javascript">

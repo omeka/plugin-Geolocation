@@ -12,6 +12,7 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
     public $zoom_level;
     public $map_type;
     public $address;
+    public $label;
 
     /**
      * Executes before the record is saved.
@@ -23,6 +24,9 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         }
         if (is_null($this->address)) {
             $this->address = '';
+        }
+        if (is_null($this->label)) {
+            $this->label = '';
         }
     }
 
@@ -38,18 +42,13 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         if (!$this->getTable('Item')->exists($this->item_id)) {
             $this->addError('item_id', __('Location requires a valid item ID.'));
         }
-        // An item can only have one location. This assumes that updating an
-        // existing location will never modify the item ID.
-        if (!$this->exists() && $this->getTable()->findBy(['item_id' => $this->item_id])) {
-            $this->addError('latitude', __('A location already exists for the provided item.'));
-        }
-        if (empty($this->latitude)) {
+        if (!is_numeric($this->latitude)) {
             $this->addError('latitude', __('Location requires a latitude.'));
         }
-        if (empty($this->longitude)) {
+        if (!is_numeric($this->longitude)) {
             $this->addError('longitude', __('Location requires a longitude.'));
         }
-        if (empty($this->zoom_level)) {
+        if (!is_numeric($this->zoom_level)) {
             $this->addError('zoom_level', __('Location requires a zoom level.'));
         }
     }
