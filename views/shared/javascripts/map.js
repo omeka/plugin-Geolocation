@@ -389,7 +389,6 @@ OmekaMapForm.prototype = {
         addHidden('latitude', lat);
         addHidden('longitude', lng);
         addHidden('zoom_level', zoom);
-        addHidden('map_type', 'Leaflet');
         addHidden('address', address);
         addHidden('label', label);
 

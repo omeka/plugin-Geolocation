@@ -10,7 +10,6 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
     public $latitude;
     public $longitude;
     public $zoom_level;
-    public $map_type;
     public $address;
     public $label;
 
@@ -19,9 +18,6 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
      */
     protected function beforeSave($args)
     {
-        if (is_null($this->map_type)) {
-            $this->map_type = '';
-        }
         if (is_null($this->address)) {
             $this->address = '';
         }

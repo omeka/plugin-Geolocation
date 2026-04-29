@@ -58,7 +58,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         `latitude` DOUBLE NOT NULL ,
         `longitude` DOUBLE NOT NULL ,
         `zoom_level` INT NOT NULL ,
-        `map_type` VARCHAR( 255 ) NOT NULL ,
         `address` TEXT NOT NULL ,
         `label` VARCHAR( 255 ) NOT NULL DEFAULT '' ,
         INDEX (`item_id`)) ENGINE = InnoDB";
@@ -167,6 +166,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         if (version_compare($args['old_version'], '4.0', '<')) {
             $db = get_db();
             $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`");
+            $db->query("ALTER TABLE `$db->Location` DROP COLUMN `map_type`");
         }
     }
 
@@ -983,7 +983,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'latitude'     => $location->latitude,
             'longitude'    => $location->longitude,
             'zoomLevel'    => $location->zoom_level,
-            'mapType'      => $location->map_type,
             'address'      => $location->address,
             'label'        => $location->label,
             'itemID'       => $item->id,
