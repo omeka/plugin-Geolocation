@@ -39,11 +39,20 @@ class Table_Location extends Omeka_Db_Table
         return $grouped;
     }
 
+    public function applySearchFilters($select, $params)
+    {
+        if (isset($params['item_id'])) {
+            $alias = $this->getTableAlias();
+            $select->where("$alias.item_id = ?", (int) $params['item_id']);
+        }
+    }
+
     /**
-     * Add permission check to location queries.
+     * Join items so that public permissions on items are enforced for locations.
      *
-     * Since all locations belong to an item we can override this method to join
-     * the items table and add a permission check to the select object.
+     * Locations have no visibility of their own — a location is public only if
+     * its item is public. Joining the items table here means every query on
+     * this table automatically excludes locations for private items.
      *
      * @return Omeka_Db_Select
      */
