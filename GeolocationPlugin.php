@@ -760,6 +760,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
 
+        // For single-location items this sets the initial zoom correctly.
+        // For multi-location items fitBounds overrides the center on tab select.
+        if ($existingLocations) {
+            $center['latitude'] = $existingLocations[0]['latitude'];
+            $center['longitude'] = $existingLocations[0]['longitude'];
+            $center['zoomLevel'] = $existingLocations[0]['zoom_level'];
+        }
+
         $options = [];
         $options['form'] = ['id' => 'location_form'];
         $options['cluster'] = false;
