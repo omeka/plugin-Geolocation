@@ -27,6 +27,11 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
 
         $options['custom_map'] = json_decode((string) get_option('geolocation_custom_map'), true);
 
+        $options['strings'] = [
+            'fitAllMarkers' => __('Fit all markers'),
+            'label'         => __('Label'),
+        ];
+
         return js_escape($options);
     }
 

@@ -40,6 +40,21 @@ div#geolocation {
     margin-bottom:0px;
 }
 
+.leaflet-control-fit-all a {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+}
+
+.leaflet-control-fit-all a svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+}
+
 img.leaflet-tile,
 img.leaflet-marker-icon,
 img.leaflet-marker-shadow {

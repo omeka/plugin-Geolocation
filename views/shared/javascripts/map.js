@@ -73,6 +73,7 @@ OmekaMap.prototype = {
     },
 
     initMap: function () {
+        var that = this;
         var customMap = this.options.custom_map;
 
         if (!this.center) {
@@ -104,6 +105,25 @@ OmekaMap.prototype = {
         }
 
         jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
+
+        var FitControl = L.Control.extend({
+            onAdd: function () {
+                var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-fit-all');
+                var link = L.DomUtil.create('a', '', container);
+                link.href = '#';
+                link.title = that.options.strings.fitAllMarkers;
+                link.setAttribute('role', 'button');
+                link.setAttribute('aria-label', that.options.strings.fitAllMarkers);
+                link.innerHTML = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18"><path d="M1 1h5v2H3v3H1V1zm11 0h5v5h-2V3h-3V1zM1 12h2v3h3v2H1v-5zm14 3h-3v2h5v-5h-2v3z" fill="currentColor"/></svg>';
+                L.DomEvent.on(link, 'click', function (e) {
+                    L.DomEvent.preventDefault(e);
+                    L.DomEvent.stopPropagation(e);
+                    that.fitMarkers();
+                });
+                return container;
+            }
+        });
+        new FitControl({ position: 'topleft' }).addTo(this.map);
 
         // Show the center marker if we have that enabled.
         if (this.center.show) {
@@ -344,7 +364,7 @@ OmekaMapForm.prototype = {
 
         var labelInput = jQuery('<input type="text" class="geolocation-popup-label">').val(label);
         var popupContent = jQuery('<div></div>')
-            .append(jQuery('<label></label>').text('Label: ').append(labelInput));
+            .append(jQuery('<label></label>').text(that.options.strings.label + ': ').append(labelInput));
 
         marker.bindPopup(popupContent[0], {autoPanPadding: [50, 50]});
 
