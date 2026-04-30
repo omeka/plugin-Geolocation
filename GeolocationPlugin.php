@@ -702,9 +702,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $label = __('Find a Location by Address:');
         }
 
-        $center = $this->_getCenter();
-        $center['show'] = false;
-
         // If the form was previously submitted (e.g. save failed validation),
         // re-populate from POST so unsaved changes are not lost.
         $existingLocations = [];
@@ -735,8 +732,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
 
+        // For no-location items this sets the default center.
         // For single-location items this sets the initial zoom correctly.
         // For multi-location items fitBounds overrides the center on tab select.
+        $center = [
+            'latitude'  => (float) get_option('geolocation_default_latitude'),
+            'longitude' => (float) get_option('geolocation_default_longitude'),
+            'zoomLevel' => (float) get_option('geolocation_default_zoom_level'),
+        ];
         if ($existingLocations) {
             $center['latitude'] = $existingLocations[0]['latitude'];
             $center['longitude'] = $existingLocations[0]['longitude'];
@@ -753,15 +756,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'options' => $options,
             'existingLocations' => $existingLocations,
         ]);
-    }
-
-    protected function _getCenter()
-    {
-        return [
-            'latitude' => (float) get_option('geolocation_default_latitude'),
-            'longitude' => (float) get_option('geolocation_default_longitude'),
-            'zoomLevel' => (float) get_option('geolocation_default_zoom_level'),
-        ];
     }
 
     protected function _filterCssLength($length, $default)

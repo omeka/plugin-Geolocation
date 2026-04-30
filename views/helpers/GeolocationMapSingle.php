@@ -17,7 +17,6 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
             'latitude'  => $locations[0]->latitude,
             'longitude' => $locations[0]->longitude,
             'zoomLevel' => $locations[0]->zoom_level,
-            'show'      => false,
         ];
 
         $points = [];

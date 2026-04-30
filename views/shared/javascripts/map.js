@@ -107,13 +107,6 @@ OmekaMap.prototype = {
         jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
 
         new OmekaFitControl({ position: 'topleft', omekaMap: that }).addTo(this.map);
-
-        // Show the center marker if we have that enabled.
-        if (this.center.show) {
-            this.addMarker([this.center.latitude, this.center.longitude],
-                           {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"},
-                           this.center.markerHtml);
-        }
     }
 };
 
