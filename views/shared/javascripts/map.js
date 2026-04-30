@@ -145,9 +145,7 @@ function OmekaMapBrowse(mapDivId, center, options) {
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
-
-    //XML loads asynchronously, so need to call for further config only after it has executed
-    this.loadKmlIntoMap(this.options.uri, this.options.params);
+    this.loadLocationsIntoMap(this.options.uri, this.options.params);
 }
 
 OmekaMapBrowse.prototype = {
@@ -165,77 +163,34 @@ OmekaMapBrowse.prototype = {
         if (!listDiv.length) {
             alert('Error: You have no map links div!');
         } else {
-            //Create HTML links for each of the markers
             this.buildListLinks(listDiv);
         }
     },
 
-    /* Need to parse KML manually b/c Google Maps API cannot access the KML
-       behind the admin interface */
-    loadKmlIntoMap: function (kmlUrl, params) {
+    loadLocationsIntoMap: function (url, params) {
         var that = this;
         jQuery.ajax({
             type: 'GET',
-            dataType: 'xml',
-            url: kmlUrl,
+            dataType: 'json',
+            url: url,
             data: params,
-            success: function(data) {
-                var xml = jQuery(data);
-
-                /* KML can be parsed as:
-                    kml - root element
-                        Placemark
-                            namewithlink
-                            description
-                            Point - longitude,latitude
-                */
-                var placeMarks = xml.find('Placemark');
-
-                // If we have some placemarks, load them
-                if (placeMarks.length) {
-                    // Retrieve the balloon styling from the KML file
-                    that.browseBalloon = that.getBalloonStyling(xml);
-
-                    // Build the markers from the placemarks
-                    jQuery.each(placeMarks, function (index, placeMark) {
-                        placeMark = jQuery(placeMark);
-                        that.buildMarkerFromPlacemark(placeMark);
+            success: function(locations) {
+                if (locations.length) {
+                    jQuery.each(locations, function (index, locationData) {
+                        that.buildLayerFromLocation(locationData);
                     });
-
-                    // We have successfully loaded some map points, so continue setting up the map object
                     return that.afterLoadItems();
-                } else {
-                    // @todo Elaborate with an error message
-                    return false;
                 }
             }
         });
     },
 
-    getBalloonStyling: function (xml) {
-        return xml.find('BalloonStyle text').text();
-    },
-
-    // Build a marker given the KML XML Placemark data
-    // I wish we could use the KML file directly, but it's behind the admin interface so no go
-    buildMarkerFromPlacemark: function (placeMark) {
-        // Get the info for each location on the map
-        var title = placeMark.find('name').text();
-        var titleWithLink = placeMark.find('namewithlink').text();
-        var body = placeMark.find('description').text();
-        var snippet = placeMark.find('Snippet').text();
-
-        // Extract the lat/long from the KML-formatted data
-        var coordinates = placeMark.find('Point coordinates').text().split(',');
-        var longitude = coordinates[0];
-        var latitude = coordinates[1];
-
-        // Use the KML formatting (do some string sub magic)
-        var balloon = this.browseBalloon;
-        balloon = balloon.replace('$[namewithlink]', titleWithLink).replace('$[description]', body).replace('$[Snippet]', snippet);
-
-        // Build a marker, add HTML for it
-        this.addMarker([latitude, longitude], {title: title, alt: title}, balloon);
+    buildLayerFromLocation: function (locationData) {
+        this.addMarker(
+            [locationData.latitude, locationData.longitude],
+            {title: locationData.title, alt: locationData.title},
+            locationData.markerHtml
+        );
     },
 
     buildListLinks: function (container) {

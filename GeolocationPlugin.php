@@ -34,8 +34,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = [
         'admin_navigation_main',
         'public_navigation_main',
-        'response_contexts',
-        'action_contexts',
         'admin_items_form_tabs',
         'public_navigation_items',
         'api_resources',
@@ -249,15 +247,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         ]);
         $router->addRoute('items_map', $mapRoute);
 
-        // Trying to make the route look like a KML file so google will eat it.
-        // @todo Include page parameter if this works.
-        $kmlRoute = new Zend_Controller_Router_Route_Regex('geolocation/map\.kml', [
-            'controller' => 'map',
-            'action' => 'browse',
-            'module' => 'geolocation',
-            'output' => 'kml',
-        ]);
-        $router->addRoute('map_kml', $kmlRoute);
     }
 
     public function hookAdminHead($args)
@@ -536,22 +525,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $navArray['Geolocation'] = ['label' => __('Map'), 'uri' => url('geolocation/map/browse')];
         return $navArray;
-    }
-
-    public function filterResponseContexts($contexts)
-    {
-        $contexts['kml'] = ['suffix' => 'kml',
-            'headers' => ['Content-Type' => 'text/xml']];
-        return $contexts;
-    }
-
-    public function filterActionContexts($contexts, $args)
-    {
-        $controller = $args['controller'];
-        if ($controller instanceof Geolocation_MapController) {
-            $contexts['browse'] = ['kml'];
-        }
-        return $contexts;
     }
 
     public function filterAdminItemsFormTabs($tabs, $args)

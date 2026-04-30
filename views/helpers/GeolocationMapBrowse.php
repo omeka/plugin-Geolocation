@@ -18,8 +18,8 @@ class Geolocation_View_Helper_GeolocationMapBrowse extends Zend_View_Helper_Abst
 
         if (!array_key_exists('uri', $options)) {
             // This should not be a link to the public side b/c then all the URLs that
-            // are generated inside the KML will also link to the public side.
-            $options['uri'] = url('geolocation/map.kml');
+            // are generated inside the JSON will also link to the public side.
+            $options['uri'] = url('geolocation/map/browse-json');
         }
 
         if (!array_key_exists('fitMarkers', $options)) {
