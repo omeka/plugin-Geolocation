@@ -4,7 +4,7 @@ $options = $this->geolocationMapOptions($options);
 ?>
 
 <input type="hidden" name="geolocation_form_shown" value="1">
-<div id="geolocation-locations-container"></div>
+<input type="hidden" name="geolocation_locations" id="geolocation-locations-json">
 
 <div class="field">
     <div id="location_form" class="two columns alpha">

@@ -262,7 +262,8 @@ function OmekaMapForm(mapDivId, center, options) {
 
     this.locationCounter = 0;
     this.markerMap = {};
-    this.locationsContainer = document.getElementById('geolocation-locations-container');
+    this.locationData = {};
+    this.jsonInput = document.getElementById('geolocation-locations-json');
 
     // Leaflet.draw's edit and delete toolbars require a FeatureGroup to operate on.
     this.drawnItems = new L.FeatureGroup();
@@ -297,25 +298,28 @@ function OmekaMapForm(mapDivId, center, options) {
             var idx = layer._geolocationIndex;
             if (idx === undefined) return;
             var latlng = layer.getLatLng();
-            jQuery('[name="geolocation[' + idx + '][latitude]"]').val(latlng.lat);
-            jQuery('[name="geolocation[' + idx + '][longitude]"]').val(latlng.lng);
+            that.locationData[idx].latitude = latlng.lat;
+            that.locationData[idx].longitude = latlng.lng;
         });
+        that._syncJson();
     });
 
     this.map.on(L.Draw.Event.DELETED, function (event) {
         event.layers.eachLayer(function (layer) {
             var idx = layer._geolocationIndex;
             if (idx === undefined) return;
-            jQuery('[name^="geolocation[' + idx + ']["]').remove();
+            delete that.locationData[idx];
             delete that.markerMap[idx];
         });
+        that._syncJson();
     });
 
     this.map.on('zoomend', function () {
         var zoom = that.map.getZoom();
-        for (var i in that.markerMap) {
-            jQuery('[name="geolocation[' + i + '][zoom_level]"]').val(zoom);
+        for (var i in that.locationData) {
+            that.locationData[i].zoom_level = zoom;
         }
+        that._syncJson();
     });
 }
 
@@ -326,7 +330,7 @@ OmekaMapForm.prototype = {
         var index = this.locationCounter++;
 
         var marker = L.marker([lat, lng]);
-        marker._geolocationIndex = index; // links this layer to its hidden form inputs
+        marker._geolocationIndex = index; // links this layer to its locationData entry
         this.drawnItems.addLayer(marker);
         this.markers.push(marker);
         this.markerBounds.extend([lat, lng]);
@@ -338,24 +342,23 @@ OmekaMapForm.prototype = {
         marker.bindPopup(popupContent[0], {autoPanPadding: [50, 50]});
 
         labelInput.on('input', function () {
-            jQuery('[name="geolocation[' + index + '][label]"]').val(jQuery(this).val());
+            that.locationData[index].label = jQuery(this).val();
+            that._syncJson();
         });
 
-        var container = jQuery(this.locationsContainer);
-        var addHidden = function (field, value) {
-            container.append(jQuery('<input type="hidden">').attr('name', 'geolocation[' + index + '][' + field + ']').val(value));
-        };
-        if (id) {
-            addHidden('id', id);
-        }
-        addHidden('latitude', lat);
-        addHidden('longitude', lng);
-        addHidden('zoom_level', zoom);
-        addHidden('address', address);
-        addHidden('label', label);
+        this.locationData[index] = {id: id, latitude: lat, longitude: lng, zoom_level: zoom, address: address, label: label};
+        this._syncJson();
 
         this.markerMap[index] = marker;
         return index;
+    },
+
+    _syncJson: function () {
+        var data = [];
+        for (var idx in this.locationData) {
+            data.push(this.locationData[idx]);
+        }
+        jQuery(this.jsonInput).val(JSON.stringify(data));
     },
 
     getLocationCount: function () {

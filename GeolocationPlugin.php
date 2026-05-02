@@ -280,8 +280,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         $item = $args['record'];
         // geolocation_form_shown is a sentinel set by input-partial.php. Its
-        // presence means the map form was rendered, so missing geolocation[]
-        // inputs mean all markers were deleted, not that the form was absent.
+        // presence means the map form was rendered, so an empty geolocation_locations
+        // value means all markers were deleted, not that the form was absent.
         if (!isset($post['geolocation_form_shown'])) {
             return;
         }
@@ -294,7 +294,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $remaining[$loc->id] = $loc;
         }
 
-        foreach ($post['geolocation'] ?? [] as $entry) {
+        foreach (json_decode($post['geolocation_locations'] ?? '[]', true) as $entry) {
             if (!is_numeric($entry['latitude'] ?? null) || !is_numeric($entry['longitude'] ?? null)) {
                 continue;
             }
@@ -699,7 +699,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         // re-populate from POST so unsaved changes are not lost.
         $existingLocations = [];
         if (isset($_POST['geolocation_form_shown'])) {
-            foreach ($_POST['geolocation'] ?? [] as $entry) {
+            foreach (json_decode($_POST['geolocation_locations'] ?? '[]', true) as $entry) {
                 if (!is_numeric($entry['latitude'] ?? null) || !is_numeric($entry['longitude'] ?? null)) {
                     continue;
                 }
