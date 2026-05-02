@@ -25,6 +25,7 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
                 'latitude'  => $loc->latitude,
                 'longitude' => $loc->longitude,
                 'zoomLevel' => $loc->zoom_level,
+                'label'     => $loc->label,
             ];
             if ($loc->label !== '') {
                 $point['markerHtml'] = '<div class="geolocation_balloon">'

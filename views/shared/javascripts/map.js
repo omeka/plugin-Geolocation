@@ -233,7 +233,7 @@ function OmekaMapSingle(mapDivId, center, options) {
     if (options.points && options.points.length) {
         for (var i = 0; i < options.points.length; i++) {
             var pt = options.points[i];
-            this.addMarker([pt.latitude, pt.longitude], {}, pt.markerHtml);
+            this.addMarker([pt.latitude, pt.longitude], {title: pt.label, alt: pt.label}, pt.markerHtml);
         }
         this.fitMarkers();
     }
