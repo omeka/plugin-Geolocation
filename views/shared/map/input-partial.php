@@ -16,7 +16,7 @@ $options = $this->geolocationMapOptions($options);
     </div>
 </div>
 <div id="geolocation-sr-alerts" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-<div id="omeka-map-form" class="geolocation-map"></div>
+<div id="omeka-map-form" class="geolocation-map" data-locations="<?php echo html_escape(json_encode($existingLocations)); ?>"></div>
 
 <?php
 echo js_tag('geocoder');
@@ -24,16 +24,9 @@ $geocoder = json_encode(get_option('geolocation_geocoder'));
 ?>
 <script type="text/javascript">
 var omekaGeolocationForm = new OmekaMapForm('omeka-map-form', <?php echo $center; ?>, <?php echo $options; ?>);
-<?php foreach ($existingLocations as $loc): ?>
-omekaGeolocationForm.addLocation(
-    <?php echo (float) $loc['latitude']; ?>,
-    <?php echo (float) $loc['longitude']; ?>,
-    <?php echo (int) $loc['zoom_level']; ?>,
-    <?php echo (int) $loc['id']; ?>,
-    <?php echo js_escape($loc['address']); ?>,
-    <?php echo js_escape($loc['label']); ?>
-);
-<?php endforeach; ?>
+jQuery.each(jQuery('#omeka-map-form').data('locations'), function (i, loc) {
+    omekaGeolocationForm.addLocation(loc.latitude, loc.longitude, loc.zoom_level, loc.id, loc.address, loc.label);
+});
 var geocoder = new OmekaGeocoder(<?php echo $geocoder; ?>);
 var geolocationMapFitted = false;
 jQuery(document).on('omeka:tabselected', function () {
