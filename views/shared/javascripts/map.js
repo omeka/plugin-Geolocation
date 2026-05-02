@@ -180,8 +180,23 @@ OmekaMapBrowse.prototype = {
         this.addMarker(
             [locationData.latitude, locationData.longitude],
             {title: locationData.title, alt: locationData.title},
-            locationData.markerHtml
+            this.buildMarkerContent(locationData)
         );
+    },
+
+    buildMarkerContent: function (locationData) {
+        var balloon = jQuery('<div class="geolocation_balloon">');
+        var titleLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).text(locationData.title);
+        balloon.append(jQuery('<div class="geolocation_balloon_title">').append(titleLink));
+        if (locationData.thumbnailUrl) {
+            var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: ''});
+            var thumbLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).append(img);
+            balloon.append(jQuery('<div class="geolocation_balloon_thumbnail">').append(thumbLink));
+        }
+        if (locationData.snippet) {
+            balloon.append(jQuery('<p class="geolocation_balloon_description">').text(locationData.snippet));
+        }
+        return balloon[0];
     },
 
     buildListLinks: function (container) {
