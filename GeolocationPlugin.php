@@ -258,15 +258,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $this->_head();
     }
 
-    private function _getVersion()
-    {
-        $pluginLoader = Zend_Registry::get('plugin_loader');
-        return $pluginLoader->getPlugin('Geolocation')->getIniVersion();
-    }
-
     private function _head()
     {
-        $version = $this->_getVersion();
+        $version = Zend_Registry::get('plugin_loader')->getPlugin('Geolocation')->getIniVersion();
         queue_css_file('leaflet/leaflet', null, null, 'javascripts', $version);
         queue_css_file('leaflet-draw/leaflet.draw', null, null, 'javascripts', $version);
         queue_css_file('geolocation-marker', null, null, 'css', $version);
