@@ -123,7 +123,6 @@ var OmekaFitControl = L.Control.extend({
             L.DomEvent.preventDefault(e);
             L.DomEvent.stopPropagation(e);
             omekaMap.fitMarkers();
-            link.blur();
         });
         this._link = link;
         return container;
