@@ -9,7 +9,7 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
 
     public function browseAction()
     {
-        list($params, $limit, $currentPage) = $this->_getBrowseParams();
+        [$params, $limit, $currentPage] = $this->_getBrowseParams();
 
         $this->view->totalItems = $this->_helper->db->getTable()->count($params);
         $this->view->params = $params;
@@ -23,7 +23,7 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
 
     public function browseJsonAction()
     {
-        list($params, $limit, $currentPage) = $this->_getBrowseParams();
+        [$params, $limit, $currentPage] = $this->_getBrowseParams();
 
         $items = $this->_helper->db->getTable()->findBy($params, $limit, $currentPage);
         $this->view->items = $items;
