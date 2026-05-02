@@ -324,7 +324,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $item = $args['item'];
         $locations = $this->_db->getTable('Location')->findBy(['item_id' => $item->id]);
 
-        if (!empty($locations)) {
+        if ($locations) {
             $html = ''
                   . '<div class="geolocation panel">'
                   . '<h4>' . __('Geolocation') . '</h4>'
@@ -345,7 +345,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $item = $args['item'];
         $locations = $this->_db->getTable('Location')->findBy(['item_id' => $item->id]);
 
-        if (!empty($locations)) {
+        if ($locations) {
             $width = $this->_filterCssLength(get_option('geolocation_item_map_width'), '100%');
             $height = $this->_filterCssLength(get_option('geolocation_item_map_height'), '300px');
             $html = "<div id='geolocation'>";
@@ -864,7 +864,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $blocks = $args['blocks'];
 
         $itemLocations = get_db()->getTable('Location')->findBy(['item_id' => $item->id]);
-        if (empty($itemLocations)) {
+        if (!$itemLocations) {
             return;
         }
 
