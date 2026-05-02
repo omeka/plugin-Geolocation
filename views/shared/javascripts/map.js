@@ -73,7 +73,6 @@ OmekaMap.prototype = {
     },
 
     initMap: function () {
-        var that = this;
         var customMap = this.options.custom_map;
 
         if (!this.center) {
@@ -106,7 +105,7 @@ OmekaMap.prototype = {
 
         jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
 
-        new OmekaFitControl({ position: 'topleft', omekaMap: that }).addTo(this.map);
+        new OmekaFitControl({ position: 'topleft', omekaMap: this }).addTo(this.map);
     }
 };
 
