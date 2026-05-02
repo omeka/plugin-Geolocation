@@ -163,8 +163,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         if (version_compare($args['old_version'], '4.0', '<')) {
             $db = get_db();
-            $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`");
-            $db->query("ALTER TABLE `$db->Location` DROP COLUMN `map_type`");
+            $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`, DROP COLUMN `map_type`");
         }
     }
 
