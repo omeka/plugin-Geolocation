@@ -260,9 +260,6 @@ function OmekaMapForm(mapDivId, center, options) {
     jQuery.extend(true, this, omekaMap);
     this.initMap();
 
-    this.locationCounter = 0;
-    this.markerMap = {};
-    this.locationData = {};
     this.jsonInput = document.getElementById('geolocation-locations-json');
 
     // Leaflet.draw's edit and delete toolbars require a FeatureGroup to operate on.
@@ -289,80 +286,59 @@ function OmekaMapForm(mapDivId, center, options) {
 
     this.map.on(L.Draw.Event.CREATED, function (event) {
         var latlng = event.layer.getLatLng();
-        var idx = that.addLocation(latlng.lat, latlng.lng, that.map.getZoom(), null, '', '');
-        that.markerMap[idx].openPopup();
+        var marker = that.addLocation(latlng.lat, latlng.lng, that.map.getZoom(), null, '', '');
+        marker.openPopup();
     });
 
     this.map.on(L.Draw.Event.EDITED, function (event) {
         event.layers.eachLayer(function (layer) {
-            var idx = layer._geolocationIndex;
-            if (idx === undefined) return;
             var latlng = layer.getLatLng();
-            that.locationData[idx].latitude = latlng.lat;
-            that.locationData[idx].longitude = latlng.lng;
+            layer._locationData.latitude = latlng.lat;
+            layer._locationData.longitude = latlng.lng;
         });
-        that._syncJson();
-    });
-
-    this.map.on(L.Draw.Event.DELETED, function (event) {
-        event.layers.eachLayer(function (layer) {
-            var idx = layer._geolocationIndex;
-            if (idx === undefined) return;
-            delete that.locationData[idx];
-            delete that.markerMap[idx];
-        });
-        that._syncJson();
     });
 
     this.map.on('zoomend', function () {
         var zoom = that.map.getZoom();
-        for (var i in that.locationData) {
-            that.locationData[i].zoom_level = zoom;
-        }
-        that._syncJson();
+        that.drawnItems.eachLayer(function (layer) {
+            layer._locationData.zoom_level = zoom;
+        });
+    });
+
+    jQuery(this.jsonInput).closest('form').on('submit', function () {
+        var data = [];
+        that.drawnItems.eachLayer(function (layer) {
+            data.push(layer._locationData);
+        });
+        jQuery(that.jsonInput).val(JSON.stringify(data));
     });
 }
 
 OmekaMapForm.prototype = {
 
     addLocation: function (lat, lng, zoom, id, address, label) {
-        var that = this;
-        var index = this.locationCounter++;
-
         var marker = L.marker([lat, lng]);
-        marker._geolocationIndex = index; // links this layer to its locationData entry
         this.drawnItems.addLayer(marker);
         this.markers.push(marker);
         this.markerBounds.extend([lat, lng]);
 
+        marker._locationData = {id: id, latitude: lat, longitude: lng, zoom_level: zoom, address: address, label: label};
+
         var labelInput = jQuery('<input type="text" class="geolocation-popup-label">').val(label);
         var popupContent = jQuery('<div></div>')
-            .append(jQuery('<label></label>').text(that.options.strings.label + ': ').append(labelInput));
+            .append(jQuery('<label></label>').text(this.options.strings.label + ': ').append(labelInput));
 
         marker.bindPopup(popupContent[0], {autoPanPadding: [50, 50]});
 
         labelInput.on('input', function () {
-            that.locationData[index].label = jQuery(this).val();
-            that._syncJson();
+            marker._locationData.label = jQuery(this).val();
         });
 
-        this.locationData[index] = {id: id, latitude: lat, longitude: lng, zoom_level: zoom, address: address, label: label};
-        this._syncJson();
-
-        this.markerMap[index] = marker;
-        return index;
-    },
-
-    _syncJson: function () {
-        var data = [];
-        for (var idx in this.locationData) {
-            data.push(this.locationData[idx]);
-        }
-        jQuery(this.jsonInput).val(JSON.stringify(data));
+        return marker;
     },
 
     getLocationCount: function () {
-        return Object.keys(this.markerMap).length;
+        return this.drawnItems.getLayers().length;
     },
 
     resize: function () {
