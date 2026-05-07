@@ -58,6 +58,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         `zoom_level` INT NOT NULL ,
         `address` TEXT NOT NULL ,
         `label` VARCHAR( 255 ) NOT NULL DEFAULT '' ,
+        `geometry_json` TEXT NOT NULL ,
         INDEX (`item_id`)) ENGINE = InnoDB";
         $db->query($sql);
 
@@ -71,6 +72,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
         set_option('geolocation_geocoder', self::DEFAULT_GEOCODER);
         set_option('geolocation_item_map_enable', '1');
+        set_option('geolocation_auto_fit_browse', '1');
     }
 
     public function hookUninstall()
@@ -163,7 +165,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         if (version_compare($args['old_version'], '4.0', '<')) {
             $db = get_db();
-            $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`, DROP COLUMN `map_type`");
+            $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`, DROP COLUMN `map_type`, ADD COLUMN `geometry_json` TEXT NULL");
+            $db->query("UPDATE `$db->Location` SET `geometry_json` = CONCAT('{\"type\":\"Point\",\"coordinates\":[', `longitude`, ',', `latitude`, ']}')");
+            $db->query("ALTER TABLE `$db->Location` MODIFY COLUMN `geometry_json` TEXT NOT NULL");
         }
     }
 
@@ -263,13 +267,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $version = Zend_Registry::get('plugin_loader')->getPlugin('Geolocation')->getIniVersion();
         queue_css_file('leaflet/leaflet', null, null, 'javascripts', $version);
         queue_css_file('leaflet-draw/leaflet.draw', null, null, 'javascripts', $version);
-        queue_css_file('geolocation-marker', null, null, 'css', $version);
-        queue_js_file(['leaflet/leaflet', 'leaflet/leaflet-providers', 'leaflet-draw/leaflet.draw', 'map'], 'javascripts', [], $version);
-
-        if (get_option('geolocation_cluster')) {
-            queue_css_file(['MarkerCluster', 'MarkerCluster.Default'], null, null, 'javascripts/leaflet-markercluster', $version);
-            queue_js_file('leaflet-markercluster/leaflet.markercluster', 'javascripts', [], $version);
-        }
+        queue_css_file('geolocation-map', null, null, 'css', $version);
+        queue_css_file(['MarkerCluster', 'MarkerCluster.Default'], null, null, 'javascripts/leaflet-markercluster', $version);
+        queue_js_file(['leaflet/leaflet', 'leaflet/leaflet-providers', 'leaflet-draw/leaflet.draw', 'leaflet-deflate/L.Deflate', 'leaflet-markercluster/leaflet.markercluster', 'map'], 'javascripts', [], $version);
     }
 
     public function hookAfterSaveItem($args)
@@ -281,7 +281,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $item = $args['record'];
         // geolocation_form_shown is a sentinel set by input-partial.php. Its
         // presence means the map form was rendered, so an empty geolocation_locations
-        // value means all markers were deleted, not that the form was absent.
+        // value means all locations were deleted, not that the form was absent.
         if (!isset($post['geolocation_form_shown'])) {
             return;
         }
@@ -295,7 +295,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         foreach (json_decode($post['geolocation_locations'] ?? '[]', true) as $entry) {
-            if (!is_numeric($entry['latitude'] ?? null) || !is_numeric($entry['longitude'] ?? null)) {
+            if (empty($entry['geometry_json'])) {
                 continue;
             }
             $id = !empty($entry['id']) ? (int) $entry['id'] : null;
@@ -648,9 +648,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $options = [];
 
         if (isset($args['fit'])) {
-            $options['fitMarkers'] = $booleanFilter->filter($args['fit']);
+            $options['fitLocations'] = $booleanFilter->filter($args['fit']);
         } else {
-            $options['fitMarkers'] = '1';
+            $options['fitLocations'] = '1';
         }
 
         if (isset($args['type'])) {
@@ -700,27 +700,29 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $existingLocations = [];
         if (isset($_POST['geolocation_form_shown'])) {
             foreach (json_decode($_POST['geolocation_locations'] ?? '[]', true) as $entry) {
-                if (!is_numeric($entry['latitude'] ?? null) || !is_numeric($entry['longitude'] ?? null)) {
+                if (empty($entry['geometry_json'])) {
                     continue;
                 }
                 $existingLocations[] = [
-                    'id'         => !empty($entry['id']) ? (int) $entry['id'] : null,
-                    'latitude'   => (float) $entry['latitude'],
-                    'longitude'  => (float) $entry['longitude'],
-                    'zoom_level' => (int) ($entry['zoom_level'] ?? 0),
-                    'address'    => $entry['address'] ?? '',
-                    'label'      => $entry['label'] ?? '',
+                    'id'          => !empty($entry['id']) ? (int) $entry['id'] : null,
+                    'latitude'    => (float) ($entry['latitude'] ?? 0),
+                    'longitude'   => (float) ($entry['longitude'] ?? 0),
+                    'zoom_level'  => (int) ($entry['zoom_level'] ?? 0),
+                    'address'     => $entry['address'] ?? '',
+                    'label'       => $entry['label'] ?? '',
+                    'geometry_json' => $entry['geometry_json'],
                 ];
             }
         } elseif ($item && $item->id) {
             foreach ($this->_db->getTable('Location')->findBy(['item_id' => $item->id]) as $loc) {
                 $existingLocations[] = [
-                    'id'         => $loc->id,
-                    'latitude'   => $loc->latitude,
-                    'longitude'  => $loc->longitude,
-                    'zoom_level' => $loc->zoom_level,
-                    'address'    => $loc->address,
-                    'label'      => $loc->label,
+                    'id'          => $loc->id,
+                    'latitude'    => $loc->latitude,
+                    'longitude'   => $loc->longitude,
+                    'zoom_level'  => $loc->zoom_level,
+                    'address'     => $loc->address,
+                    'label'       => $loc->label,
+                    'geometry_json' => $loc->geometry_json,
                 ];
             }
         }
@@ -803,7 +805,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         // @see GeolocationPlugin::geolocationShortcode()
         $callbacks['geolocation'] = function ($args, $frontMatter, $job) {
             $frontMatter['css'][] = 'vendor/leaflet/leaflet.css';
-            $frontMatter['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+            $frontMatter['css'][] = 'vendor/omeka-geolocation/geolocation-map.css';
             $frontMatter['js'][] = 'vendor/jquery/jquery.js';
             $frontMatter['js'][] = 'vendor/leaflet/leaflet.js';
             $frontMatter['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
@@ -825,7 +827,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'title' => __('Map'),
             'css' => [
                 'vendor/leaflet/leaflet.css',
-                'vendor/omeka-geolocation/geolocation-marker.css',
+                'vendor/omeka-geolocation/geolocation-map.css',
             ],
             'js' => [
                 'vendor/jquery/jquery.js',
@@ -869,7 +871,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         $frontMatterPage['css'][] = 'vendor/leaflet/leaflet.css';
-        $frontMatterPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterPage['css'][] = 'vendor/omeka-geolocation/geolocation-map.css';
         $frontMatterPage['js'][] = 'vendor/jquery/jquery.js';
         $frontMatterPage['js'][] = 'vendor/leaflet/leaflet.js';
         $frontMatterPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
@@ -916,7 +918,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $attachments = $exhibitPageBlock->getAttachments();
 
         $frontMatterExhibitPage['css'][] = 'vendor/leaflet/leaflet.css';
-        $frontMatterExhibitPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterExhibitPage['css'][] = 'vendor/omeka-geolocation/geolocation-map.css';
         $frontMatterExhibitPage['js'][] = 'vendor/jquery/jquery.js';
         $frontMatterExhibitPage['js'][] = 'vendor/leaflet/leaflet.js';
         $frontMatterExhibitPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
@@ -945,6 +947,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $file = $item->getFile();
         return [
+            'geometry_json' => $location->geometry_json,
             'latitude'     => $location->latitude,
             'longitude'    => $location->longitude,
             'zoomLevel'    => $location->zoom_level,

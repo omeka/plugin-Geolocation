@@ -25,7 +25,11 @@ $geocoder = json_encode(get_option('geolocation_geocoder'));
 <script type="text/javascript">
 var omekaGeolocationForm = new OmekaMapForm('omeka-map-form', <?php echo $center; ?>, <?php echo $options; ?>);
 jQuery.each(jQuery('#omeka-map-form').data('locations'), function (i, loc) {
-    omekaGeolocationForm.addLocation(loc.latitude, loc.longitude, loc.zoom_level, loc.id, loc.address, loc.label);
+    if (JSON.parse(loc.geometry_json).type === 'Point') {
+        omekaGeolocationForm.addLocation(loc.latitude, loc.longitude, loc.zoom_level, loc.id, loc.address, loc.label);
+    } else {
+        omekaGeolocationForm.addShape(loc.geometry_json, loc.id, loc.label);
+    }
 });
 var geocoder = new OmekaGeocoder(<?php echo $geocoder; ?>);
 var geolocationMapFitted = false;
@@ -35,7 +39,7 @@ jQuery(document).on('omeka:tabselected', function () {
     // load the container has 0 height, so defer fitting to the first omeka:tabselected
     // event at which the container actually has size.
     if (!geolocationMapFitted && omekaGeolocationForm.map.getSize().x > 0) {
-        omekaGeolocationForm.fitMarkers();
+        omekaGeolocationForm.fitLocations();
         geolocationMapFitted = true;
     }
 });

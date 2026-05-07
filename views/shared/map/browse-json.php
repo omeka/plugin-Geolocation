@@ -15,6 +15,7 @@ foreach (loop('item') as $item):
             'zoom_level'   => (int) $location->zoom_level,
             'address'      => $location->address,
             'label'        => $location->label,
+            'geometry_json' => $location->geometry_json,
             'title'        => $displayTitle,
             'thumbnailUrl' => $thumbnailUrl,
             'snippet'      => $snippet,

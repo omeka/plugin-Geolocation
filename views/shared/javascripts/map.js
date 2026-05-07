@@ -6,16 +6,7 @@ function OmekaMap(mapDivId, center, options) {
 
 OmekaMap.prototype = {
 
-    map: null,
-    mapDivId: null,
-    markers: [],
-    options: {},
-    center: null,
-    markerBounds: null,
-    clusterGroup: null,
-
-    addMarker: function (latLng, options, bindHtml)
-    {
+    addMarker: function (latLng, options, bindHtml) {
         var map = this.map;
         var marker = L.marker(latLng, options);
         var srAlertsDiv = jQuery('#geolocation-sr-alerts');
@@ -60,16 +51,33 @@ OmekaMap.prototype = {
         }
 
         this.markers.push(marker);
-        this.markerBounds.extend(latLng);
+        this.locationBounds.extend(latLng);
         return marker;
     },
 
-    fitMarkers: function () {
+    fitLocations: function () {
         if (this.markers.length == 1) {
             this.map.panTo(this.markers[0].getLatLng());
-        } else if (this.markers.length > 0) {
-            this.map.fitBounds(this.markerBounds, {padding: [25, 25]});
+        } else if (this.locationBounds.isValid()) {
+            this.map.fitBounds(this.locationBounds, {padding: [25, 25]});
         }
+    },
+
+    addShapeLayer: function (geojson, bindHtml) {
+        var layer = L.GeoJSON.geometryToLayer(geojson);
+        if (bindHtml) {
+            layer.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
+        }
+        this.deflateGroup.addLayer(layer);
+        this.locationBounds.extend(layer.getBounds());
+        return layer;
+    },
+
+    addLayerFromGeometry: function (geometry, markerOptions, bindHtml) {
+        if (geometry.type === 'Point') {
+            return this.addMarker([geometry.coordinates[1], geometry.coordinates[0]], markerOptions, bindHtml);
+        }
+        return this.addShapeLayer(geometry, bindHtml);
     },
 
     initMap: function () {
@@ -81,7 +89,8 @@ OmekaMap.prototype = {
         }
 
         this.map = L.map(this.mapDivId).setView([this.center.latitude, this.center.longitude], this.center.zoomLevel);
-        this.markerBounds = L.latLngBounds();
+        this.locationBounds = L.latLngBounds();
+        this.markers = [];
 
         L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
 
@@ -100,8 +109,14 @@ OmekaMap.prototype = {
             this.clusterGroup = L.markerClusterGroup({
                 showCoverageOnHover: false
             });
-            this.map.addLayer(this.clusterGroup);
         }
+
+        this.deflateGroup = L.deflate({
+            minSize: 10,
+            markerLayer: this.clusterGroup,
+            greedyCollapse: false,
+        });
+        this.map.addLayer(this.deflateGroup);
 
         jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
 
@@ -115,14 +130,14 @@ var OmekaFitControl = L.Control.extend({
         var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-fit-all');
         var link = L.DomUtil.create('a', '', container);
         link.href = '#';
-        link.title = omekaMap.options.strings.fitAllMarkers;
+        link.title = omekaMap.options.strings.fitAllLocations;
         link.setAttribute('role', 'button');
-        link.setAttribute('aria-label', omekaMap.options.strings.fitAllMarkers);
+        link.setAttribute('aria-label', omekaMap.options.strings.fitAllLocations);
         link.innerHTML = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18"><path d="M1 1h5v2H3v3H1V1zm11 0h5v5h-2V3h-3V1zM1 12h2v3h3v2H1v-5zm14 3h-3v2h5v-5h-2v3z" fill="currentColor"/></svg>';
         L.DomEvent.on(link, 'click', function (e) {
             L.DomEvent.preventDefault(e);
             L.DomEvent.stopPropagation(e);
-            omekaMap.fitMarkers();
+            omekaMap.fitLocations();
         });
         this._link = link;
         return container;
@@ -142,8 +157,8 @@ function OmekaMapBrowse(mapDivId, center, options) {
 OmekaMapBrowse.prototype = {
 
     afterLoadItems: function () {
-        if (this.options.fitMarkers) {
-            this.fitMarkers();
+        if (this.options.fitLocations) {
+            this.fitLocations();
         }
 
         if (!this.options.list) {
@@ -177,14 +192,14 @@ OmekaMapBrowse.prototype = {
     },
 
     buildLayerFromLocation: function (locationData) {
-        this.addMarker(
-            [locationData.latitude, locationData.longitude],
-            {title: locationData.title, alt: locationData.title},
-            this.buildMarkerContent(locationData)
-        );
+        var geometry = JSON.parse(locationData.geometry_json);
+        var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
+        if (geometry.type !== 'Point') {
+            layer._geolocationTitle = locationData.title || '';
+        }
     },
 
-    buildMarkerContent: function (locationData) {
+    buildLocationContent: function (locationData) {
         var balloon = jQuery('<div class="geolocation_balloon">');
         var titleLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).text(locationData.title);
         balloon.append(jQuery('<div class="geolocation_balloon_title">').append(titleLink));
@@ -204,25 +219,8 @@ OmekaMapBrowse.prototype = {
         var list = jQuery('<ul></ul>');
         list.appendTo(container);
 
-        // Loop through all the markers
         jQuery.each(this.markers, function (index, marker) {
-            var listElement = jQuery('<li></li>');
-
-            // Make an <a> tag, give it a class for styling
-            var link = jQuery('<a></a>');
-            link.addClass('item-link');
-
-            // Links open up the markers on the map, clicking them doesn't actually go anywhere
-            link.attr('href', 'javascript:void(0);');
-            link.attr('role', 'button');
-
-            // Each <li> starts with the title of the item
-            link.text(marker.options.title);
-
-            // Clicking the link should take us to the map
-            link.bind('click', {}, function (event) {
-                link.toggleClass('current');
-
+            that._buildListItem(list, marker.options.title, function () {
                 if (that.clusterGroup) {
                     that.clusterGroup.zoomToShowLayer(marker, function () {
                         marker.fire('click');
@@ -234,10 +232,29 @@ OmekaMapBrowse.prototype = {
                     that.map.flyTo(marker.getLatLng());
                 }
             });
-
-            link.appendTo(listElement);
-            listElement.appendTo(list);
         });
+
+        jQuery.each(this.deflateGroup.getLayers(), function (index, layer) {
+            that._buildListItem(list, layer._geolocationTitle, function () {
+                that.map.once('moveend', function () {
+                    layer.openPopup();
+                });
+                that.map.fitBounds(layer.getBounds());
+            });
+        });
+    },
+
+    _buildListItem: function (list, title, onClick) {
+        var link = jQuery('<a></a>')
+            .addClass('item-link')
+            .attr('href', 'javascript:void(0);')
+            .attr('role', 'button')
+            .text(title);
+        link.bind('click', {}, function () {
+            link.toggleClass('current');
+            onClick();
+        });
+        jQuery('<li></li>').append(link).appendTo(list);
     }
 };
 
@@ -245,12 +262,12 @@ function OmekaMapSingle(mapDivId, center, options) {
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
-    if (options.points && options.points.length) {
-        for (var i = 0; i < options.points.length; i++) {
-            var pt = options.points[i];
-            this.addMarker([pt.latitude, pt.longitude], {title: pt.label, alt: pt.label}, pt.markerHtml);
+    if (options.locations && options.locations.length) {
+        for (var i = 0; i < options.locations.length; i++) {
+            var pt = options.locations[i];
+            this.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: pt.label, alt: pt.label}, pt.popupHtml);
         }
-        this.fitMarkers();
+        this.fitLocations();
     }
 }
 
@@ -266,13 +283,18 @@ function OmekaMapForm(mapDivId, center, options) {
     this.drawnItems = new L.FeatureGroup();
     this.map.addLayer(this.drawnItems);
 
+    L.drawLocal.edit.toolbar.buttons.edit = options.strings.editLocations;
+    L.drawLocal.edit.toolbar.buttons.editDisabled = options.strings.noLocationsToEdit;
+    L.drawLocal.edit.toolbar.buttons.remove = options.strings.deleteLocations;
+    L.drawLocal.edit.toolbar.buttons.removeDisabled = options.strings.noLocationsToDelete;
+
     var drawControl = new L.Control.Draw({
         position: 'topleft',
         draw: {
             marker: true,
-            polyline: false,
-            polygon: false,
-            rectangle: false,
+            polyline: true,
+            polygon: true,
+            rectangle: true,
             circle: false,
             circlemarker: false,
         },
@@ -285,16 +307,23 @@ function OmekaMapForm(mapDivId, center, options) {
     this.map.addControl(drawControl);
 
     this.map.on(L.Draw.Event.CREATED, function (event) {
-        var latlng = event.layer.getLatLng();
-        var marker = that.addLocation(latlng.lat, latlng.lng, that.map.getZoom(), null, '', '');
-        marker.openPopup();
+        if (event.layerType === 'marker') {
+            var latlng = event.layer.getLatLng();
+            var marker = that.addLocation(latlng.lat, latlng.lng, that.map.getZoom(), null, '', '');
+            marker.openPopup();
+        } else {
+            that.addShape(JSON.stringify(event.layer.toGeoJSON().geometry));
+        }
     });
 
     this.map.on(L.Draw.Event.EDITED, function (event) {
         event.layers.eachLayer(function (layer) {
-            var latlng = layer.getLatLng();
-            layer._locationData.latitude = latlng.lat;
-            layer._locationData.longitude = latlng.lng;
+            layer._locationData.geometry_json = JSON.stringify(layer.toGeoJSON().geometry);
+            if (layer instanceof L.Marker) {
+                var latlng = layer.getLatLng();
+                layer._locationData.latitude = latlng.lat;
+                layer._locationData.longitude = latlng.lng;
+            }
         });
     });
 
@@ -320,21 +349,33 @@ OmekaMapForm.prototype = {
         var marker = L.marker([lat, lng]);
         this.drawnItems.addLayer(marker);
         this.markers.push(marker);
-        this.markerBounds.extend([lat, lng]);
+        this.locationBounds.extend([lat, lng]);
 
-        marker._locationData = {id: id, latitude: lat, longitude: lng, zoom_level: zoom, address: address, label: label};
+        marker._locationData = {id: id, latitude: lat, longitude: lng, zoom_level: zoom, address: address, label: label, geometry_json: JSON.stringify({type: 'Point', coordinates: [lng, lat]})};
 
-        var labelInput = jQuery('<input type="text" class="geolocation-popup-label">').val(label);
-        var popupContent = jQuery('<div></div>')
-            .append(jQuery('<label></label>').text(this.options.strings.label + ': ').append(labelInput));
-
-        marker.bindPopup(popupContent[0], {autoPanPadding: [50, 50]});
-
-        labelInput.on('input', function () {
-            marker._locationData.label = jQuery(this).val();
-        });
+        this._bindLabelPopup(marker, label);
 
         return marker;
+    },
+
+    addShape: function (geometryJson, id, label) {
+        var layer = L.GeoJSON.geometryToLayer(JSON.parse(geometryJson));
+        this.drawnItems.addLayer(layer);
+        this.locationBounds.extend(layer.getBounds());
+
+        layer._locationData = {id: id || null, geometry_json: geometryJson, zoom_level: 0, address: '', label: label || ''};
+
+        this._bindLabelPopup(layer, label || '');
+    },
+
+    _bindLabelPopup: function (layer, initialLabel) {
+        var labelInput = jQuery('<input type="text" class="geolocation-popup-label">').val(initialLabel);
+        var popupContent = jQuery('<div></div>')
+            .append(jQuery('<label></label>').text(this.options.strings.label + ': ').append(labelInput));
+        layer.bindPopup(popupContent[0], {autoPanPadding: [50, 50]});
+        labelInput.on('input', function () {
+            layer._locationData.label = jQuery(this).val();
+        });
     },
 
     getLocationCount: function () {

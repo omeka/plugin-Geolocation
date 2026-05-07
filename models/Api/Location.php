@@ -22,6 +22,7 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
         $representation = [
             'id' => $record->id,
             'url' => $this->getResourceUrl("/geolocations/{$record->id}"),
+            'geometry_json' => $record->geometry_json,
             'latitude' => $record->latitude,
             'longitude' => $record->longitude,
             'zoom_level' => $record->zoom_level,
@@ -63,11 +64,14 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
 
     private function _applyLocationFields(Omeka_Record_AbstractRecord $record, $data)
     {
-        if (isset($data->latitude)) {
-            $record->latitude = $data->latitude;
-        }
-        if (isset($data->longitude)) {
-            $record->longitude = $data->longitude;
+        if (isset($data->geometry_json)) {
+            $record->geometry_json = $data->geometry_json;
+        } elseif (isset($data->latitude) && isset($data->longitude)) {
+            // Fallback for pre-4.0 API clients that post lat/lng without geometry_json
+            $record->geometry_json = json_encode([
+                'type' => 'Point',
+                'coordinates' => [(float) $data->longitude, (float) $data->latitude],
+            ]);
         }
         if (isset($data->zoom_level)) {
             $record->zoom_level = $data->zoom_level;

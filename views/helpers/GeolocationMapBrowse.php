@@ -22,8 +22,8 @@ class Geolocation_View_Helper_GeolocationMapBrowse extends Zend_View_Helper_Abst
             $options['uri'] = url('geolocation/map/browse-json');
         }
 
-        if (!array_key_exists('fitMarkers', $options)) {
-            $options['fitMarkers'] = (bool) get_option('geolocation_auto_fit_browse');
+        if (!array_key_exists('fitLocations', $options)) {
+            $options['fitLocations'] = (bool) get_option('geolocation_auto_fit_browse');
         }
 
         $class = 'map geolocation-map';

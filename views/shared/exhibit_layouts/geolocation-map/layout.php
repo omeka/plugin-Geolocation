@@ -26,8 +26,7 @@ foreach ($attachments as $attachment):
               . $body
               . '</div>';
         $locations[] = [
-            'lat' => $location->latitude,
-            'lng' => $location->longitude,
+            'geometry_json' => $location->geometry_json,
             'html' => $html,
         ];
     endforeach;
@@ -43,13 +42,9 @@ jQuery(window).on('load', function () {
     var map_locations = <?php echo json_encode($locations); ?>;
     for (var i = 0; i < map_locations.length; i++) {
         var locationData = map_locations[i];
-        geolocation_map.addMarker(
-            [locationData.lat, locationData.lng],
-            {},
-            locationData.html
-        );
+        geolocation_map.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html);
     }
-    geolocation_map.fitMarkers();
+    geolocation_map.fitLocations();
 });
 </script>
 <div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"></div>
