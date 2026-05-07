@@ -56,10 +56,14 @@ OmekaMap.prototype = {
     },
 
     fitLocations: function () {
-        if (this.markers.length == 1) {
-            this.map.panTo(this.markers[0].getLatLng());
-        } else if (this.locationBounds.isValid()) {
-            this.map.fitBounds(this.locationBounds, {padding: [25, 25]});
+        if (!this.locationBounds.isValid()) {
+            return;
+        }
+        var bounds = this.locationBounds;
+        if (bounds.getNorth() === bounds.getSouth() && bounds.getEast() === bounds.getWest()) {
+            this.map.panTo(bounds.getCenter());
+        } else {
+            this.map.fitBounds(bounds, {padding: [25, 25]});
         }
     },
 
