@@ -204,18 +204,18 @@ OmekaMapBrowse.prototype = {
     },
 
     buildLocationContent: function (locationData) {
-        var balloon = jQuery('<div class="geolocation_balloon">');
+        var popup = jQuery('<div class="geolocation-popup">');
         var titleLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).text(locationData.title);
-        balloon.append(jQuery('<div class="geolocation_balloon_title">').append(titleLink));
+        popup.append(jQuery('<div class="geolocation-popup-title">').append(titleLink));
         if (locationData.thumbnailUrl) {
             var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: ''});
             var thumbLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).append(img);
-            balloon.append(jQuery('<div class="geolocation_balloon_thumbnail">').append(thumbLink));
+            popup.append(jQuery('<div class="geolocation-popup-thumbnail">').append(thumbLink));
         }
         if (locationData.snippet) {
-            balloon.append(jQuery('<p class="geolocation_balloon_description">').text(locationData.snippet));
+            popup.append(jQuery('<p class="geolocation-popup-description">').text(locationData.snippet));
         }
-        return balloon[0];
+        return popup[0];
     },
 
     buildListLinks: function (container) {

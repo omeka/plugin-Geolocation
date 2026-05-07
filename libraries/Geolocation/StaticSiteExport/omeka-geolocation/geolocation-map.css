@@ -28,13 +28,13 @@ div#geolocation {
     padding:0;
 }
 
-.geolocation_balloon {
+.geolocation-popup {
     width: 200px;
 }
-.geolocation_balloon img {
+.geolocation-popup img {
     max-width: 100%;
 }
-.geolocation_balloon_title {
+.geolocation-popup-title {
     font-weight:bold;
     font-size:18px;
     margin-bottom:0px;

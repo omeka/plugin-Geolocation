@@ -21,8 +21,8 @@ foreach ($attachments as $attachment):
     $itemLocations = $locationTable->findBy(['item_id' => $item->id]);
     foreach ($itemLocations as $location):
         $title = $titleLink . ($location->label ? ' — ' . html_escape($location->label) : '');
-        $html = '<div class="geolocation_balloon">'
-              . '<div class="geolocation_balloon_title">' . $title . '</div>'
+        $html = '<div class="geolocation-popup">'
+              . '<div class="geolocation-popup-title">' . $title . '</div>'
               . $body
               . '</div>';
         $locations[] = [
