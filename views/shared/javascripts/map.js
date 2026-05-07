@@ -364,7 +364,15 @@ OmekaMapForm.prototype = {
         this.markers.push(marker);
         this.locationBounds.extend([lat, lng]);
 
-        marker._locationData = {id: id, latitude: lat, longitude: lng, zoom_level: zoom, address: address, label: label, geometry_json: JSON.stringify({type: 'Point', coordinates: [lng, lat]})};
+        marker._locationData = {
+            id: id,
+            latitude: lat,
+            longitude: lng,
+            zoom_level: zoom,
+            address: address,
+            label: label,
+            geometry_json: JSON.stringify({type: 'Point', coordinates: [lng, lat]})
+        };
 
         this._bindLabelPopup(marker, label);
 
@@ -376,7 +384,16 @@ OmekaMapForm.prototype = {
         this.drawnItems.addLayer(layer);
         this.locationBounds.extend(layer.getBounds());
 
-        layer._locationData = {id: id || null, geometry_json: geometryJson, zoom_level: 0, address: '', label: label || ''};
+        var center = layer.getBounds().getCenter();
+        layer._locationData = {
+            id: id || null,
+            latitude: center.lat,
+            longitude: center.lng,
+            zoom_level: 0,
+            address: '',
+            label: label || '',
+            geometry_json: geometryJson
+        };
 
         this._bindLabelPopup(layer, label || '');
     },
