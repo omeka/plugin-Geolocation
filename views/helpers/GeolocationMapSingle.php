@@ -27,7 +27,7 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
             ];
             if ($loc->label !== '') {
                 $point['popupHtml'] = '<div class="geolocation-popup">'
-                                     . '<div class="geolocation-popup-title">' . html_escape($loc->label) . '</div>'
+                                     . '<div class="geolocation-popup-header">' . html_escape($loc->label) . '</div>'
                                      . '</div>';
             }
             $points[] = $point;

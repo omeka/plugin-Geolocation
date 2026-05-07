@@ -10,6 +10,7 @@ $locations = [];
 foreach ($attachments as $attachment):
     $item = $attachment->getItem();
     $file = $attachment->getFile();
+    $title = metadata($item, 'display_title', ['no_escape' => true]);
     $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
 
     if ($file):
@@ -20,10 +21,11 @@ foreach ($attachments as $attachment):
 
     $itemLocations = $locationTable->findBy(['item_id' => $item->id]);
     foreach ($itemLocations as $location):
-        $title = $titleLink . ($location->label ? ' — ' . html_escape($location->label) : '');
+        $headerText = $location->label ? html_escape($location->label) : html_escape($title);
         $html = '<div class="geolocation-popup">'
-              . '<div class="geolocation-popup-title">' . $title . '</div>'
+              . '<div class="geolocation-popup-header">' . $headerText . '</div>'
               . $body
+              . '<div class="geolocation-popup-title">' . $titleLink . '</div>'
               . '</div>';
         $locations[] = [
             'geometry_json' => $location->geometry_json,

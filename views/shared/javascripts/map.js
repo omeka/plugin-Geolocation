@@ -205,13 +205,15 @@ OmekaMapBrowse.prototype = {
 
     buildLocationContent: function (locationData) {
         var popup = jQuery('<div class="geolocation-popup">');
-        var titleLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).text(locationData.title);
-        popup.append(jQuery('<div class="geolocation-popup-title">').append(titleLink));
+        var headerText = locationData.label || locationData.title;
+        popup.append(jQuery('<div class="geolocation-popup-header">').text(headerText));
         if (locationData.thumbnailUrl) {
             var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: ''});
             var thumbLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).append(img);
             popup.append(jQuery('<div class="geolocation-popup-thumbnail">').append(thumbLink));
         }
+        var titleLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).text(locationData.title);
+        popup.append(jQuery('<div class="geolocation-popup-title">').append(titleLink));
         if (locationData.snippet) {
             popup.append(jQuery('<p class="geolocation-popup-description">').text(locationData.snippet));
         }

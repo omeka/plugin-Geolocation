@@ -28,16 +28,33 @@ div#geolocation {
     padding:0;
 }
 
+.leaflet-popup-content-wrapper:has(.geolocation-popup) {
+    overflow: hidden;
+    padding: 0;
+}
+
+.leaflet-popup-content:has(.geolocation-popup) {
+    margin: 0;
+}
+
 .geolocation-popup {
     width: 200px;
+    padding: 0 20px 13px;
 }
+
+.geolocation-popup-header {
+    margin: 0 -20px 13px;
+    padding: 8px 20px;
+    background: #e3e3e3;
+    font-weight: bold;
+}
+
+.geolocation-popup a {
+    border-bottom: none;
+}
+
 .geolocation-popup img {
     max-width: 100%;
-}
-.geolocation-popup-title {
-    font-weight:bold;
-    font-size:18px;
-    margin-bottom:0px;
 }
 
 img.leaflet-tile,
