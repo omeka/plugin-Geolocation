@@ -165,6 +165,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         if (version_compare($args['old_version'], '4.0', '<')) {
             $db = get_db();
+            // Three steps: add nullable, back-fill from existing lat/lng,
+            // then tighten to NOT NULL. MySQL rejects adding a NOT NULL
+            // column to a non-empty table without a default, and a
+            // placeholder default would corrupt the existing coordinate data.
             $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`, DROP COLUMN `map_type`, ADD COLUMN `geometry_json` TEXT NULL");
             $db->query("UPDATE `$db->Location` SET `geometry_json` = CONCAT('{\"type\":\"Point\",\"coordinates\":[', `longitude`, ',', `latitude`, ']}')");
             $db->query("ALTER TABLE `$db->Location` MODIFY COLUMN `geometry_json` TEXT NOT NULL");

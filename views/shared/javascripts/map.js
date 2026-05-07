@@ -60,6 +60,8 @@ OmekaMap.prototype = {
             return;
         }
         var bounds = this.locationBounds;
+        // fitBounds on a zero-area bounds (single point) zooms in too
+        // aggressively; panTo preserves the set zoom level.
         if (bounds.getNorth() === bounds.getSouth() && bounds.getEast() === bounds.getWest()) {
             this.map.panTo(bounds.getCenter());
         } else {
@@ -115,6 +117,8 @@ OmekaMap.prototype = {
             });
         }
 
+        // markerLayer routes collapsed shapes into the cluster group so
+        // they cluster alongside point markers.
         this.deflateGroup = L.deflate({
             minSize: 10,
             markerLayer: this.clusterGroup,
@@ -198,6 +202,9 @@ OmekaMapBrowse.prototype = {
     buildLayerFromLocation: function (locationData) {
         var geometry = JSON.parse(locationData.geometry_json);
         var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
+        // Shapes have no native title property; _geolocationTitle is read
+        // by buildListLinks to label them in the sidebar. Points are omitted
+        // because they carry their title via marker.options.title.
         if (geometry.type !== 'Point') {
             layer._geolocationTitle = locationData.title || '';
         }

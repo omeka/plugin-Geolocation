@@ -25,6 +25,10 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         if (is_null($this->label)) {
             $this->label = '';
         }
+        // latitude and longitude are kept in sync with geometry_json so that
+        // geographic radius search (hookItemsBrowseSql) works for all location
+        // types without spatial SQL functions. For shapes, we use the bounding
+        // box center as a representative point.
         $geometry = json_decode($this->geometry_json, true);
         if ($geometry) {
             if ($geometry['type'] === 'Point') {
