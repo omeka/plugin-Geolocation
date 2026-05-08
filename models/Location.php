@@ -59,10 +59,47 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
         if (!$this->getTable('Item')->exists($this->item_id)) {
             $this->addError('item_id', __('Location requires a valid item ID.'));
         }
-        $geometry = json_decode($this->geometry_json, true);
-        if (!$geometry || !in_array($geometry['type'] ?? '', ['Point', 'LineString', 'Polygon'])) {
+        if (!$this->_isValidGeometry(json_decode($this->geometry_json, true))) {
             $this->addError('geometry_json', __('Location requires a valid geometry.'));
         }
+    }
+
+    /** Validates that $geometry is a well-formed GeoJSON geometry object. */
+    private function _isValidGeometry($geometry)
+    {
+        if (!is_array($geometry)) {
+            return false;
+        }
+        $type = $geometry['type'] ?? '';
+        $coords = $geometry['coordinates'] ?? null;
+        if (!is_array($coords)) {
+            return false;
+        }
+        if ($type === 'Point') {
+            return $this->_isValidPosition($coords);
+        }
+        if ($type === 'LineString') {
+            return count($coords) >= 2 && $this->_areValidPositions($coords);
+        }
+        if ($type === 'Polygon') {
+            return isset($coords[0]) && count($coords[0]) >= 4 && $this->_areValidPositions($coords[0]);
+        }
+        return false; // unrecognized type
+    }
+
+    private function _isValidPosition($pos)
+    {
+        return is_array($pos) && count($pos) >= 2 && is_numeric($pos[0]) && is_numeric($pos[1]);
+    }
+
+    private function _areValidPositions($positions)
+    {
+        foreach ($positions as $pos) {
+            if (!$this->_isValidPosition($pos)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
