@@ -22,24 +22,6 @@ OmekaMap.prototype = {
 
         if (bindHtml) {
             marker.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
-            // Fit images on the map on first load
-            marker.once('popupopen', function (event) {
-                var popup = event.popup;
-                var imgs = popup.getElement().getElementsByTagName('img');
-                for (var i = 0; i < imgs.length; i++) {
-                    imgs[i].addEventListener('load', function imgLoadListener(event) {
-                        event.target.removeEventListener('load', imgLoadListener);
-                        // Marker autopan is disabled during panning, so defer
-                        if (map._panAnim && map._panAnim._inProgress) {
-                            map.once('moveend', function () {
-                                popup.update();
-                            });
-                        } else {
-                            popup.update();
-                        }
-                    });
-                }
-            });
 
             marker.addEventListener('popupopen', function (event) {
                 srAlertsDiv.text(srOpenedAlertStringArray.join(' '));
@@ -80,10 +62,23 @@ OmekaMap.prototype = {
     },
 
     addLayerFromGeometry: function (geometry, markerOptions, bindHtml) {
+        var layer;
         if (geometry.type === 'Point') {
-            return this.addMarker([geometry.coordinates[1], geometry.coordinates[0]], markerOptions, bindHtml);
+            layer = this.addMarker([geometry.coordinates[1], geometry.coordinates[0]], markerOptions, bindHtml);
+        } else {
+            layer = this.addShapeLayer(geometry, bindHtml);
         }
-        return this.addShapeLayer(geometry, bindHtml);
+        // Popup dimensions are calculated before images load; update on first
+        // open so the popup resizes correctly once the image is available.
+        if (bindHtml) {
+            layer.once('popupopen', function (event) {
+                var popup = event.popup;
+                jQuery(popup.getElement()).find('img').one('load', function () {
+                    popup.update();
+                });
+            });
+        }
+        return layer;
     },
 
     initMap: function () {
