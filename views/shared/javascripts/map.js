@@ -9,10 +9,6 @@ OmekaMap.prototype = {
     addMarker: function (latLng, options, bindHtml) {
         var map = this.map;
         var marker = L.marker(latLng, options);
-        var srAlertsDiv = jQuery('#geolocation-sr-alerts');
-        var srAlertStringArray = [marker.options.title, srAlertsDiv.data('latString'), latLng[0], srAlertsDiv.data('longString'), latLng[1]];
-        var srOpenedAlertStringArray = srAlertStringArray.concat([srAlertsDiv.data('openedString')]);
-        var srClosedAlertStringArray = srAlertStringArray.concat([srAlertsDiv.data('closedString')]);
 
         if (this.clusterGroup) {
             this.clusterGroup.addLayer(marker);
@@ -22,14 +18,6 @@ OmekaMap.prototype = {
 
         if (bindHtml) {
             marker.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
-
-            marker.addEventListener('popupopen', function (event) {
-                srAlertsDiv.text(srOpenedAlertStringArray.join(' '));
-            });
-
-            marker.addEventListener('popupclose', function (event) {
-                srAlertsDiv.text(srClosedAlertStringArray.join(' '));
-            });
         }
 
         this.markers.push(marker);
@@ -61,16 +49,33 @@ OmekaMap.prototype = {
         return layer;
     },
 
-    addLayerFromGeometry: function (geometry, markerOptions, bindHtml) {
+    addLayerFromGeometry: function (geometry, options, bindHtml) {
         var layer;
         if (geometry.type === 'Point') {
-            layer = this.addMarker([geometry.coordinates[1], geometry.coordinates[0]], markerOptions, bindHtml);
+            layer = this.addMarker([geometry.coordinates[1], geometry.coordinates[0]], options, bindHtml);
         } else {
             layer = this.addShapeLayer(geometry, bindHtml);
         }
-        // Popup dimensions are calculated before images load; update on first
-        // open so the popup resizes correctly once the image is available.
         if (bindHtml) {
+            var srAlertsDiv = jQuery('#geolocation-sr-alerts');
+            var title = options.title || '';
+            var latlng = geometry.type === 'Point'
+                ? layer.getLatLng()
+                : layer.getBounds().getCenter();
+            var parts = [title, srAlertsDiv.data('latString'), latlng.lat,
+                srAlertsDiv.data('longString'), latlng.lng];
+            var srOpenedText = parts.concat(srAlertsDiv.data('openedString')).join(' ');
+            var srClosedText = parts.concat(srAlertsDiv.data('closedString')).join(' ');
+            // Leaflet popup events give no screen reader feedback; announce the
+            // layer title, coordinates, and open/close status.
+            layer.addEventListener('popupopen', function () {
+                srAlertsDiv.text(srOpenedText);
+            });
+            layer.addEventListener('popupclose', function () {
+                srAlertsDiv.text(srClosedText);
+            });
+            // Popup dimensions are calculated before images load; update on
+            // first open so the popup resizes correctly once the image loads.
             layer.once('popupopen', function (event) {
                 var popup = event.popup;
                 jQuery(popup.getElement()).find('img').one('load', function () {
