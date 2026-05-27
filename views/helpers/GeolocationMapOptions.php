@@ -25,7 +25,11 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
             $options['cluster'] = (bool) get_option('geolocation_cluster');
         }
 
-        $options['custom_map'] = json_decode((string) get_option('geolocation_custom_map'), true);
+        $customMap = $options['custom_map'] = json_decode((string) get_option('geolocation_custom_map'), true);
+        if (isset($customMap['attribution'])) {
+            $customMap['attribution'] = html_escape($customMap['attribution']);
+        }
+        $options['custom_map'] = $customMap;
 
         return js_escape($options);
     }
