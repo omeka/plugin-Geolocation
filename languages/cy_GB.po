@@ -12,66 +12,66 @@ msgstr ""
 "POT-Creation-Date: 2012-01-09 21:49-0500\n"
 "PO-Revision-Date: 2013-06-06 15:48+0000\n"
 "Last-Translator: John Flatness <john@omeka.org>, 2016\n"
-"Language-Team: Welsh (United Kingdom) (http://www.transifex.com/omeka/omeka/language/cy_GB/)\n"
+"Language-Team: Welsh (United Kingdom) (http://app.transifex.com/omeka/omeka/language/cy_GB/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: cy_GB\n"
 "Plural-Forms: nplurals=4; plural=(n==1) ? 0 : (n==2) ? 1 : (n != 8 && n != 11) ? 2 : 3;\n"
 
-#: GeolocationPlugin.php:279 GeolocationPlugin.php:297
+#: GeolocationPlugin.php:328 GeolocationPlugin.php:350
+#: GeolocationPlugin.php:930
 msgid "Geolocation"
 msgstr ""
 
-#: GeolocationPlugin.php:422
+#: GeolocationPlugin.php:477
 msgid "kilometers"
 msgstr ""
 
-#: GeolocationPlugin.php:424
+#: GeolocationPlugin.php:479
 msgid "miles"
 msgstr ""
 
-#: GeolocationPlugin.php:426
+#: GeolocationPlugin.php:482
 #, php-format
 msgid "within %1$s %2$s of \"%3$s\""
 msgstr ""
 
-#: GeolocationPlugin.php:436 views/shared/map/advanced-search-partial.php:34
+#: GeolocationPlugin.php:492 views/admin/map/advanced-search-partial.php:32
+#: views/public/map/advanced-search-partial.php:32
 msgid "Only Items with Locations"
 msgstr ""
 
-#: GeolocationPlugin.php:438 views/shared/map/advanced-search-partial.php:35
+#: GeolocationPlugin.php:494 views/admin/map/advanced-search-partial.php:33
+#: views/public/map/advanced-search-partial.php:33
 msgid "Only Items without Locations"
 msgstr ""
 
-#: GeolocationPlugin.php:455 GeolocationPlugin.php:461
+#: GeolocationPlugin.php:511 GeolocationPlugin.php:517
+#: GeolocationPlugin.php:800 GeolocationPlugin.php:849
 msgid "Map"
 msgstr "Map"
 
-#: GeolocationPlugin.php:494
+#: GeolocationPlugin.php:550
 msgid "Browse Map"
 msgstr "Pori'r map"
 
-#: GeolocationPlugin.php:549
+#: GeolocationPlugin.php:605
 #, php-format
 msgid "Find A Geographic Location For The %s:"
 msgstr "Darganfod Lleoliad Ar Gyfer Y %s:"
 
-#: GeolocationPlugin.php:561
+#: GeolocationPlugin.php:617
 msgid "Geolocation Map"
 msgstr ""
 
-#: GeolocationPlugin.php:562
+#: GeolocationPlugin.php:618
 msgid "Show attached items on a map"
 msgstr ""
 
-#: GeolocationPlugin.php:661
+#: GeolocationPlugin.php:710
 msgid "Find a Location by Address:"
 msgstr "Darganfod Lleoliad yn ôl Cyfeiriad:"
-
-#: config_form.php:3
-msgid "General Settings"
-msgstr ""
 
 #: config_form.php:7
 msgid "Default Latitude"
@@ -246,122 +246,220 @@ msgid ""
 "basemap. Get your token at %s."
 msgstr ""
 
-#: config_form.php:104
+#: config_form.php:103
 msgid "Mapbox Map ID"
 msgstr ""
 
-#: config_form.php:109
+#: config_form.php:106
 msgid ""
 "Mapbox Map ID for the map to display as the basemap. The default street map "
 "will be used if nothing is entered here."
 msgstr ""
 
-#: config_form.php:118
+#: config_form.php:113
 msgid "Geocoder"
 msgstr ""
 
-#: config_form.php:122
+#: config_form.php:116
 msgid "Service to use for looking up coordinates from addresses."
 msgstr ""
 
-#: config_form.php:126
+#: config_form.php:119
 msgid "OpenStreetMap Nominatim"
 msgstr ""
 
-#: config_form.php:127
+#: config_form.php:120
 msgid "Photon"
 msgstr ""
 
-#: config_form.php:135
-msgid "Browse Map Settings"
+#: config_form.php:128
+msgid "Custom Map Overlay"
+msgstr ""
+
+#: config_form.php:131
+msgid "Map Type"
+msgstr ""
+
+#: config_form.php:134
+msgid "Type of custom map to overlay."
+msgstr ""
+
+#: config_form.php:137
+msgid "None"
 msgstr ""
 
 #: config_form.php:138
+msgid "Tiled web map"
+msgstr ""
+
+#: config_form.php:139
+msgid "WMS"
+msgstr ""
+
+#: config_form.php:146
+msgid "Tile URL Template"
+msgstr ""
+
+#: config_form.php:149
+msgid "URL template for map tiles. Should contain {x}, {y}, and {z}"
+msgstr ""
+
+#: config_form.php:155
+msgid "WMS Base URL"
+msgstr ""
+
+#: config_form.php:158
+msgid "Base URL for the WMS layer."
+msgstr ""
+
+#: config_form.php:164
+msgid "WMS Layers"
+msgstr ""
+
+#: config_form.php:167
+msgid "WMS layers to display (separate by comma for multiple)"
+msgstr ""
+
+#: config_form.php:173
+msgid "WMS Styles"
+msgstr ""
+
+#: config_form.php:176
+msgid "WMS styles (optional, separate by comma for multiple)"
+msgstr ""
+
+#: config_form.php:182
+msgid "Transparent"
+msgstr ""
+
+#: config_form.php:185
+msgid "Request transparent tiles from the WMS server"
+msgstr ""
+
+#: config_form.php:191
+msgid "Zoom Range"
+msgstr ""
+
+#: config_form.php:195
+msgid ""
+"Zoom levels valid for the custom map. Leave blank if the tiles are available"
+" at all zoom levels. 0 is the most zoomed out and 18 is the most zoomed in."
+msgstr ""
+
+#: config_form.php:198
+msgid "Min Zoom"
+msgstr ""
+
+#: config_form.php:199
+msgid "Max Zoom"
+msgstr ""
+
+#: config_form.php:205
+msgid "Attribution"
+msgstr ""
+
+#: config_form.php:208
+msgid "Attribution text for the custom map."
+msgstr ""
+
+#: config_form.php:215
+msgid "Browse Map Settings"
+msgstr ""
+
+#: config_form.php:218
 msgid "Number of Locations Per Page"
 msgstr "Nifer o Leoliadau Fesul Tudalen"
 
-#: config_form.php:141
+#: config_form.php:221
 msgid "The number of locations displayed per page when browsing the map."
 msgstr ""
 
-#: config_form.php:147
+#: config_form.php:227
 msgid "Auto-fit to Locations"
 msgstr ""
 
-#: config_form.php:151
+#: config_form.php:232
 msgid ""
 "If checked, the default location and zoom settings will be ignored on the "
 "browse map. Instead, the map will automatically pan and zoom to fit the "
 "locations displayed on each page."
 msgstr ""
 
-#: config_form.php:165
+#: config_form.php:243
 msgid "Default Radius"
 msgstr ""
 
-#: config_form.php:168
+#: config_form.php:246
 msgid ""
 "The size of the default radius to use on the items advanced search page. See"
 " below for whether to measure in miles or kilometers."
 msgstr ""
 
-#: config_form.php:174
+#: config_form.php:252
 msgid "Use metric distances"
 msgstr "Defnyddio pellteroedd metrig"
 
-#: config_form.php:177
+#: config_form.php:255
 msgid "Use metric distances in proximity search."
 msgstr "Defnyddio pellteroedd metrig mewn chwiliadau agosrwydd."
 
-#: config_form.php:186
+#: config_form.php:261
 msgid "Enable marker clustering"
 msgstr ""
 
-#: config_form.php:189
+#: config_form.php:264
 msgid "Show close or overlapping markers as clusters."
 msgstr ""
 
-#: config_form.php:199
+#: config_form.php:271
 msgid "Item Map Settings"
 msgstr ""
 
-#: config_form.php:202
+#: config_form.php:274
+msgid "Enable Item Map"
+msgstr ""
+
+#: config_form.php:277
+msgid "Display map on the items/show page."
+msgstr ""
+
+#: config_form.php:283
 msgid "Width for Item Map"
 msgstr "Lled ar gyfer Map Eitem"
 
-#: config_form.php:205
+#: config_form.php:286
 msgid ""
 "The width of the map displayed on your items/show page. If left blank, the "
 "default width of 100% will be used."
 msgstr "Lled y map ar eich tudalen eitemau/dangos. Os yw'n wag, bydd lled rhagosodedig o 100% yn cael ei ddefnyddio."
 
-#: config_form.php:212
+#: config_form.php:293
 msgid "Height for Item Map"
 msgstr "Uchder ar gyfer Map Eitem"
 
-#: config_form.php:215
+#: config_form.php:296
 msgid ""
 "The height of the map displayed on your items/show page. If left blank, the "
 "default height of 300px will be used."
 msgstr "Uchder y map ar eich tudalen eitemau/dangos. Os yw'n wag, bydd uchder rhagosodedig o 300px yn cael ei ddefnyddio."
 
-#: config_form.php:222
+#: config_form.php:303
 msgid "Map Integration"
 msgstr ""
 
-#: config_form.php:225
+#: config_form.php:306
 msgid "Add Link to Map on Items/Browse Navigation"
 msgstr "Ychwanegu Dolen i'r Map ar y Rhyngwyneb Eitemau/Pori"
 
-#: config_form.php:228
+#: config_form.php:309
 msgid "Add a link to the items map on all the items/browse pages."
 msgstr "Ychwanegu dolen i'r map eitemau ar yr holl dudalennau eitemau/pori."
 
-#: config_form.php:238
+#: config_form.php:316
 msgid "Add Map To Contribution Form"
 msgstr "Ychwanegu Map I'r Ffurflen Cyfrannu"
 
-#: config_form.php:241
+#: config_form.php:319
 msgid ""
 "If the Contribution plugin is installed and activated, Geolocation  will add"
 " a geolocation map field to the contribution form to associate a location to"
@@ -392,6 +490,26 @@ msgstr "Mae'r lleoliad angen hydred."
 msgid "Location requires a zoom level."
 msgstr "Mae'r lleoliad angen llefel chwyddo."
 
+#: views/admin/map/advanced-search-partial.php:19
+#: views/public/map/advanced-search-partial.php:19
+msgid "Geographic Radius (kilometers)"
+msgstr "Radiws Daearyddol (cilometrau)"
+
+#: views/admin/map/advanced-search-partial.php:21
+#: views/public/map/advanced-search-partial.php:21
+msgid "Geographic Radius (miles)"
+msgstr "Radiws Daearyddol (milltiroedd)"
+
+#: views/admin/map/advanced-search-partial.php:28
+#: views/public/map/advanced-search-partial.php:28
+msgid "Geolocation Status"
+msgstr ""
+
+#: views/admin/map/advanced-search-partial.php:40
+#: views/public/map/advanced-search-partial.php:40
+msgid "Geographic Address"
+msgstr "Cyfeiriad Daearyddol"
+
 #: views/admin/map/browse.php:4 views/public/map/browse.php:4
 msgid "Browse Items on the Map"
 msgstr "Pori Eitemau ar y Map."
@@ -404,25 +522,37 @@ msgstr "cyfanswm"
 msgid "Find An Item on the Map"
 msgstr "Dod o hyd i Eitem ar y Map"
 
-#: views/helpers/GeolocationMapSingle.php:36
+#: views/admin/map/browse.php:14
+msgid "Marker opened on map."
+msgstr ""
+
+#: views/admin/map/browse.php:14
+msgid "Marker closed on map."
+msgstr ""
+
+#: views/helpers/GeolocationMapSingle.php:43
 msgid "This item has no location info associated with it."
 msgstr "Does dim gwybodaeth lleoliad yn gysylltiol a'r eitem hon."
 
-#: views/shared/map/advanced-search-partial.php:19
-msgid "Geographic Radius (kilometers)"
-msgstr "Radiws Daearyddol (cilometrau)"
-
-#: views/shared/map/advanced-search-partial.php:21
-msgid "Geographic Radius (miles)"
-msgstr "Radiws Daearyddol (milltiroedd)"
-
-#: views/shared/map/advanced-search-partial.php:29
-msgid "Geolocation Status"
+#: views/public/map/browse.php:22
+msgid "Latitude"
 msgstr ""
 
-#: views/shared/map/advanced-search-partial.php:43
-msgid "Geographic Address"
-msgstr "Cyfeiriad Daearyddol"
+#: views/public/map/browse.php:22
+msgid "Longitude"
+msgstr ""
+
+#: views/public/map/browse.php:22
+msgid "Opened."
+msgstr ""
+
+#: views/public/map/browse.php:22
+msgid "Closed."
+msgstr ""
+
+#: views/shared/map/input-partial.php:17
+msgid "Location found."
+msgstr ""
 
 #: views/shared/map/input-partial.php:17
 msgid "Find"
