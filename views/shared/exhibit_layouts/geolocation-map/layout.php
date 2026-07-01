@@ -54,18 +54,24 @@ jQuery(window).on('load', function () {
     var prevBtn = jQuery('#<?php echo $divId; ?>-prev');
     var nextBtn = jQuery('#<?php echo $divId; ?>-next');
     var counter = jQuery('#<?php echo $divId; ?>-counter');
+    var pendingPopupOpen = null;
     function goToStep(index) {
         currentIndex = index;
         var layer = layers[currentIndex];
         var geometry = JSON.parse(map_locations[currentIndex].geometry_json);
+        if (pendingPopupOpen) {
+            geolocation_map.map.off('moveend', pendingPopupOpen);
+        }
+        pendingPopupOpen = function () {
+            pendingPopupOpen = null;
+            layer.openPopup();
+        };
+        geolocation_map.map.once('moveend', pendingPopupOpen);
         if (geometry.type === 'Point') {
             geolocation_map.map.flyTo(layer.getLatLng());
         } else {
-            geolocation_map.map.fitBounds(layer.getBounds(), {padding: [25, 25]});
+            geolocation_map.map.flyToBounds(layer.getBounds(), {padding: [25, 25]});
         }
-        geolocation_map.map.once('moveend', function () {
-            layer.openPopup();
-        });
         counter.text((currentIndex + 1) + ' / ' + total);
         prevBtn.prop('disabled', currentIndex === 0);
         nextBtn.prop('disabled', currentIndex === total - 1);
