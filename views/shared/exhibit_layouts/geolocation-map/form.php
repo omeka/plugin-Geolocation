@@ -16,7 +16,7 @@ $options = $block->getOptions();
         <div class="sequence-mode">
             <?php echo $this->formLabel($formStem . '[options][sequence]', __('Sequence mode')); ?>
             <?php echo $this->formCheckbox($formStem . '[options][sequence]', @$options['sequence'], [], ['1', '0']); ?>
-            <p class="instructions"><?php echo __('Step through locations in the arranged order above.'); ?></p>
+            <p class="instructions"><?php echo __('Step through locations in the arranged order above. For items with multiple locations, the locations will advance in the order which they were added.'); ?></p>
         </div>
     </div>
 </div>
