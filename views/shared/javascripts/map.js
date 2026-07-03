@@ -6,6 +6,15 @@ function OmekaMap(mapDivId, center, options) {
 
 OmekaMap.prototype = {
 
+    map: null,
+    mapDivId: null,
+    center: null,
+    options: {},
+    locations: [],
+    locationBounds: null,
+    clusterGroup: null,
+    deflateGroup: null,
+
     addMarker: function (latLng, options, bindHtml) {
         var map = this.map;
         var marker = L.marker(latLng, options);
@@ -20,7 +29,7 @@ OmekaMap.prototype = {
             marker.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
         }
 
-        this.markers.push(marker);
+        this.locations.push(marker);
         this.locationBounds.extend(latLng);
         return marker;
     },
@@ -45,6 +54,7 @@ OmekaMap.prototype = {
             layer.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
         }
         this.deflateGroup.addLayer(layer);
+        this.locations.push(layer);
         this.locationBounds.extend(layer.getBounds());
         return layer;
     },
@@ -96,7 +106,7 @@ OmekaMap.prototype = {
 
         this.map = L.map(this.mapDivId).setView([this.center.latitude, this.center.longitude], this.center.zoomLevel);
         this.locationBounds = L.latLngBounds();
-        this.markers = [];
+        this.locations = [];
 
         L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
 
@@ -202,12 +212,8 @@ OmekaMapBrowse.prototype = {
     buildLayerFromLocation: function (locationData) {
         var geometry = JSON.parse(locationData.geometry_json);
         var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
-        // Shapes have no native title property; _geolocationTitle is read
-        // by buildListLinks to label them in the sidebar. Points are omitted
-        // because they carry their title via marker.options.title.
-        if (geometry.type !== 'Point') {
-            layer._geolocationTitle = locationData.title || '';
-        }
+        // _geolocationTitle is the label this location shows in the sidebar list.
+        layer._geolocationTitle = locationData.title || '';
     },
 
     buildLocationContent: function (locationData) {
@@ -232,27 +238,27 @@ OmekaMapBrowse.prototype = {
         var list = jQuery('<ul></ul>');
         list.appendTo(container);
 
-        jQuery.each(this.markers, function (index, marker) {
-            that._buildListItem(list, marker.options.title, function () {
-                if (that.clusterGroup) {
-                    that.clusterGroup.zoomToShowLayer(marker, function () {
-                        marker.fire('click');
-                    });
+        // this.locations holds points and shapes in load order, so the list
+        // interleaves them as they were added rather than grouping by type.
+        jQuery.each(this.locations, function (index, layer) {
+            that._buildListItem(list, layer._geolocationTitle, function () {
+                if (layer instanceof L.Marker) {
+                    if (that.clusterGroup) {
+                        that.clusterGroup.zoomToShowLayer(layer, function () {
+                            layer.fire('click');
+                        });
+                    } else {
+                        that.map.once('moveend', function () {
+                            layer.fire('click');
+                        });
+                        that.map.flyTo(layer.getLatLng());
+                    }
                 } else {
                     that.map.once('moveend', function () {
-                        marker.fire('click');
+                        layer.openPopup();
                     });
-                    that.map.flyTo(marker.getLatLng());
+                    that.map.fitBounds(layer.getBounds());
                 }
-            });
-        });
-
-        jQuery.each(this.deflateGroup.getLayers(), function (index, layer) {
-            that._buildListItem(list, layer._geolocationTitle, function () {
-                that.map.once('moveend', function () {
-                    layer.openPopup();
-                });
-                that.map.fitBounds(layer.getBounds());
             });
         });
     },
@@ -361,7 +367,7 @@ OmekaMapForm.prototype = {
     addLocation: function (lat, lng, zoom, id, address, label) {
         var marker = L.marker([lat, lng]);
         this.drawnItems.addLayer(marker);
-        this.markers.push(marker);
+        this.locations.push(marker);
         this.locationBounds.extend([lat, lng]);
 
         marker._locationData = {
