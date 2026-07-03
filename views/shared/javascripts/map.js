@@ -328,12 +328,13 @@ function OmekaMapForm(mapDivId, center, options) {
     this.map.addControl(drawControl);
 
     this.map.on(L.Draw.Event.CREATED, function (event) {
-        if (event.layerType === 'marker') {
-            var latlng = event.layer.getLatLng();
-            var marker = that.addLocation(latlng.lat, latlng.lng, that.map.getZoom(), null, '', '');
-            marker.openPopup();
-        } else {
-            that.addShape(JSON.stringify(event.layer.toGeoJSON().geometry));
+        var isMarker = event.layerType === 'marker';
+        var layer = that.addLocation({
+            geometry_json: JSON.stringify(event.layer.toGeoJSON().geometry),
+            zoom_level: isMarker ? that.map.getZoom() : 0
+        });
+        if (isMarker) {
+            layer.openPopup();
         }
     });
 
@@ -366,44 +367,41 @@ function OmekaMapForm(mapDivId, center, options) {
 
 OmekaMapForm.prototype = {
 
-    addLocation: function (lat, lng, zoom, id, address, label) {
-        var marker = L.marker([lat, lng]);
-        this.drawnItems.addLayer(marker);
-        this.locations.push(marker);
-        this.locationBounds.extend([lat, lng]);
-
-        marker._locationData = {
-            id: id,
-            latitude: lat,
-            longitude: lng,
-            zoom_level: zoom,
-            address: address,
-            label: label,
-            geometry_json: JSON.stringify({type: 'Point', coordinates: [lng, lat]})
-        };
-
-        this._bindLabelPopup(marker, label);
-
-        return marker;
-    },
-
-    addShape: function (geometryJson, id, label) {
-        var layer = L.GeoJSON.geometryToLayer(JSON.parse(geometryJson));
+    // Adds an editable layer (point marker or shape) from a location object and
+    // records its _locationData for form submission. locationData needs only a
+    // geometry_json string; id/zoom_level/address/label default sensibly.
+    addLocation: function (locationData) {
+        var geometry = JSON.parse(locationData.geometry_json);
+        var layer = L.GeoJSON.geometryToLayer(geometry);
         this.drawnItems.addLayer(layer);
-        this.locationBounds.extend(layer.getBounds());
+        this.locations.push(layer);
 
-        var center = layer.getBounds().getCenter();
+        // A point is represented by its own position; a shape by its bounding
+        // box, with the box center standing in as its point (matching how
+        // Location::beforeSave derives lat/lng server-side). `extent` is the
+        // shape we grow the map's overall bounds by.
+        var center, extent;
+        if (geometry.type === 'Point') {
+            extent = center = layer.getLatLng();
+        } else {
+            extent = layer.getBounds();
+            center = extent.getCenter();
+        }
+        this.locationBounds.extend(extent);
+
         layer._locationData = {
-            id: id || null,
+            id: locationData.id || null,
             latitude: center.lat,
             longitude: center.lng,
-            zoom_level: 0,
-            address: '',
-            label: label || '',
-            geometry_json: geometryJson
+            zoom_level: locationData.zoom_level || 0,
+            address: locationData.address || '',
+            label: locationData.label || '',
+            geometry_json: locationData.geometry_json
         };
 
-        this._bindLabelPopup(layer, label || '');
+        this._bindLabelPopup(layer, layer._locationData.label);
+
+        return layer;
     },
 
     _bindLabelPopup: function (layer, initialLabel) {
