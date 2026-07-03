@@ -36,7 +36,6 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         $options = [];
         $options['basemap'] = get_option('geolocation_basemap');
         $options['locations'] = $points;
-        $options['cluster'] = true;
         $options = $this->view->geolocationMapOptions($options);
         $center = js_escape($center);
         $varDivId = Inflector::variablize($divId);

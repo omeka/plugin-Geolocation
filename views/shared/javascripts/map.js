@@ -127,8 +127,10 @@ OmekaMap.prototype = {
             });
         }
 
-        // markerLayer routes collapsed shapes into the cluster group so
-        // they cluster alongside point markers.
+        // When clustering is enabled, markerLayer routes collapsed shapes into
+        // the cluster group so they cluster alongside point markers. When it is
+        // disabled clusterGroup is null and Leaflet.Deflate falls back to its
+        // own FeatureGroup.
         this.deflateGroup = L.deflate({
             minSize: 10,
             markerLayer: this.clusterGroup,

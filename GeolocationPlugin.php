@@ -272,8 +272,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         queue_css_file('leaflet/leaflet', null, null, 'javascripts', $version);
         queue_css_file('leaflet-draw/leaflet.draw', null, null, 'javascripts', $version);
         queue_css_file('geolocation-map', null, null, 'css', $version);
-        queue_css_file(['MarkerCluster', 'MarkerCluster.Default'], null, null, 'javascripts/leaflet-markercluster', $version);
-        queue_js_file(['leaflet/leaflet', 'leaflet/leaflet-providers', 'leaflet-draw/leaflet.draw', 'leaflet-deflate/L.Deflate', 'leaflet-markercluster/leaflet.markercluster', 'map'], 'javascripts', [], $version);
+
+        // Marker clustering is optional, so its assets load only when enabled.
+        // leaflet-deflate always loads because every map initializes it.
+        $jsFiles = ['leaflet/leaflet', 'leaflet/leaflet-providers', 'leaflet-draw/leaflet.draw', 'leaflet-deflate/L.Deflate'];
+        if (get_option('geolocation_cluster')) {
+            queue_css_file(['MarkerCluster', 'MarkerCluster.Default'], null, null, 'javascripts/leaflet-markercluster', $version);
+            $jsFiles[] = 'leaflet-markercluster/leaflet.markercluster';
+        }
+        $jsFiles[] = 'map';
+        queue_js_file($jsFiles, 'javascripts', [], $version);
     }
 
     public function hookAfterSaveItem($args)
