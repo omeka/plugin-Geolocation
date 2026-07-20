@@ -10,6 +10,7 @@ $locations = [];
 foreach ($attachments as $attachment):
     $item = $attachment->getItem();
     $file = $attachment->getFile();
+    $title = metadata($item, 'display_title', ['no_escape' => true]);
     $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
 
     if ($file):
@@ -20,14 +21,14 @@ foreach ($attachments as $attachment):
 
     $itemLocations = $locationTable->findBy(['item_id' => $item->id]);
     foreach ($itemLocations as $location):
-        $title = $titleLink . ($location->label ? ' — ' . html_escape($location->label) : '');
-        $html = '<div class="geolocation_balloon">'
-              . '<div class="geolocation_balloon_title">' . $title . '</div>'
+        $headerText = $location->label ? html_escape($location->label) : html_escape($title);
+        $html = '<div class="geolocation-popup">'
+              . '<div class="geolocation-popup-header">' . $headerText . '</div>'
               . $body
+              . '<div class="geolocation-popup-title">' . $titleLink . '</div>'
               . '</div>';
         $locations[] = [
-            'lat' => $location->latitude,
-            'lng' => $location->longitude,
+            'geometry_json' => $location->geometry_json,
             'html' => $html,
         ];
     endforeach;
@@ -43,13 +44,9 @@ jQuery(window).on('load', function () {
     var map_locations = <?php echo json_encode($locations); ?>;
     for (var i = 0; i < map_locations.length; i++) {
         var locationData = map_locations[i];
-        geolocation_map.addMarker(
-            [locationData.lat, locationData.lng],
-            {},
-            locationData.html
-        );
+        geolocation_map.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html);
     }
-    geolocation_map.fitMarkers();
+    geolocation_map.fitLocations();
 });
 </script>
 <div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"></div>

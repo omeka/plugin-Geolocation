@@ -41,14 +41,6 @@
     margin-top: 0 !important;
 }
 
-/* The map for the items page needs a bit of styling on it */
-#address_balloon dt {
-    font-weight: bold;
-}
-#address_balloon {
-    width: 100px;
-}
-
 div.map-notification {
     display:block;
     border: 1px dotted #ccc;

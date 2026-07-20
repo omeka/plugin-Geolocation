@@ -12,7 +12,7 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         }
 
         // For single-location items this sets the initial zoom correctly.
-        // For multi-location items fitMarkers() overrides the center after all points are added.
+        // For multi-location items fitLocations() overrides the center after all points are added.
         $center = [
             'latitude'  => $locations[0]->latitude,
             'longitude' => $locations[0]->longitude,
@@ -22,14 +22,12 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         $points = [];
         foreach ($locations as $loc) {
             $point = [
-                'latitude'  => $loc->latitude,
-                'longitude' => $loc->longitude,
-                'zoomLevel' => $loc->zoom_level,
-                'label'     => $loc->label,
+                'geometry_json' => $loc->geometry_json,
+                'label'         => $loc->label,
             ];
             if ($loc->label !== '') {
-                $point['markerHtml'] = '<div class="geolocation_balloon">'
-                                     . '<div class="geolocation_balloon_title">' . html_escape($loc->label) . '</div>'
+                $point['popupHtml'] = '<div class="geolocation-popup">'
+                                     . '<div class="geolocation-popup-header">' . html_escape($loc->label) . '</div>'
                                      . '</div>';
             }
             $points[] = $point;
@@ -37,7 +35,7 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
 
         $options = [];
         $options['basemap'] = get_option('geolocation_basemap');
-        $options['points'] = $points;
+        $options['locations'] = $points;
         $options = $this->view->geolocationMapOptions($options);
         $center = js_escape($center);
         $varDivId = Inflector::variablize($divId);

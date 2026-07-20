@@ -25,7 +25,7 @@ $geocoder = json_encode(get_option('geolocation_geocoder'));
 <script type="text/javascript">
 var omekaGeolocationForm = new OmekaMapForm('omeka-map-form', <?php echo $center; ?>, <?php echo $options; ?>);
 jQuery.each(jQuery('#omeka-map-form').data('locations'), function (i, loc) {
-    omekaGeolocationForm.addLocation(loc.latitude, loc.longitude, loc.zoom_level, loc.id, loc.address, loc.label);
+    omekaGeolocationForm.addLocation(loc);
 });
 var geocoder = new OmekaGeocoder(<?php echo $geocoder; ?>);
 var geolocationMapFitted = false;
@@ -35,7 +35,7 @@ jQuery(document).on('omeka:tabselected', function () {
     // load the container has 0 height, so defer fitting to the first omeka:tabselected
     // event at which the container actually has size.
     if (!geolocationMapFitted && omekaGeolocationForm.map.getSize().x > 0) {
-        omekaGeolocationForm.fitMarkers();
+        omekaGeolocationForm.fitLocations();
         geolocationMapFitted = true;
     }
 });
@@ -47,7 +47,11 @@ jQuery(document).ready(function () {
         var successMessage = jQuery(this).data('successMessage');
         geocoder.geocode(address).then(function (coords) {
             var latlng = L.latLng(coords);
-            omekaGeolocationForm.addLocation(latlng.lat, latlng.lng, omekaGeolocationForm.map.getZoom(), null, address, '');
+            omekaGeolocationForm.addLocation({
+                geometry_json: JSON.stringify({type: 'Point', coordinates: [latlng.lng, latlng.lat]}),
+                zoom_level: omekaGeolocationForm.map.getZoom(),
+                address: address
+            });
             omekaGeolocationForm.map.panTo(latlng);
             jQuery('#geolocation-sr-alerts').text(successMessage + ' ' + address);
         }, function () {
