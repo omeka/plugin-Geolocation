@@ -38,8 +38,6 @@ class Geolocation_IntegrationHelper
 
         // Add plugin filters
         add_filter('admin_navigation_main', 'geolocation_admin_nav');
-        add_filter('define_response_contexts', 'geolocation_kml_response_context');
-        add_filter('define_action_contexts', 'geolocation_kml_action_context');
         add_filter('admin_items_form_tabs', 'geolocation_item_form_tabs');
     }
 }

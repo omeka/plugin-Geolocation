@@ -5,73 +5,97 @@ function OmekaMap(mapDivId, center, options) {
 }
 
 OmekaMap.prototype = {
-    
+
     map: null,
     mapDivId: null,
-    markers: [],
-    options: {},
     center: null,
-    markerBounds: null,
+    options: {},
+    locations: [],
+    locationBounds: null,
     clusterGroup: null,
-    
-    addMarker: function (latLng, options, bindHtml)
-    {
+    deflateGroup: null,
+
+    addMarker: function (latLng, options, bindHtml) {
         var map = this.map;
         var marker = L.marker(latLng, options);
-        var srAlertsDiv = jQuery('#geolocation-sr-alerts');
-        var srAlertStringArray = [marker.options.title, srAlertsDiv.data('latString'), latLng[0], srAlertsDiv.data('longString'), latLng[1]];
-        var srOpenedAlertStringArray = srAlertStringArray.concat([srAlertsDiv.data('openedString')]);
-        var srClosedAlertStringArray = srAlertStringArray.concat([srAlertsDiv.data('closedString')]);
 
         if (this.clusterGroup) {
             this.clusterGroup.addLayer(marker);
         } else {
             marker.addTo(map);
         }
-        
+
         if (bindHtml) {
             marker.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
-            // Fit images on the map on first load
-            marker.once('popupopen', function (event) {
-                var popup = event.popup;
-                var imgs = popup.getElement().getElementsByTagName('img');
-                for (var i = 0; i < imgs.length; i++) {
-                    imgs[i].addEventListener('load', function imgLoadListener(event) {
-                        event.target.removeEventListener('load', imgLoadListener);
-                        // Marker autopan is disabled during panning, so defer
-                        if (map._panAnim && map._panAnim._inProgress) {
-                            map.once('moveend', function () {
-                                popup.update();
-                            });
-                        } else {
-                            popup.update();
-                        }
-                    });
-                }
-            });
-
-            marker.addEventListener('popupopen', function (event) {
-                srAlertsDiv.text(srOpenedAlertStringArray.join(' '));
-            });
-
-            marker.addEventListener('popupclose', function (event) {
-                srAlertsDiv.text(srClosedAlertStringArray.join(' '));
-            });
         }
-               
-        this.markers.push(marker);
-        this.markerBounds.extend(latLng);
+
+        this.locations.push(marker);
+        this.locationBounds.extend(latLng);
         return marker;
     },
 
-    fitMarkers: function () {
-        if (this.markers.length == 1) {
-            this.map.panTo(this.markers[0].getLatLng());
-        } else if (this.markers.length > 0) {
-            this.map.fitBounds(this.markerBounds, {padding: [25, 25]});
+    fitLocations: function () {
+        if (!this.locationBounds.isValid()) {
+            return;
+        }
+        var bounds = this.locationBounds;
+        // fitBounds on a zero-area bounds (single point) zooms in too
+        // aggressively; panTo preserves the set zoom level.
+        if (bounds.getNorth() === bounds.getSouth() && bounds.getEast() === bounds.getWest()) {
+            this.map.panTo(bounds.getCenter());
+        } else {
+            this.map.fitBounds(bounds, {padding: [25, 25]});
         }
     },
-    
+
+    addShapeLayer: function (geojson, bindHtml) {
+        var layer = L.GeoJSON.geometryToLayer(geojson);
+        if (bindHtml) {
+            layer.bindPopup(bindHtml, {autoPanPadding: [50, 50]});
+        }
+        this.deflateGroup.addLayer(layer);
+        this.locations.push(layer);
+        this.locationBounds.extend(layer.getBounds());
+        return layer;
+    },
+
+    addLayerFromGeometry: function (geometry, options, bindHtml) {
+        var layer;
+        if (geometry.type === 'Point') {
+            layer = this.addMarker([geometry.coordinates[1], geometry.coordinates[0]], options, bindHtml);
+        } else {
+            layer = this.addShapeLayer(geometry, bindHtml);
+        }
+        if (bindHtml) {
+            var srAlertsDiv = jQuery('#geolocation-sr-alerts');
+            var title = options.title || '';
+            var latlng = geometry.type === 'Point'
+                ? layer.getLatLng()
+                : layer.getBounds().getCenter();
+            var parts = [title, srAlertsDiv.data('latString'), latlng.lat,
+                srAlertsDiv.data('longString'), latlng.lng];
+            var srOpenedText = parts.concat(srAlertsDiv.data('openedString')).join(' ');
+            var srClosedText = parts.concat(srAlertsDiv.data('closedString')).join(' ');
+            // Leaflet popup events give no screen reader feedback; announce the
+            // layer title, coordinates, and open/close status.
+            layer.addEventListener('popupopen', function () {
+                srAlertsDiv.text(srOpenedText);
+            });
+            layer.addEventListener('popupclose', function () {
+                srAlertsDiv.text(srClosedText);
+            });
+            // Popup dimensions are calculated before images load; update on
+            // first open so the popup resizes correctly once the image loads.
+            layer.once('popupopen', function (event) {
+                var popup = event.popup;
+                jQuery(popup.getElement()).find('img').one('load', function () {
+                    popup.update();
+                });
+            });
+        }
+        return layer;
+    },
+
     initMap: function () {
         var customMap = this.options.custom_map;
 
@@ -81,7 +105,8 @@ OmekaMap.prototype = {
         }
 
         this.map = L.map(this.mapDivId).setView([this.center.latitude, this.center.longitude], this.center.zoomLevel);
-        this.markerBounds = L.latLngBounds();
+        this.locationBounds = L.latLngBounds();
+        this.locations = [];
 
         L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
 
@@ -100,34 +125,60 @@ OmekaMap.prototype = {
             this.clusterGroup = L.markerClusterGroup({
                 showCoverageOnHover: false
             });
-            this.map.addLayer(this.clusterGroup);
         }
+
+        // When clustering is enabled, markerLayer routes collapsed shapes into
+        // the cluster group so they cluster alongside point markers. When it is
+        // disabled clusterGroup is null and Leaflet.Deflate falls back to its
+        // own FeatureGroup.
+        this.deflateGroup = L.deflate({
+            minSize: 10,
+            markerLayer: this.clusterGroup,
+            greedyCollapse: false,
+        });
+        this.map.addLayer(this.deflateGroup);
 
         jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
 
-        // Show the center marker if we have that enabled.
-        if (this.center.show) {
-            this.addMarker([this.center.latitude, this.center.longitude],
-                           {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"}, 
-                           this.center.markerHtml);
-        }
+        new OmekaFitControl({ position: 'topleft', omekaMap: this }).addTo(this.map);
     }
 };
+
+var OmekaFitControl = L.Control.extend({
+    onAdd: function () {
+        var omekaMap = this.options.omekaMap;
+        var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-fit-all');
+        var link = L.DomUtil.create('a', '', container);
+        link.href = '#';
+        link.title = omekaMap.options.strings.fitAllLocations;
+        link.setAttribute('role', 'button');
+        link.setAttribute('aria-label', omekaMap.options.strings.fitAllLocations);
+        link.innerHTML = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18"><path d="M1 1h5v2H3v3H1V1zm11 0h5v5h-2V3h-3V1zM1 12h2v3h3v2H1v-5zm14 3h-3v2h5v-5h-2v3z" fill="currentColor"/></svg>';
+        L.DomEvent.on(link, 'click', function (e) {
+            L.DomEvent.preventDefault(e);
+            L.DomEvent.stopPropagation(e);
+            omekaMap.fitLocations();
+        });
+        this._link = link;
+        return container;
+    },
+    onRemove: function () {
+        L.DomEvent.off(this._link, 'click');
+    }
+});
 
 function OmekaMapBrowse(mapDivId, center, options) {
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
-
-    //XML loads asynchronously, so need to call for further config only after it has executed
-    this.loadKmlIntoMap(this.options.uri, this.options.params);
+    this.loadLocationsIntoMap(this.options.uri, this.options.params);
 }
 
 OmekaMapBrowse.prototype = {
-    
+
     afterLoadItems: function () {
-        if (this.options.fitMarkers) {
-            this.fitMarkers();
+        if (this.options.fitLocations) {
+            this.fitLocations();
         }
 
         if (!this.options.list) {
@@ -138,118 +189,93 @@ OmekaMapBrowse.prototype = {
         if (!listDiv.length) {
             alert('Error: You have no map links div!');
         } else {
-            //Create HTML links for each of the markers
             this.buildListLinks(listDiv);
         }
     },
-    
-    /* Need to parse KML manually b/c Google Maps API cannot access the KML 
-       behind the admin interface */
-    loadKmlIntoMap: function (kmlUrl, params) {
+
+    loadLocationsIntoMap: function (url, params) {
         var that = this;
         jQuery.ajax({
             type: 'GET',
-            dataType: 'xml',
-            url: kmlUrl,
+            dataType: 'json',
+            url: url,
             data: params,
-            success: function(data) {
-                var xml = jQuery(data);
-        
-                /* KML can be parsed as:
-                    kml - root element
-                        Placemark
-                            namewithlink
-                            description
-                            Point - longitude,latitude
-                */
-                var placeMarks = xml.find('Placemark');
-        
-                // If we have some placemarks, load them
-                if (placeMarks.length) {
-                    // Retrieve the balloon styling from the KML file
-                    that.browseBalloon = that.getBalloonStyling(xml);
-                
-                    // Build the markers from the placemarks
-                    jQuery.each(placeMarks, function (index, placeMark) {
-                        placeMark = jQuery(placeMark);
-                        that.buildMarkerFromPlacemark(placeMark);
+            success: function(locations) {
+                if (locations.length) {
+                    jQuery.each(locations, function (index, locationData) {
+                        that.buildLayerFromLocation(locationData);
                     });
-            
-                    // We have successfully loaded some map points, so continue setting up the map object
                     return that.afterLoadItems();
-                } else {
-                    // @todo Elaborate with an error message
-                    return false;
-                }            
+                }
             }
         });
     },
-    
-    getBalloonStyling: function (xml) {
-        return xml.find('BalloonStyle text').text();        
-    },
-    
-    // Build a marker given the KML XML Placemark data
-    // I wish we could use the KML file directly, but it's behind the admin interface so no go
-    buildMarkerFromPlacemark: function (placeMark) {
-        // Get the info for each location on the map
-        var title = placeMark.find('name').text();
-        var titleWithLink = placeMark.find('namewithlink').text();
-        var body = placeMark.find('description').text();
-        var snippet = placeMark.find('Snippet').text();
-            
-        // Extract the lat/long from the KML-formatted data
-        var coordinates = placeMark.find('Point coordinates').text().split(',');
-        var longitude = coordinates[0];
-        var latitude = coordinates[1];
-        
-        // Use the KML formatting (do some string sub magic)
-        var balloon = this.browseBalloon;
-        balloon = balloon.replace('$[namewithlink]', titleWithLink).replace('$[description]', body).replace('$[Snippet]', snippet);
 
-        // Build a marker, add HTML for it
-        this.addMarker([latitude, longitude], {title: title, alt: title}, balloon);
+    buildLayerFromLocation: function (locationData) {
+        var geometry = JSON.parse(locationData.geometry_json);
+        var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
+        // _geolocationTitle is the label this location shows in the sidebar list.
+        layer._geolocationTitle = locationData.title || '';
     },
-    
+
+    buildLocationContent: function (locationData) {
+        var popup = jQuery('<div class="geolocation-popup">');
+        var headerText = locationData.label || locationData.title;
+        popup.append(jQuery('<div class="geolocation-popup-header">').text(headerText));
+        if (locationData.thumbnailUrl) {
+            var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: ''});
+            var thumbLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).append(img);
+            popup.append(jQuery('<div class="geolocation-popup-thumbnail">').append(thumbLink));
+        }
+        var titleLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).text(locationData.title);
+        popup.append(jQuery('<div class="geolocation-popup-title">').append(titleLink));
+        if (locationData.snippet) {
+            popup.append(jQuery('<p class="geolocation-popup-description">').text(locationData.snippet));
+        }
+        return popup[0];
+    },
+
     buildListLinks: function (container) {
         var that = this;
         var list = jQuery('<ul></ul>');
         list.appendTo(container);
 
-        // Loop through all the markers
-        jQuery.each(this.markers, function (index, marker) {
-            var listElement = jQuery('<li></li>');
-
-            // Make an <a> tag, give it a class for styling
-            var link = jQuery('<a></a>');
-            link.addClass('item-link');
-
-            // Links open up the markers on the map, clicking them doesn't actually go anywhere
-            link.attr('href', 'javascript:void(0);');
-            link.attr('role', 'button');
-
-            // Each <li> starts with the title of the item            
-            link.text(marker.options.title);
-
-            // Clicking the link should take us to the map
-            link.bind('click', {}, function (event) {
-                link.toggleClass('current');
-
-                if (that.clusterGroup) {
-                    that.clusterGroup.zoomToShowLayer(marker, function () {
-                        marker.fire('click');
-                    });
+        // this.locations holds points and shapes in load order, so the list
+        // interleaves them as they were added rather than grouping by type.
+        jQuery.each(this.locations, function (index, layer) {
+            that._buildListItem(list, layer._geolocationTitle, function () {
+                if (layer instanceof L.Marker) {
+                    if (that.clusterGroup) {
+                        that.clusterGroup.zoomToShowLayer(layer, function () {
+                            layer.fire('click');
+                        });
+                    } else {
+                        that.map.once('moveend', function () {
+                            layer.fire('click');
+                        });
+                        that.map.flyTo(layer.getLatLng());
+                    }
                 } else {
                     that.map.once('moveend', function () {
-                        marker.fire('click');
+                        layer.openPopup();
                     });
-                    that.map.flyTo(marker.getLatLng());
+                    that.map.fitBounds(layer.getBounds());
                 }
             });
-
-            link.appendTo(listElement);
-            listElement.appendTo(list);
         });
+    },
+
+    _buildListItem: function (list, title, onClick) {
+        var link = jQuery('<a></a>')
+            .addClass('item-link')
+            .attr('href', 'javascript:void(0);')
+            .attr('role', 'button')
+            .text(title);
+        link.bind('click', {}, function () {
+            link.toggleClass('current');
+            onClick();
+        });
+        jQuery('<li></li>').append(link).appendTo(list);
     }
 };
 
@@ -257,6 +283,13 @@ function OmekaMapSingle(mapDivId, center, options) {
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
+    if (options.locations && options.locations.length) {
+        for (var i = 0; i < options.locations.length; i++) {
+            var pt = options.locations[i];
+            this.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: pt.label, alt: pt.label}, pt.popupHtml);
+        }
+        this.fitLocations();
+    }
 }
 
 function OmekaMapForm(mapDivId, center, options) {
@@ -264,102 +297,127 @@ function OmekaMapForm(mapDivId, center, options) {
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
-    
-    this.formDiv = jQuery('#' + this.options.form.id);       
-        
-    // Make the map clickable to add a location point.
-    this.map.on('click', function (event) {
-        // If we are clicking a new spot on the map
-        var marker = that.setMarker(event.latlng.wrap());
-        if (marker) {
-            jQuery('#geolocation_address').val('');
+
+    this.jsonInput = document.getElementById('geolocation-locations-json');
+
+    // Leaflet.draw's edit and delete toolbars require a FeatureGroup to operate on.
+    this.drawnItems = new L.FeatureGroup();
+    this.map.addLayer(this.drawnItems);
+
+    L.drawLocal.edit.toolbar.buttons.edit = options.strings.editLocations;
+    L.drawLocal.edit.toolbar.buttons.editDisabled = options.strings.noLocationsToEdit;
+    L.drawLocal.edit.toolbar.buttons.remove = options.strings.deleteLocations;
+    L.drawLocal.edit.toolbar.buttons.removeDisabled = options.strings.noLocationsToDelete;
+
+    var drawControl = new L.Control.Draw({
+        position: 'topleft',
+        draw: {
+            marker: true,
+            polyline: true,
+            polygon: true,
+            rectangle: true,
+            circle: false,
+            circlemarker: false,
+        },
+        edit: {
+            featureGroup: this.drawnItems,
+            edit: true,
+            remove: true,
+        },
+    });
+    this.map.addControl(drawControl);
+
+    this.map.on(L.Draw.Event.CREATED, function (event) {
+        var isMarker = event.layerType === 'marker';
+        var layer = that.addLocation({
+            geometry_json: JSON.stringify(event.layer.toGeoJSON().geometry),
+            zoom_level: isMarker ? that.map.getZoom() : 0
+        });
+        if (isMarker) {
+            layer.openPopup();
         }
     });
-	
-    // Make the map update on zoom changes.
-    this.map.on('zoomend', function () {
-        that.updateZoomForm();
+
+    this.map.on(L.Draw.Event.EDITED, function (event) {
+        event.layers.eachLayer(function (layer) {
+            layer._locationData.geometry_json = JSON.stringify(layer.toGeoJSON().geometry);
+            if (layer instanceof L.Marker) {
+                var latlng = layer.getLatLng();
+                layer._locationData.latitude = latlng.lat;
+                layer._locationData.longitude = latlng.lng;
+            }
+        });
     });
 
-    // Add the existing map point.
-    if (this.options.point) {
-        var point = L.latLng(this.options.point.latitude, this.options.point.longitude);
-        this.setMarker(point);
-        this.map.setView(point, this.options.point.zoomLevel);
-    }
+    this.map.on('zoomend', function () {
+        var zoom = that.map.getZoom();
+        that.drawnItems.eachLayer(function (layer) {
+            layer._locationData.zoom_level = zoom;
+        });
+    });
+
+    jQuery(this.jsonInput).closest('form').on('submit', function () {
+        var data = [];
+        that.drawnItems.eachLayer(function (layer) {
+            data.push(layer._locationData);
+        });
+        jQuery(that.jsonInput).val(JSON.stringify(data));
+    });
 }
 
 OmekaMapForm.prototype = {
-    /* Set the marker to the point. */   
-    setMarker: function (point) {
-        var that = this;
 
-        if (this.options.confirmLocationChange
-            && this.markers.length > 0
-            && !confirm('Are you sure you want to change the location of the item?')
-        ) {
-            return false;
-        }
+    // Adds an editable layer (point marker or shape) from a location object and
+    // records its _locationData for form submission. locationData needs only a
+    // geometry_json string; id/zoom_level/address/label default sensibly.
+    addLocation: function (locationData) {
+        var geometry = JSON.parse(locationData.geometry_json);
+        var layer = L.GeoJSON.geometryToLayer(geometry);
+        this.drawnItems.addLayer(layer);
+        this.locations.push(layer);
 
-        // Get rid of existing markers.
-        this.clearForm();
-        
-        // Add the marker
-        var marker = this.addMarker(point);
-        
-        // Pan the map to the marker
-        this.map.panTo(point);
-        
-        //  Make the marker clear the form if clicked.
-        marker.on('click', function (event) {
-            if (!that.options.confirmLocationChange || confirm('Are you sure you want to remove the location of the item?')) {
-                that.clearForm();
-            }
-        });
-        
-        this.updateForm(point);
-        return marker;
-    },
-    
-    /* Update the latitude, longitude, and zoom of the form. */
-    updateForm: function (point) {
-        var latElement = document.getElementsByName('geolocation[latitude]')[0];
-        var lngElement = document.getElementsByName('geolocation[longitude]')[0];
-        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
-        
-        // If we passed a point, then set the form to that. If there is no point, clear the form
-        if (point) {
-            latElement.value = point.lat;
-            lngElement.value = point.lng;
-            zoomElement.value = this.map.getZoom();          
+        // A point is represented by its own position; a shape by its bounding
+        // box, with the box center standing in as its point (matching how
+        // Location::beforeSave derives lat/lng server-side). `extent` is the
+        // shape we grow the map's overall bounds by.
+        var center, extent;
+        if (geometry.type === 'Point') {
+            extent = center = layer.getLatLng();
         } else {
-            latElement.value = '';
-            lngElement.value = '';
-            zoomElement.value = this.map.getZoom();          
-        }        
-    },
-    
-    /* Update the zoom input of the form to be the current zoom on the map. */
-    updateZoomForm: function () {
-        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
-        zoomElement.value = this.map.getZoom();
-    },
-    
-    /* Clear the form of all markers. */
-    clearForm: function () {
-        // Remove the markers from the map
-        for (var i = 0; i < this.markers.length; i++) {
-            this.markers[i].remove();
+            extent = layer.getBounds();
+            center = extent.getCenter();
         }
-        
-        // Clear the markers array
-        this.markers = [];
-        
-        // Update the form
-        this.updateForm();
+        this.locationBounds.extend(extent);
+
+        layer._locationData = {
+            id: locationData.id || null,
+            latitude: center.lat,
+            longitude: center.lng,
+            zoom_level: locationData.zoom_level || 0,
+            address: locationData.address || '',
+            label: locationData.label || '',
+            geometry_json: locationData.geometry_json
+        };
+
+        this._bindLabelPopup(layer, layer._locationData.label);
+
+        return layer;
     },
-    
-    /* Resize the map and center it on the first marker. */
+
+    _bindLabelPopup: function (layer, initialLabel) {
+        var labelInput = jQuery('<input type="text" class="geolocation-popup-label">').val(initialLabel);
+        var popupContent = jQuery('<div></div>')
+            .append(jQuery('<label></label>').text(this.options.strings.label + ': ').append(labelInput));
+        layer.bindPopup(popupContent[0], {autoPanPadding: [50, 50]});
+        labelInput.on('input', function () {
+            layer._locationData.label = jQuery(this).val();
+        });
+    },
+
+    getLocationCount: function () {
+        return this.drawnItems.getLayers().length;
+    },
+
     resize: function () {
         this.map.invalidateSize();
     }

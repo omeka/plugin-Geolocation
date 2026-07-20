@@ -2,12 +2,12 @@
 class Table_Location extends Omeka_Db_Table
 {
     /**
-     * Returns a location (or array of locations) for an item (or array of items)
-     * @param array|Item|int $item An item or item id, or an array of items or item ids
-     * @param boolean $findOnlyOne Whether or not to return only one location if it exists for the item
-     * @return array|Location A location or an array of locations
-     **/
-    public function findLocationByItem($item, $findOnlyOne = false)
+     * Returns all locations for an item or array of items, grouped by item_id.
+     *
+     * @param array|Item|int $item
+     * @return array item_id => Location[]
+     */
+    public function findLocationsByItem($item)
     {
         $db = get_db();
 
@@ -16,11 +16,10 @@ class Table_Location extends Omeka_Db_Table
         } elseif (is_array($item) && !count($item)) {
             return [];
         }
+
         $alias = $this->getTableAlias();
-        // Create a SELECT statement for the Location table
         $select = $db->select()->from([$alias => $db->Location], "$alias.*");
 
-        // Create a WHERE condition that will pull down all the location info
         if (is_array($item)) {
             $itemIds = [];
             foreach ($item as $it) {
@@ -32,31 +31,20 @@ class Table_Location extends Omeka_Db_Table
             $select->where("$alias.item_id = ?", $itemId);
         }
 
-        // If only a single location is request, return the first one found.
-        if ($findOnlyOne) {
-            $location = $this->fetchObject($select);
-            return $location;
-        }
-
-        // Get the locations.
         $locations = $this->fetchObjects($select);
-
-        // Return an associative array of locations where the key is the item_id of the location
-        // Note: Since each item can only have one location, this makes sense to associate a single location with a single item_id.
-        // However, if in the future, an item can have multiple locations, then we cannot just associate a single location with a single item_id;
-        // Instead, in the future, we would have to associate an array of locations with a single item_id.
-        $indexedLocations = [];
-        foreach ($locations as $k => $loc) {
-            $indexedLocations[$loc['item_id']] = $loc;
+        $grouped = [];
+        foreach ($locations as $loc) {
+            $grouped[$loc->item_id][] = $loc;
         }
-        return $indexedLocations;
+        return $grouped;
     }
 
     /**
-     * Add permission check to location queries.
+     * Join items so that public permissions on items are enforced for locations.
      *
-     * Since all locations belong to an item we can override this method to join
-     * the items table and add a permission check to the select object.
+     * Locations have no visibility of their own — a location is public only if
+     * its item is public. Joining the items table here means every query on
+     * this table automatically excludes locations for private items.
      *
      * @return Omeka_Db_Select
      */

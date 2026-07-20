@@ -10,28 +10,28 @@ $locations = [];
 foreach ($attachments as $attachment):
     $item = $attachment->getItem();
     $file = $attachment->getFile();
-    $location = $locationTable->findLocationByItem($item, true);
-    if ($location):
-        $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
+    $title = metadata($item, 'display_title', ['no_escape' => true]);
+    $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
 
-        // Manually print just the caption as body when there's no file to avoid
-        // double-printing the title link.
-        if ($file):
-            $body = $this->exhibitAttachment($attachment, [], [], true);
-        else:
-            $body = $this->exhibitAttachmentCaption($attachment);
-        endif;
+    if ($file):
+        $body = $this->exhibitAttachment($attachment, [], [], true);
+    else:
+        $body = $this->exhibitAttachmentCaption($attachment);
+    endif;
 
-        $html = '<div class="geolocation_balloon">'
-              . '<div class="geolocation_balloon_title">' . $titleLink . '</div>'
+    $itemLocations = $locationTable->findBy(['item_id' => $item->id]);
+    foreach ($itemLocations as $location):
+        $headerText = $location->label ? html_escape($location->label) : html_escape($title);
+        $html = '<div class="geolocation-popup">'
+              . '<div class="geolocation-popup-header">' . $headerText . '</div>'
               . $body
+              . '<div class="geolocation-popup-title">' . $titleLink . '</div>'
               . '</div>';
         $locations[] = [
-            'lat' => $location->latitude,
-            'lng' => $location->longitude,
+            'geometry_json' => $location->geometry_json,
             'html' => $html,
         ];
-    endif;
+    endforeach;
 endforeach;
 ?>
 <script type="text/javascript">
@@ -44,13 +44,9 @@ jQuery(window).on('load', function () {
     var map_locations = <?php echo json_encode($locations); ?>;
     for (var i = 0; i < map_locations.length; i++) {
         var locationData = map_locations[i];
-        geolocation_map.addMarker(
-            [locationData.lat, locationData.lng],
-            {},
-            locationData.html
-        );
+        geolocation_map.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html);
     }
-    geolocation_map.fitMarkers();
+    geolocation_map.fitLocations();
 });
 </script>
 <div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"></div>

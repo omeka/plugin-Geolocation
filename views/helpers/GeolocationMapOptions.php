@@ -31,6 +31,15 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
         }
         $options['custom_map'] = $customMap;
 
+        $options['strings'] = [
+            'fitAllLocations'     => __('Fit all locations'),
+            'label'               => __('Label'),
+            'editLocations'       => __('Edit locations'),
+            'noLocationsToEdit'   => __('No locations to edit'),
+            'deleteLocations'     => __('Delete locations'),
+            'noLocationsToDelete' => __('No locations to delete'),
+        ];
+
         return js_escape($options);
     }
 

@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
         const featureGroup = L.featureGroup();
 
         // Get the locations data and add the locations to the map.
+        let lastGeometry = null;
         locationsData.forEach((locationData) => {
             const popupDiv = document.createElement('div');
             const popupHeading = document.createElement('h2');
@@ -27,14 +28,14 @@ document.addEventListener('DOMContentLoaded', function(event) {
                 popupDiv.appendChild(popupImg);
             }
 
-            const marker = L.marker([locationData.latitude, locationData.longitude]);
-            marker.bindPopup(popupDiv);
-            marker.addTo(featureGroup);
+            lastGeometry = JSON.parse(locationData.geometry_json);
+            const layer = L.geoJSON(lastGeometry);
+            layer.bindPopup(popupDiv);
+            layer.addTo(featureGroup);
         });
 
         map.fitBounds(featureGroup.getBounds());
-        if (locationsData.length === 1) {
-            // Set the zoom level if there is only one location.
+        if (locationsData.length === 1 && lastGeometry.type === 'Point') {
             map.setZoom(locationsData[0].zoomLevel ?? 15);
         }
 

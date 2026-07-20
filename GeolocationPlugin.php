@@ -34,8 +34,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     protected $_filters = [
         'admin_navigation_main',
         'public_navigation_main',
-        'response_contexts',
-        'action_contexts',
         'admin_items_form_tabs',
         'public_navigation_items',
         'api_resources',
@@ -58,8 +56,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         `latitude` DOUBLE NOT NULL ,
         `longitude` DOUBLE NOT NULL ,
         `zoom_level` INT NOT NULL ,
-        `map_type` VARCHAR( 255 ) NOT NULL ,
         `address` TEXT NOT NULL ,
+        `label` VARCHAR( 255 ) NOT NULL DEFAULT '' ,
+        `geometry_json` TEXT NOT NULL ,
         INDEX (`item_id`)) ENGINE = InnoDB";
         $db->query($sql);
 
@@ -73,6 +72,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
         set_option('geolocation_geocoder', self::DEFAULT_GEOCODER);
         set_option('geolocation_item_map_enable', '1');
+        set_option('geolocation_auto_fit_browse', '1');
     }
 
     public function hookUninstall()
@@ -163,6 +163,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 set_option('geolocation_basemap', $stamenBasemaps[$currentBasemap]);
             }
         }
+        if (version_compare($args['old_version'], '4.0', '<')) {
+            $db = get_db();
+            // Three steps: add nullable, back-fill from existing lat/lng,
+            // then tighten to NOT NULL. MySQL rejects adding a NOT NULL
+            // column to a non-empty table without a default, and a
+            // placeholder default would corrupt the existing coordinate data.
+            $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`, DROP COLUMN `map_type`, ADD COLUMN `geometry_json` TEXT NULL");
+            $db->query("UPDATE `$db->Location` SET `geometry_json` = CONCAT('{\"type\":\"Point\",\"coordinates\":[', `longitude`, ',', `latitude`, ']}')");
+            $db->query("ALTER TABLE `$db->Location` MODIFY COLUMN `geometry_json` TEXT NOT NULL");
+        }
     }
 
     /**
@@ -244,15 +254,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         ]);
         $router->addRoute('items_map', $mapRoute);
 
-        // Trying to make the route look like a KML file so google will eat it.
-        // @todo Include page parameter if this works.
-        $kmlRoute = new Zend_Controller_Router_Route_Regex('geolocation/map\.kml', [
-            'controller' => 'map',
-            'action' => 'browse',
-            'module' => 'geolocation',
-            'output' => 'kml',
-        ]);
-        $router->addRoute('map_kml', $kmlRoute);
     }
 
     public function hookAdminHead($args)
@@ -267,17 +268,20 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     private function _head()
     {
-        $pluginLoader = Zend_Registry::get('plugin_loader');
-        $geolocation = $pluginLoader->getPlugin('Geolocation');
-        $version = $geolocation->getIniVersion();
+        $version = Zend_Registry::get('plugin_loader')->getPlugin('Geolocation')->getIniVersion();
         queue_css_file('leaflet/leaflet', null, null, 'javascripts', $version);
-        queue_css_file('geolocation-marker', null, null, 'css', $version);
-        queue_js_file(['leaflet/leaflet', 'leaflet/leaflet-providers', 'map'], 'javascripts', [], $version);
+        queue_css_file('leaflet-draw/leaflet.draw', null, null, 'javascripts', $version);
+        queue_css_file('geolocation-map', null, null, 'css', $version);
 
+        // Marker clustering is optional, so its assets load only when enabled.
+        // leaflet-deflate always loads because every map initializes it.
+        $jsFiles = ['leaflet/leaflet', 'leaflet/leaflet-providers', 'leaflet-draw/leaflet.draw', 'leaflet-deflate/L.Deflate'];
         if (get_option('geolocation_cluster')) {
             queue_css_file(['MarkerCluster', 'MarkerCluster.Default'], null, null, 'javascripts/leaflet-markercluster', $version);
-            queue_js_file('leaflet-markercluster/leaflet.markercluster', 'javascripts', [], $version);
+            $jsFiles[] = 'leaflet-markercluster/leaflet.markercluster';
         }
+        $jsFiles[] = 'map';
+        queue_js_file($jsFiles, 'javascripts', [], $version);
     }
 
     public function hookAfterSaveItem($args)
@@ -287,32 +291,42 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
 
         $item = $args['record'];
-        // If we don't have the geolocation form on the page, don't do anything!
-        if (!isset($post['geolocation'])) {
+        // geolocation_form_shown is a sentinel set by input-partial.php. Its
+        // presence means the map form was rendered, so an empty geolocation_locations
+        // value means all locations were deleted, not that the form was absent.
+        if (!isset($post['geolocation_form_shown'])) {
             return;
         }
 
-        // Find the location object for the item
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        // Build an index of existing locations. As POST entries are matched to existing
+        // records, they are removed from $remaining. Whatever is left at the end was
+        // not in the POST and gets deleted.
+        $remaining = [];
+        foreach ($this->_db->getTable('Location')->findBy(['item_id' => $item->id]) as $loc) {
+            $remaining[$loc->id] = $loc;
+        }
 
-        // If we have filled out info for the geolocation, then submit to the db
-        $geolocationPost = $post['geolocation'];
-        if (!empty($geolocationPost)
-            && $geolocationPost['latitude'] != ''
-            && $geolocationPost['longitude'] != ''
-        ) {
-            if (!$location) {
+        foreach (json_decode($post['geolocation_locations'] ?? '[]', true) as $entry) {
+            if (empty($entry['geometry_json'])) {
+                continue;
+            }
+            $id = !empty($entry['id']) ? (int) $entry['id'] : null;
+            if ($id && isset($remaining[$id])) {
+                $location = $remaining[$id];
+                unset($remaining[$id]);
+            } else {
                 $location = new Location;
                 $location->item_id = $item->id;
             }
-            $location->setPostData($geolocationPost);
+            // Exclude 'id' so a crafted POST cannot cause setPostData to set
+            // the id on a new record, which would trigger an UPDATE on a row
+            // belonging to a different item.
+            $location->setPostData(array_diff_key($entry, ['id' => null]));
             $location->save();
-        } else {
-            // If the form is empty, then we want to delete whatever location is
-            // currently stored
-            if ($location) {
-                $location->delete();
-            }
+        }
+
+        foreach ($remaining as $loc) {
+            $loc->delete();
         }
     }
 
@@ -320,9 +334,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         $view = $args['view'];
         $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        $locations = $this->_db->getTable('Location')->findBy(['item_id' => $item->id]);
 
-        if ($location) {
+        if ($locations) {
             $html = ''
                   . '<div class="geolocation panel">'
                   . '<h4>' . __('Geolocation') . '</h4>'
@@ -341,9 +355,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
         $view = $args['view'];
         $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        $locations = $this->_db->getTable('Location')->findBy(['item_id' => $item->id]);
 
-        if ($location) {
+        if ($locations) {
             $width = $this->_filterCssLength(get_option('geolocation_item_map_width'), '100%');
             $height = $this->_filterCssLength(get_option('geolocation_item_map_height'), '300px');
             $html = "<div id='geolocation'>";
@@ -518,22 +532,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         return $navArray;
     }
 
-    public function filterResponseContexts($contexts)
-    {
-        $contexts['kml'] = ['suffix' => 'kml',
-            'headers' => ['Content-Type' => 'text/xml']];
-        return $contexts;
-    }
-
-    public function filterActionContexts($contexts, $args)
-    {
-        $controller = $args['controller'];
-        if ($controller instanceof Geolocation_MapController) {
-            $contexts['browse'] = ['kml'];
-        }
-        return $contexts;
-    }
-
     public function filterAdminItemsFormTabs($tabs, $args)
     {
         // insert the map tab before the Miscellaneous tab
@@ -563,8 +561,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function filterApiResources($apiResources)
     {
         $apiResources['geolocations'] = [
-            'record_type' => 'Location',
-            'actions' => ['get', 'index', 'post', 'put', 'delete'],
+            'record_type'  => 'Location',
+            'actions'      => ['get', 'index', 'post', 'put', 'delete'],
+            // Whitelist item_id as an allowed GET param on the index action;
+            // without this the API router rejects ?item_id=X requests.
+            'index_params' => ['item_id'],
         ];
         return $apiResources;
     }
@@ -579,14 +580,15 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function filterApiExtendItems($extend, $args)
     {
         $item = $args['record'];
-        $location = $this->_db->getTable('Location')->findBy(['item_id' => $item->id]);
-        if (!$location) {
+        $locations = $this->_db->getTable('Location')->findBy(['item_id' => $item->id]);
+        if (!$locations) {
             return $extend;
         }
-        $locationId = $location[0]['id'];
+        // count+url is the Omeka API format for multi-resource references;
+        // ApiController validates this shape and rejects plain arrays of objects.
         $extend['geolocations'] = [
-            'id' => $locationId,
-            'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId"),
+            'count'    => count($locations),
+            'url'      => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl('/geolocations') . '?item_id=' . $item->id,
             'resource' => 'geolocations',
         ];
         return $extend;
@@ -602,7 +604,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         if (get_option('geolocation_add_map_to_contribution_form')) {
             $contributionType = $args['type'];
             $view = $args['view'];
-            echo $this->_mapForm(null, __('Find A Geographic Location For The %s:', $contributionType->display_name), false, $view, null);
+            echo $this->_mapForm(null, __('Find A Geographic Location For The %s:', $contributionType->display_name), $view);
         }
     }
 
@@ -658,9 +660,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $options = [];
 
         if (isset($args['fit'])) {
-            $options['fitMarkers'] = $booleanFilter->filter($args['fit']);
+            $options['fitLocations'] = $booleanFilter->filter($args['fit']);
         } else {
-            $options['fitMarkers'] = '1';
+            $options['fitLocations'] = '1';
         }
 
         if (isset($args['type'])) {
@@ -692,87 +694,75 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      * @param Item $item
      * @param string $label if empty string, a default string will be used. Set
      * null if you don't want a label.
-     * @param boolean $confirmLocationChange
      * @param Omeka_View $view
-     * @param array $post
      * @return string Html string.
      */
-    protected function _mapForm($item, $label = '', $confirmLocationChange = true, $view = null, $post = null)
+    protected function _mapForm($item, $label = '', $view = null)
     {
-        $html = '';
-
         if (is_null($view)) {
             $view = get_view();
         }
 
-        // Need to be translated.
         if ($label == '') {
             $label = __('Find a Location by Address:');
         }
-        $center = $this->_getCenter();
-        $center['show'] = false;
 
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
-
-        if (is_null($post)) {
-            $post = $_POST;
-        }
-
-        $usePost = !empty($post)
-                    && !empty($post['geolocation'])
-                    && $post['geolocation']['longitude'] != ''
-                    && $post['geolocation']['latitude'] != '';
-        if ($usePost) {
-            $lng = empty($post['geolocation']['longitude']) ? '' : (float) $post['geolocation']['longitude'];
-            $lat = empty($post['geolocation']['latitude']) ? '' : (float) $post['geolocation']['latitude'];
-            $zoom = empty($post['geolocation']['zoom_level']) ? '' : (int) $post['geolocation']['zoom_level'];
-            $address = html_escape($post['geolocation']['address']);
-        } else {
-            if ($location) {
-                $lng = (float) $location['longitude'];
-                $lat = (float) $location['latitude'];
-                $zoom = (int) $location['zoom_level'];
-                $address = html_escape($location['address']);
-            } else {
-                $lng = $lat = $zoom = $address = '';
+        // If the form was previously submitted (e.g. save failed validation),
+        // re-populate from POST so unsaved changes are not lost.
+        $existingLocations = [];
+        if (isset($_POST['geolocation_form_shown'])) {
+            foreach (json_decode($_POST['geolocation_locations'] ?? '[]', true) as $entry) {
+                if (empty($entry['geometry_json'])) {
+                    continue;
+                }
+                $existingLocations[] = [
+                    'id'          => !empty($entry['id']) ? (int) $entry['id'] : null,
+                    'latitude'    => (float) ($entry['latitude'] ?? 0),
+                    'longitude'   => (float) ($entry['longitude'] ?? 0),
+                    'zoom_level'  => (int) ($entry['zoom_level'] ?? 0),
+                    'address'     => $entry['address'] ?? '',
+                    'label'       => $entry['label'] ?? '',
+                    'geometry_json' => $entry['geometry_json'],
+                ];
+            }
+        } elseif ($item && $item->id) {
+            foreach ($this->_db->getTable('Location')->findBy(['item_id' => $item->id]) as $loc) {
+                $existingLocations[] = [
+                    'id'          => $loc->id,
+                    'latitude'    => $loc->latitude,
+                    'longitude'   => $loc->longitude,
+                    'zoom_level'  => $loc->zoom_level,
+                    'address'     => $loc->address,
+                    'label'       => $loc->label,
+                    'geometry_json' => $loc->geometry_json,
+                ];
             }
         }
 
-        // Prepare javascript.
-        $options = [];
-        $options['form'] = [
-            'id' => 'location_form',
-            'posted' => $usePost,
+        // For no-location items this sets the default center.
+        // For single-location items this sets the initial zoom correctly.
+        // For multi-location items fitBounds overrides the center on tab select.
+        $center = [
+            'latitude'  => (float) get_option('geolocation_default_latitude'),
+            'longitude' => (float) get_option('geolocation_default_longitude'),
+            'zoomLevel' => (float) get_option('geolocation_default_zoom_level'),
         ];
-        if ($location or $usePost) {
-            $options['point'] = [
-                'latitude' => $lat,
-                'longitude' => $lng,
-                'zoomLevel' => $zoom,
-            ];
-            $center = $options['point'];
+        if ($existingLocations) {
+            $center['latitude'] = $existingLocations[0]['latitude'];
+            $center['longitude'] = $existingLocations[0]['longitude'];
+            $center['zoomLevel'] = $existingLocations[0]['zoom_level'];
         }
-        $options['confirmLocationChange'] = $confirmLocationChange;
+
+        $options = [];
+        $options['form'] = ['id' => 'location_form'];
         $options['cluster'] = false;
 
         return $view->partial('map/input-partial.php', [
             'label' => $label,
-            'address' => $address,
             'center' => $center,
             'options' => $options,
-            'lng' => $lng,
-            'lat' => $lat,
-            'zoom' => $zoom,
+            'existingLocations' => $existingLocations,
         ]);
-    }
-
-    protected function _getCenter()
-    {
-        return [
-            'latitude' => (float) get_option('geolocation_default_latitude'),
-            'longitude' => (float) get_option('geolocation_default_longitude'),
-            'zoomLevel' => (float) get_option('geolocation_default_zoom_level'),
-        ];
     }
 
     protected function _filterCssLength($length, $default)
@@ -827,7 +817,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         // @see GeolocationPlugin::geolocationShortcode()
         $callbacks['geolocation'] = function ($args, $frontMatter, $job) {
             $frontMatter['css'][] = 'vendor/leaflet/leaflet.css';
-            $frontMatter['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+            $frontMatter['css'][] = 'vendor/omeka-geolocation/geolocation-map.css';
             $frontMatter['js'][] = 'vendor/jquery/jquery.js';
             $frontMatter['js'][] = 'vendor/leaflet/leaflet.js';
             $frontMatter['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
@@ -849,7 +839,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'title' => __('Map'),
             'css' => [
                 'vendor/leaflet/leaflet.css',
-                'vendor/omeka-geolocation/geolocation-marker.css',
+                'vendor/omeka-geolocation/geolocation-map.css',
             ],
             'js' => [
                 'vendor/jquery/jquery.js',
@@ -872,17 +862,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $locations = [];
         foreach ($locationRows as $locationRow) {
             $item = get_db()->getTable('Item')->find($locationRow->item_id);
-            $locations[] = [
-                'latitude' => $locationRow->latitude,
-                'longitude' => $locationRow->longitude,
-                'zoomLevel' => $locationRow->zoom_level,
-                'mapType' => $locationRow->map_type,
-                'address' => $locationRow->address,
-                'itemID' => $item->id,
-                'itemTitle' => $item->getDisplayTitle(),
-                'fileID' => $item->getFile() ? $item->getFile()->id : null,
-                'hasThumbnail' => $item->hasThumbnail(),
-            ];
+            $locations[] = $this->_locationToStaticSiteExportArray($locationRow, $item);
         }
         $job->makeFile('content/geolocation/geolocation_locations.json', json_encode($locations));
     }
@@ -897,29 +877,22 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $frontMatterPage = $args['front_matter_page'];
         $blocks = $args['blocks'];
 
-        $location = get_db()->getTable('Location')->findLocationByItem($item, true);
-        if (!$location) {
+        $itemLocations = get_db()->getTable('Location')->findBy(['item_id' => $item->id]);
+        if (!$itemLocations) {
             return;
         }
 
         $frontMatterPage['css'][] = 'vendor/leaflet/leaflet.css';
-        $frontMatterPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterPage['css'][] = 'vendor/omeka-geolocation/geolocation-map.css';
         $frontMatterPage['js'][] = 'vendor/jquery/jquery.js';
         $frontMatterPage['js'][] = 'vendor/leaflet/leaflet.js';
         $frontMatterPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
 
         // Make the locations file.
-        $locations = [[
-            'latitude' => $location->latitude,
-            'longitude' => $location->longitude,
-            'zoomLevel' => $location->zoom_level,
-            'mapType' => $location->map_type,
-            'address' => $location->address,
-            'itemID' => $item->id,
-            'itemTitle' => $item->getDisplayTitle(),
-            'fileID' => $item->getFile() ? $item->getFile()->id : null,
-            'hasThumbnail' => $item->hasThumbnail(),
-        ]];
+        $locations = [];
+        foreach ($itemLocations as $location) {
+            $locations[] = $this->_locationToStaticSiteExportArray($location, $item);
+        }
         $job->makeFile(
             sprintf('content/items/%s/geolocation_locations.json', $item->id),
             json_encode($locations)
@@ -957,7 +930,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $attachments = $exhibitPageBlock->getAttachments();
 
         $frontMatterExhibitPage['css'][] = 'vendor/leaflet/leaflet.css';
-        $frontMatterExhibitPage['css'][] = 'vendor/omeka-geolocation/geolocation-marker.css';
+        $frontMatterExhibitPage['css'][] = 'vendor/omeka-geolocation/geolocation-map.css';
         $frontMatterExhibitPage['js'][] = 'vendor/jquery/jquery.js';
         $frontMatterExhibitPage['js'][] = 'vendor/leaflet/leaflet.js';
         $frontMatterExhibitPage['js'][] = 'vendor/omeka-geolocation/geolocation-locations.js';
@@ -965,21 +938,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $locations = [];
         foreach ($attachments as $attachment) {
             $item = $attachment->getItem();
-            $location = get_db()->getTable('Location')->findLocationByItem($item, true);
-            if (!$location) {
-                continue;
+            $itemLocations = get_db()->getTable('Location')->findBy(['item_id' => $item->id]);
+            foreach ($itemLocations as $location) {
+                $locations[] = $this->_locationToStaticSiteExportArray($location, $item);
             }
-            $locations[] = [
-                'latitude' => $location->latitude,
-                'longitude' => $location->longitude,
-                'zoomLevel' => $location->zoom_level,
-                'mapType' => $location->map_type,
-                'address' => $location->address,
-                'itemID' => $item->id,
-                'itemTitle' => $item->getDisplayTitle(),
-                'fileID' => $item->getFile() ? $item->getFile()->id : null,
-                'hasThumbnail' => $item->hasThumbnail(),
-            ];
         }
         $job->makeFile(
             sprintf('content/exhibits/%s/%s/geolocation_locations.json', $exhibit->slug, $exhibitPage->slug),
@@ -991,5 +953,22 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $exhibit->slug,
             $exhibitPage->slug
         );
+    }
+
+    private function _locationToStaticSiteExportArray(Location $location, Item $item)
+    {
+        $file = $item->getFile();
+        return [
+            'geometry_json' => $location->geometry_json,
+            'latitude'     => $location->latitude,
+            'longitude'    => $location->longitude,
+            'zoomLevel'    => $location->zoom_level,
+            'address'      => $location->address,
+            'label'        => $location->label,
+            'itemID'       => $item->id,
+            'itemTitle'    => $item->getDisplayTitle(),
+            'fileID'       => $file ? $file->id : null,
+            'hasThumbnail' => $item->hasThumbnail(),
+        ];
     }
 }

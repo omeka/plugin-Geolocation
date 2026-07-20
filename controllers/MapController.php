@@ -9,30 +9,34 @@ class Geolocation_MapController extends Omeka_Controller_AbstractActionControlle
 
     public function browseAction()
     {
-        $table = $this->_helper->db->getTable();
-        $locationTable = $this->_helper->db->getTable('Location');
+        [$params, $limit, $currentPage] = $this->_getBrowseParams();
 
+        $this->view->totalItems = $this->_helper->db->getTable()->count($params);
+        $this->view->params = $params;
+
+        Zend_Registry::set('pagination', [
+            'page' => $currentPage,
+            'per_page' => $limit,
+            'total_results' => $this->view->totalItems,
+        ]);
+    }
+
+    public function browseJsonAction()
+    {
+        [$params, $limit, $currentPage] = $this->_getBrowseParams();
+
+        $items = $this->_helper->db->getTable()->findBy($params, $limit, $currentPage);
+        $this->view->items = $items;
+        $this->view->locations = $this->_helper->db->getTable('Location')->findLocationsByItem($items);
+        $this->getResponse()->setHeader('Content-Type', 'application/json');
+    }
+
+    private function _getBrowseParams()
+    {
         $params = $this->getAllParams();
         $params['geolocation-mapped'] = true;
         $limit = (int) get_option('geolocation_per_page');
         $currentPage = $this->getParam('page', 1);
-
-        // Only get pagination data for the "normal" page, only get
-        // item/location data for the KML output.
-        if ($this->_helper->contextSwitch->getCurrentContext() == 'kml') {
-            $items = $table->findBy($params, $limit, $currentPage);
-            $this->view->items = $items;
-            $this->view->locations = $locationTable->findLocationByItem($items);
-        } else {
-            $this->view->totalItems = $table->count($params);
-            $this->view->params = $params;
-
-            $pagination = [
-                'page' => $currentPage,
-                'per_page' => $limit,
-                'total_results' => $this->view->totalItems,
-            ];
-            Zend_Registry::set('pagination', $pagination);
-        }
+        return [$params, $limit, $currentPage];
     }
 }
