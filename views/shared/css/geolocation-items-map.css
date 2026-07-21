@@ -70,9 +70,15 @@ div.map-notification {
         overflow: hidden;
     }
 
-    #map_browse { 
+    #map_browse {
         float:left;
         width:70%;
         margin-bottom: 0 !important;
+    }
+
+    /* With the sidebar list hidden, the map fills the row. */
+    #geolocation-browse.no-list #map_browse {
+        width: 100%;
+        float: none;
     }
 }

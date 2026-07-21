@@ -73,6 +73,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_geocoder', self::DEFAULT_GEOCODER);
         set_option('geolocation_item_map_enable', '1');
         set_option('geolocation_auto_fit_browse', '1');
+        set_option('geolocation_show_browse_list', '1');
     }
 
     public function hookUninstall()
@@ -89,6 +90,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_basemap');
         delete_option('geolocation_geocoder');
         delete_option('geolocation_auto_fit_browse');
+        delete_option('geolocation_show_browse_list');
         delete_option('geolocation_mapbox_access_token');
         delete_option('geolocation_mapbox_map_id');
         delete_option('geolocation_cluster');
@@ -172,6 +174,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $db->query("ALTER TABLE `$db->Location` ADD COLUMN `label` VARCHAR(255) NOT NULL DEFAULT '' AFTER `address`, DROP COLUMN `map_type`, ADD COLUMN `geometry_json` TEXT NULL");
             $db->query("UPDATE `$db->Location` SET `geometry_json` = CONCAT('{\"type\":\"Point\",\"coordinates\":[', `longitude`, ',', `latitude`, ']}')");
             $db->query("ALTER TABLE `$db->Location` MODIFY COLUMN `geometry_json` TEXT NOT NULL");
+            set_option('geolocation_show_browse_list', '1');
         }
     }
 
@@ -221,6 +224,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']);
         set_option('geolocation_basemap', $_POST['basemap']);
         set_option('geolocation_auto_fit_browse', $_POST['auto_fit_browse']);
+        set_option('geolocation_show_browse_list', $_POST['geolocation_show_browse_list']);
         set_option('geolocation_mapbox_access_token', $_POST['mapbox_access_token']);
         set_option('geolocation_mapbox_map_id', $_POST['mapbox_map_id']);
         set_option('geolocation_cluster', $_POST['cluster']);

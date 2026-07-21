@@ -265,6 +265,15 @@
         <?php echo $view->formCheckbox('cluster', true, ['checked' => (bool) get_option('geolocation_cluster')]); ?>
     </div>
 </div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_show_browse_list"><?php echo __('Show item list on browse map'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Show a list of items beside the browse map. When off, the map fills the width.'); ?></p>
+        <?php echo $view->formCheckbox('geolocation_show_browse_list', true, ['checked' => (bool) get_option('geolocation_show_browse_list')]); ?>
+    </div>
+</div>
 </fieldset>
 
 <fieldset>

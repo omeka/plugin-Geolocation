@@ -16,9 +16,18 @@ echo item_search_filters();
 echo pagination_links();
 ?>
 
-<div id="geolocation-browse">
-    <?php echo $this->geolocationMapBrowse('map_browse', ['list' => 'map-links', 'params' => $params]); ?>
-    <div id="map-links"><h2><?php echo __('Find An Item on the Map'); ?></h2></div>
+<?php $showBrowseList = (bool) get_option('geolocation_show_browse_list'); ?>
+<div id="geolocation-browse"<?php echo $showBrowseList ? '' : ' class="no-list"'; ?>>
+    <?php
+    $mapOptions = ['params' => $params];
+    if ($showBrowseList) {
+        $mapOptions['list'] = 'map-links';
+    }
+    echo $this->geolocationMapBrowse('map_browse', $mapOptions);
+    ?>
+    <?php if ($showBrowseList): ?>
+    <div id="map-links"><h2><?php echo __('Items'); ?></h2></div>
+    <?php endif; ?>
     <div id="geolocation-sr-alerts" class="sr-only" aria-live="polite" aria-atomic="true" data-lat-string="<?php echo __('Latitude'); ?>" data-long-string="<?php echo __('Longitude'); ?>" data-opened-string="<?php echo __('Opened.'); ?>" data-closed-string="<?php echo __('Closed.'); ?>"></div>
 </div>
 
