@@ -214,8 +214,10 @@ OmekaMapBrowse.prototype = {
     buildLayerFromLocation: function (locationData) {
         var geometry = JSON.parse(locationData.geometry_json);
         var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
-        // _geolocationTitle is the label this location shows in the sidebar list.
+        // _geolocationTitle labels the location in the sidebar list; _geolocationItemId
+        // groups a multi-location item's layers into a single list entry.
         layer._geolocationTitle = locationData.title || '';
+        layer._geolocationItemId = locationData.itemId;
     },
 
     buildLocationContent: function (locationData) {
@@ -240,29 +242,55 @@ OmekaMapBrowse.prototype = {
         var list = jQuery('<ul></ul>');
         list.appendTo(container);
 
-        // this.locations holds points and shapes in load order, so the list
-        // interleaves them as they were added rather than grouping by type.
+        // Group locations by item (preserving first-appearance order) so the list
+        // shows one entry per item rather than one per location.
+        var items = [];
+        var itemsById = {};
         jQuery.each(this.locations, function (index, layer) {
-            that._buildListItem(list, layer._geolocationTitle, function () {
-                if (layer instanceof L.Marker) {
-                    if (that.clusterGroup) {
-                        that.clusterGroup.zoomToShowLayer(layer, function () {
-                            layer.fire('click');
-                        });
-                    } else {
-                        that.map.once('moveend', function () {
-                            layer.fire('click');
-                        });
-                        that.map.flyTo(layer.getLatLng());
-                    }
-                } else {
-                    that.map.once('moveend', function () {
-                        layer.openPopup();
-                    });
-                    that.map.fitBounds(layer.getBounds());
-                }
-            });
+            var itemId = layer._geolocationItemId;
+            if (!itemsById[itemId]) {
+                itemsById[itemId] = {title: layer._geolocationTitle, layers: []};
+                items.push(itemsById[itemId]);
+            }
+            itemsById[itemId].layers.push(layer);
         });
+
+        jQuery.each(items, function (index, item) {
+            var onClick;
+            if (item.layers.length > 1) {
+                // Multiple locations: frame them all; no single obvious popup to open.
+                var bounds = L.latLngBounds();
+                jQuery.each(item.layers, function (i, layer) {
+                    bounds.extend(that._layerExtent(layer));
+                });
+                onClick = function () { that.map.fitBounds(bounds); };
+            } else {
+                var layer = item.layers[0];
+                onClick = function () { that._focusLayer(layer); };
+            }
+            that._buildListItem(list, item.title, onClick);
+        });
+    },
+
+    // A layer's spatial extent for bounds math: a marker's position or a shape's box.
+    _layerExtent: function (layer) {
+        return layer instanceof L.Marker ? layer.getLatLng() : layer.getBounds();
+    },
+
+    // Frame a single location and open its popup.
+    _focusLayer: function (layer) {
+        var openPopup = function () { layer.openPopup(); };
+        if (layer instanceof L.Marker) {
+            if (this.clusterGroup) {
+                this.clusterGroup.zoomToShowLayer(layer, openPopup);
+            } else {
+                this.map.once('moveend', openPopup);
+                this.map.flyTo(layer.getLatLng());
+            }
+        } else {
+            this.map.once('moveend', openPopup);
+            this.map.fitBounds(layer.getBounds());
+        }
     },
 
     _buildListItem: function (list, title, onClick) {
