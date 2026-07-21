@@ -13,18 +13,19 @@
 }
 
 #map-links ul {
-    margin-left:0;
+    margin: 0;
     padding: 0;
 }
 
 #map-links li {
-    overflow:hidden; 
+    overflow:hidden;
     width: 100% !important;
     display: inline-block;
     border-radius: 3px;
-    padding: 5px;
+    padding: 2px 5px;
     box-sizing: border-box;
-    margin-bottom: 10px;
+    margin-bottom: 2px;
+    line-height: 1.4;
 }
     
 #map-links {
@@ -33,8 +34,33 @@
 
 #map-links li a {
     display:block;
-    text-decoration:none; 
+    text-decoration:none;
     border-bottom: 0 !important;
+}
+
+/* Item lines are bold — a group header (label) or a single unlabeled item (link) —
+   to stand out from the location sub-entries beneath a header. */
+#map-links > ul > li > a,
+#map-links .item-group {
+    font-weight: bold;
+}
+
+/* The group header is a plain label, not a link. */
+#map-links .item-group {
+    display: block;
+}
+
+/* A multi-location item's locations sit as a tight, indented nested list. */
+#map-links li ul {
+    margin: 2px 0 0 18px;
+    padding: 0;
+}
+
+/* The location currently focused on the map. A translucent tint plus a solid
+   accent bar (Leaflet's marker blue) so it reads on any theme, light or dark. */
+#map-links li.current {
+    background-color: rgba(51, 136, 204, 0.15);
+    box-shadow: inset 3px 0 0 #3388cc;
 }
 
 #map-links h2:first-child {

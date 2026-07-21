@@ -26,7 +26,7 @@ echo pagination_links();
     echo $this->geolocationMapBrowse('map_browse', $mapOptions);
     ?>
     <?php if ($showBrowseList): ?>
-    <div id="map-links"><h2><?php echo __('Items'); ?></h2></div>
+    <div id="map-links" data-location-string="<?php echo __('Location'); ?>"><h2><?php echo __('Items'); ?></h2></div>
     <?php endif; ?>
     <div id="geolocation-sr-alerts" class="sr-only" aria-live="polite" aria-atomic="true" data-lat-string="<?php echo __('Latitude'); ?>" data-long-string="<?php echo __('Longitude'); ?>" data-opened-string="<?php echo __('Opened.'); ?>" data-closed-string="<?php echo __('Closed.'); ?>"></div>
 </div>

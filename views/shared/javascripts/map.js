@@ -214,10 +214,12 @@ OmekaMapBrowse.prototype = {
     buildLayerFromLocation: function (locationData) {
         var geometry = JSON.parse(locationData.geometry_json);
         var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
-        // _geolocationTitle labels the location in the sidebar list; _geolocationItemId
-        // groups a multi-location item's layers into a single list entry.
+        // The sidebar list groups by _geolocationItemId; _geolocationTitle labels the
+        // item (its header or single entry) and _geolocationLabel labels each location
+        // sub-entry.
         layer._geolocationTitle = locationData.title || '';
         layer._geolocationItemId = locationData.itemId;
+        layer._geolocationLabel = locationData.label || '';
     },
 
     buildLocationContent: function (locationData) {
@@ -239,11 +241,14 @@ OmekaMapBrowse.prototype = {
 
     buildListLinks: function (container) {
         var that = this;
+        // Kept so a clicked entry can clear the "current" mark from every other
+        // entry, including those in nested sub-lists.
+        this._listContainer = container;
+        var locationString = container.data('locationString') || 'Location';
         var list = jQuery('<ul></ul>');
         list.appendTo(container);
 
-        // Group locations by item (preserving first-appearance order) so the list
-        // shows one entry per item rather than one per location.
+        // Group locations by item, preserving first-appearance (load) order.
         var items = [];
         var itemsById = {};
         jQuery.each(this.locations, function (index, layer) {
@@ -256,25 +261,23 @@ OmekaMapBrowse.prototype = {
         });
 
         jQuery.each(items, function (index, item) {
-            var onClick;
-            if (item.layers.length > 1) {
-                // Multiple locations: frame them all; no single obvious popup to open.
-                var bounds = L.latLngBounds();
-                jQuery.each(item.layers, function (i, layer) {
-                    bounds.extend(that._layerExtent(layer));
-                });
-                onClick = function () { that.map.fitBounds(bounds); };
-            } else {
-                var layer = item.layers[0];
-                onClick = function () { that._focusLayer(layer); };
+            // A single unlabeled location has nothing to distinguish, so show one
+            // clickable line (the item) rather than a redundant header + sub-entry.
+            if (item.layers.length === 1 && !item.layers[0]._geolocationLabel) {
+                var only = item.layers[0];
+                that._buildListItem(list, item.title, function () { that._focusLayer(only); });
+                return;
             }
-            that._buildListItem(list, item.title, onClick);
+            // Otherwise a non-clickable item header with its location(s) as clickable
+            // sub-entries: labels surface here, and multi-location fallbacks are numbered.
+            var header = jQuery('<li></li>').appendTo(list);
+            jQuery('<span></span>').addClass('item-group').text(item.title).appendTo(header);
+            var subList = jQuery('<ul></ul>').appendTo(header);
+            jQuery.each(item.layers, function (i, layer) {
+                var label = layer._geolocationLabel || (locationString + ' ' + (i + 1));
+                that._buildListItem(subList, label, function () { that._focusLayer(layer); });
+            });
         });
-    },
-
-    // A layer's spatial extent for bounds math: a marker's position or a shape's box.
-    _layerExtent: function (layer) {
-        return layer instanceof L.Marker ? layer.getLatLng() : layer.getBounds();
     },
 
     // Frame a single location and open its popup.
@@ -291,24 +294,42 @@ OmekaMapBrowse.prototype = {
                 openPopup();
             }
         } else {
-            // Deflate can hide a shape when it's small on screen, so fitBounds
-            // brings it into view before its popup will open.
+            // A shape may be collapsed (by deflate) until it's framed, so
+            // fitBounds brings it into view and the popup opens on 'moveend'.
+            // If it's already framed, fitBounds won't move the map and no
+            // 'moveend' fires, so detect that via 'movestart' (synchronous for
+            // a real move) and open now, clearing the pending handlers so
+            // neither can fire on a later move.
+            var moved = false;
+            var onMoveStart = function () { moved = true; };
+            this.map.once('movestart', onMoveStart);
             this.map.once('moveend', openPopup);
             this.map.fitBounds(layer.getBounds());
+            if (!moved) {
+                this.map.off('movestart', onMoveStart);
+                this.map.off('moveend', openPopup);
+                openPopup();
+            }
         }
     },
 
     _buildListItem: function (list, title, onClick) {
+        var that = this;
         var link = jQuery('<a></a>')
             .addClass('item-link')
             .attr('href', 'javascript:void(0);')
             .attr('role', 'button')
             .text(title);
+        var item = jQuery('<li></li>').append(link);
         link.bind('click', {}, function () {
-            link.toggleClass('current');
+            // Mark just this entry as current so the user can see which location
+            // they're viewing.
+            that._listContainer.find('.current').removeClass('current');
+            item.addClass('current');
             onClick();
         });
-        jQuery('<li></li>').append(link).appendTo(list);
+        item.appendTo(list);
+        return item;
     }
 };
 
