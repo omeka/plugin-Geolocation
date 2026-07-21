@@ -9,7 +9,7 @@
 }
 
 #map_browse {
-    height: 436px; 
+    height: 600px;
 }
 
 #map-links ul {
@@ -54,7 +54,7 @@ div.map-notification {
         padding: 0 10px 10px 10px;
         -moz-box-sizing: border-box !important;
         box-sizing: border-box !important;
-        height: 436px;
+        height: 600px;
         width: 30%;
         float: left;
         overflow-y: auto;

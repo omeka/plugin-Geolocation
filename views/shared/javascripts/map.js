@@ -282,12 +282,17 @@ OmekaMapBrowse.prototype = {
         var openPopup = function () { layer.openPopup(); };
         if (layer instanceof L.Marker) {
             if (this.clusterGroup) {
+                // A clustered marker may be hidden in a cluster. Expand it first,
+                // then open the popup from zoomToShowLayer's callback.
                 this.clusterGroup.zoomToShowLayer(layer, openPopup);
             } else {
-                this.map.once('moveend', openPopup);
-                this.map.flyTo(layer.getLatLng());
+                // openPopup() pans the popup into view by itself, so no separate
+                // map move is needed here.
+                openPopup();
             }
         } else {
+            // Deflate can hide a shape when it's small on screen, so fitBounds
+            // brings it into view before its popup will open.
             this.map.once('moveend', openPopup);
             this.map.fitBounds(layer.getBounds());
         }
