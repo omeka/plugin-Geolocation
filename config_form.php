@@ -240,7 +240,7 @@
 </div>
 <div class="field">
     <div class="two columns alpha">
-        <label for="per_page"><?php echo __('Default Radius'); ?></label>
+        <label for="geolocation_default_radius"><?php echo __('Default Radius'); ?></label>
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The size of the default radius to use on the items advanced search page. See below for whether to measure in miles or kilometers.'); ?></p>

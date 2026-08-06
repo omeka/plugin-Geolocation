@@ -19,11 +19,16 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
             'zoomLevel' => $locations[0]->zoom_level,
         ];
 
+        // Passed through as the marker's accessible-name fallback when a location
+        // has no label, so an unlabeled marker is never a nameless button.
+        $itemTitle = metadata($item, 'display_title', ['no_escape' => true]);
+
         $points = [];
         foreach ($locations as $loc) {
             $point = [
                 'geometry_json' => $loc->geometry_json,
                 'label'         => $loc->label,
+                'itemTitle'     => $itemTitle,
             ];
             if ($loc->label !== '') {
                 $point['popupHtml'] = '<div class="geolocation-popup">'

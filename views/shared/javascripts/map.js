@@ -60,6 +60,14 @@ OmekaMap.prototype = {
     },
 
     addLayerFromGeometry: function (geometry, options, bindHtml) {
+        options = options || {};
+        // Every marker needs an accessible name; fall back to a generic label so
+        // an unlabeled location is never announced as a nameless button.
+        var strings = this.options.strings || {};
+        var name = options.title || strings.unlabeledLocation || 'Map location';
+        options.title = name;
+        options.alt = name;
+
         var layer;
         if (geometry.type === 'Point') {
             layer = this.addMarker([geometry.coordinates[1], geometry.coordinates[0]], options, bindHtml);
@@ -68,21 +76,33 @@ OmekaMap.prototype = {
         }
         if (bindHtml) {
             var srAlertsDiv = jQuery('#geolocation-sr-alerts');
-            var title = options.title || '';
             var latlng = geometry.type === 'Point'
                 ? layer.getLatLng()
                 : layer.getBounds().getCenter();
-            var parts = [title, srAlertsDiv.data('latString'), latlng.lat,
+            var parts = [name, srAlertsDiv.data('latString'), latlng.lat,
                 srAlertsDiv.data('longString'), latlng.lng];
             var srOpenedText = parts.concat(srAlertsDiv.data('openedString')).join(' ');
             var srClosedText = parts.concat(srAlertsDiv.data('closedString')).join(' ');
             // Leaflet popup events give no screen reader feedback; announce the
             // layer title, coordinates, and open/close status.
-            layer.addEventListener('popupopen', function () {
+            layer.addEventListener('popupopen', function (event) {
                 srAlertsDiv.text(srOpenedText);
+                // Move focus into the popup so keyboard users land on the close
+                // control instead of the next feature.
+                var popupEl = event.popup.getElement();
+                var closeButton = popupEl && popupEl.querySelector('.leaflet-popup-close-button');
+                if (closeButton) {
+                    closeButton.focus();
+                }
             });
             layer.addEventListener('popupclose', function () {
                 srAlertsDiv.text(srClosedText);
+                // Return focus to the feature that opened the popup so keyboard
+                // focus isn't dropped to the top of the document.
+                var el = layer.getElement ? layer.getElement() : null;
+                if (el && el.focus) {
+                    el.focus();
+                }
             });
             // Popup dimensions are calculated before images load; update on
             // first open so the popup resizes correctly once the image loads.
@@ -212,6 +232,7 @@ OmekaMapBrowse.prototype = {
     },
 
     buildLayerFromLocation: function (locationData) {
+        var that = this;
         var geometry = JSON.parse(locationData.geometry_json);
         var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
         // The sidebar list groups by _geolocationItemId; _geolocationTitle labels the
@@ -220,6 +241,29 @@ OmekaMapBrowse.prototype = {
         layer._geolocationTitle = locationData.title || '';
         layer._geolocationItemId = locationData.itemId;
         layer._geolocationLabel = locationData.label || '';
+        // Reverse of the list→map link: when a feature's popup opens (e.g. from a
+        // map click), highlight its row in the sidebar list.
+        layer.on('popupopen', function () {
+            that._highlightListItem(layer);
+        });
+    },
+
+    // Mark a layer's sidebar row as current and scroll it into view. The row
+    // reference is set on the layer in buildListLinks.
+    _highlightListItem: function (layer) {
+        if (!this._listContainer) {
+            return;
+        }
+        this._listContainer.find('.current').removeClass('current');
+        var item = layer._geolocationListItem;
+        if (!item || !item.length) {
+            return;
+        }
+        item.addClass('current');
+        // Bring the row to the top of the list's own scroll box — not
+        // scrollIntoView, which would also scroll the page off the popup.
+        var box = this._listContainer[0];
+        box.scrollTop += item[0].getBoundingClientRect().top - box.getBoundingClientRect().top;
     },
 
     buildLocationContent: function (locationData) {
@@ -227,7 +271,7 @@ OmekaMapBrowse.prototype = {
         var headerText = locationData.label || locationData.title;
         popup.append(jQuery('<div class="geolocation-popup-header">').text(headerText));
         if (locationData.thumbnailUrl) {
-            var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: ''});
+            var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: locationData.title});
             var thumbLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).append(img);
             popup.append(jQuery('<div class="geolocation-popup-thumbnail">').append(thumbLink));
         }
@@ -265,7 +309,7 @@ OmekaMapBrowse.prototype = {
             // clickable line (the item) rather than a redundant header + sub-entry.
             if (item.layers.length === 1 && !item.layers[0]._geolocationLabel) {
                 var only = item.layers[0];
-                that._buildListItem(list, item.title, function () { that._focusLayer(only); });
+                only._geolocationListItem = that._buildListItem(list, item.title, function () { that._focusLayer(only); });
                 return;
             }
             // Otherwise a non-clickable item header with its location(s) as clickable
@@ -275,7 +319,7 @@ OmekaMapBrowse.prototype = {
             var subList = jQuery('<ul></ul>').appendTo(header);
             jQuery.each(item.layers, function (i, layer) {
                 var label = layer._geolocationLabel || (locationString + ' ' + (i + 1));
-                that._buildListItem(subList, label, function () { that._focusLayer(layer); });
+                layer._geolocationListItem = that._buildListItem(subList, label, function () { that._focusLayer(layer); });
             });
         });
     },
@@ -340,7 +384,9 @@ function OmekaMapSingle(mapDivId, center, options) {
     if (options.locations && options.locations.length) {
         for (var i = 0; i < options.locations.length; i++) {
             var pt = options.locations[i];
-            this.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: pt.label, alt: pt.label}, pt.popupHtml);
+            // Name fallback: location label, else the item title (addLayerFromGeometry
+            // applies the generic "Map location" fallback if both are empty).
+            this.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: pt.label || pt.itemTitle}, pt.popupHtml);
         }
         this.fitLocations();
     }

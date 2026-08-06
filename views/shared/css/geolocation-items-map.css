@@ -32,10 +32,30 @@
     padding: 10px 0 10px 0;
 }
 
+/* On mobile the list stacks above the map; cap it so a long list stays a
+   scrollable region instead of expanding the whole page. The
+   desktop layout (min-width:768px, below) sets its own height/overflow. */
+@media screen and (max-width: 767px) {
+    #map-links {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+}
+
 #map-links li a {
     display:block;
     text-decoration:none;
     border-bottom: 0 !important;
+}
+
+/* Keep the link's normal color on hover — a theme's lightened hover color can
+   fall below contrast. The sidebar sits on the theme's own
+   background, so rather than impose an absolute color we revert to the
+   inherited text color and use underline as the non-color hover affordance. */
+#map-links li a:hover,
+#map-links li a:focus {
+    color: inherit;
+    text-decoration: underline;
 }
 
 /* Item lines are bold — a group header (label) or a single unlabeled item (link) —

@@ -33,6 +33,7 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
 
         $options['strings'] = [
             'fitAllLocations'     => __('Fit all locations'),
+            'unlabeledLocation'   => __('Map location'),
             'label'               => __('Label'),
             'editLocations'       => __('Edit locations'),
             'noLocationsToEdit'   => __('No locations to edit'),

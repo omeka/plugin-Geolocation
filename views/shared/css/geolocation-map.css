@@ -77,5 +77,50 @@ img.leaflet-marker-icon,
 img.leaflet-marker-shadow {
     padding: 0 !important;
     border: 0 !important;
+    border-radius: 0 !important;
     background-color: transparent !important;
+}
+
+/* Plugin-owned map widgets: theme-independent defaults.
+   The plugin renders these, so it styles them rather than relying on theme
+   inheritance. Foreground colors use !important because themes commonly set
+   link/text color with ID-scoped rules (e.g. #content a) that class selectors
+   can't outweigh; no theme deliberately styles Leaflet internals, so this
+   overrides only leaked generic rules, not intentional theme styling. */
+
+/* Contribution/label popup input — stay usably wide on every theme. min-width
+   beats a theme's `width`, so no !important is needed here. */
+.geolocation-popup-label {
+    min-width: 12em;
+    box-sizing: border-box;
+}
+
+/* Popup title/thumbnail links — legible on the white popup background. */
+.geolocation-popup .view-item {
+    color: #0071a7 !important;
+}
+.geolocation-popup .view-item:hover,
+.geolocation-popup .view-item:focus {
+    color: #004d70 !important;
+}
+
+/* Leaflet nav/draw controls, the fit-all control (its SVG uses currentColor),
+   and the popup close button — dark foreground on Leaflet's white control
+   chrome so theme colors can't wash them out. */
+.leaflet-container .leaflet-bar a,
+.leaflet-container .leaflet-draw-toolbar a {
+    color: #333 !important;
+}
+.leaflet-container .leaflet-bar a:hover,
+.leaflet-container .leaflet-bar a:focus,
+.leaflet-container .leaflet-draw-toolbar a:hover,
+.leaflet-container .leaflet-draw-toolbar a:focus {
+    color: #000 !important;
+}
+.leaflet-container .leaflet-popup-close-button {
+    color: #666 !important;
+}
+.leaflet-container .leaflet-popup-close-button:hover,
+.leaflet-container .leaflet-popup-close-button:focus {
+    color: #000 !important;
 }
