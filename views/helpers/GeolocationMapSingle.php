@@ -34,11 +34,12 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
                 'itemTitle'     => $itemTitle,
                 'itemId'        => (int) $item->id,
             ];
-            if ($loc->label !== '') {
-                $point['popupHtml'] = '<div class="geolocation-popup">'
-                                     . '<div class="geolocation-popup-header">' . html_escape($loc->label) . '</div>'
-                                     . '</div>';
-            }
+            // Every location gets a popup (unlabeled ones use the item title, matching the
+            // marker's accessible name), so activating a location always opens something.
+            $headerText = $loc->label !== '' ? $loc->label : $itemTitle;
+            $point['popupHtml'] = '<div class="geolocation-popup">'
+                                 . '<div class="geolocation-popup-header">' . html_escape($headerText) . '</div>'
+                                 . '</div>';
             $points[] = $point;
         }
 
