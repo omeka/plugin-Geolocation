@@ -75,7 +75,7 @@ OmekaMap.prototype = {
             layer = this.addShapeLayer(geometry, bindHtml);
         }
         if (bindHtml) {
-            var srAlertsDiv = jQuery('#geolocation-sr-alerts');
+            var srAlertsDiv = jQuery('#' + this.mapDivId + '-sr-alerts');
             var latlng = geometry.type === 'Point'
                 ? layer.getLatLng()
                 : layer.getBounds().getCenter();
@@ -161,6 +161,133 @@ OmekaMap.prototype = {
         jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
 
         new OmekaFitControl({ position: 'topleft', omekaMap: this }).addTo(this.map);
+    },
+
+    // The location list is the keyboard/screen-reader path to each feature: a
+    // stable, focusable row per location whose activation frames the feature and
+    // opens its popup (sidestepping the fact that clustered/deflated features have
+    // no individual focusable element until revealed). Generic across both the
+    // browse and single-item maps, so it lives on the shared prototype.
+    buildListLinks: function (container) {
+        var that = this;
+        // Kept so a clicked entry can clear the "current" mark from every other
+        // entry, including those in nested sub-lists.
+        this._listContainer = container;
+        var locationString = container.data('locationString') || 'Location';
+        var list = jQuery('<ul></ul>');
+        list.appendTo(container);
+
+        // Group locations by item, preserving first-appearance (load) order.
+        var items = [];
+        var itemsById = {};
+        jQuery.each(this.locations, function (index, layer) {
+            var itemId = layer._geolocationItemId;
+            if (!itemsById[itemId]) {
+                itemsById[itemId] = {title: layer._geolocationTitle, layers: []};
+                items.push(itemsById[itemId]);
+            }
+            itemsById[itemId].layers.push(layer);
+        });
+
+        jQuery.each(items, function (index, item) {
+            // A single unlabeled location has nothing to distinguish, so show one
+            // clickable line (the item) rather than a redundant header + sub-entry.
+            if (item.layers.length === 1 && !item.layers[0]._geolocationLabel) {
+                var only = item.layers[0];
+                only._geolocationListItem = that._buildListItem(list, item.title, function () { that._focusLayer(only); });
+                return;
+            }
+            // Otherwise a non-clickable item header with its location(s) as clickable
+            // sub-entries: labels surface here, and multi-location fallbacks are numbered.
+            var header = jQuery('<li></li>').appendTo(list);
+            jQuery('<span></span>').addClass('item-group').text(item.title).appendTo(header);
+            var subList = jQuery('<ul></ul>').appendTo(header);
+            jQuery.each(item.layers, function (i, layer) {
+                var label = layer._geolocationLabel || (locationString + ' ' + (i + 1));
+                layer._geolocationListItem = that._buildListItem(subList, label, function () { that._focusLayer(layer); });
+            });
+        });
+    },
+
+    _buildListItem: function (list, title, onClick) {
+        var that = this;
+        var link = jQuery('<a></a>')
+            .addClass('item-link')
+            .attr('href', 'javascript:void(0);')
+            .attr('role', 'button')
+            .text(title);
+        var item = jQuery('<li></li>').append(link);
+        link.bind('click', {}, function () {
+            // Mark just this entry as current so the user can see which location
+            // they're viewing.
+            that._listContainer.find('.current').removeClass('current');
+            item.addClass('current');
+            onClick();
+        });
+        item.appendTo(list);
+        return item;
+    },
+
+    // Frame a single location and open its popup.
+    _focusLayer: function (layer) {
+        var openPopup = function () { layer.openPopup(); };
+        if (layer instanceof L.Marker) {
+            if (this.clusterGroup) {
+                // A clustered marker may be hidden in a cluster. Expand it first,
+                // then open the popup from zoomToShowLayer's callback.
+                this.clusterGroup.zoomToShowLayer(layer, openPopup);
+            } else {
+                // openPopup() pans the popup into view by itself, so no separate
+                // map move is needed here.
+                openPopup();
+            }
+        } else {
+            // A shape may be collapsed (by deflate) until it's framed, so
+            // fitBounds brings it into view and the popup opens on 'moveend'.
+            // If it's already framed, fitBounds won't move the map and no
+            // 'moveend' fires, so detect that via 'movestart' (synchronous for
+            // a real move) and open now, clearing the pending handlers so
+            // neither can fire on a later move.
+            var moved = false;
+            var onMoveStart = function () { moved = true; };
+            this.map.once('movestart', onMoveStart);
+            this.map.once('moveend', openPopup);
+            this.map.fitBounds(layer.getBounds());
+            if (!moved) {
+                this.map.off('movestart', onMoveStart);
+                this.map.off('moveend', openPopup);
+                openPopup();
+            }
+        }
+    },
+
+    // Mark a layer's list row as current and scroll it into view. The row
+    // reference is set on the layer in buildListLinks.
+    _highlightListItem: function (layer) {
+        if (!this._listContainer) {
+            return;
+        }
+        this._listContainer.find('.current').removeClass('current');
+        var item = layer._geolocationListItem;
+        if (!item || !item.length) {
+            return;
+        }
+        item.addClass('current');
+        // Bring the row to the top of the list's own scroll box — not
+        // scrollIntoView, which would also scroll the page off the popup.
+        var box = this._listContainer[0];
+        box.scrollTop += item[0].getBoundingClientRect().top - box.getBoundingClientRect().top;
+    },
+
+    // A layer joins the accessible location list: record the fields buildListLinks
+    // groups and labels by, and highlight its row when its popup opens (the reverse
+    // of the list→map link).
+    _registerListLayer: function (layer, info) {
+        var that = this;
+        layer._geolocationTitle = info.title || '';
+        layer._geolocationItemId = info.itemId;
+        layer._geolocationLabel = info.label || '';
+        layer.on('popupopen', function () { that._highlightListItem(layer); });
     }
 };
 
@@ -232,38 +359,9 @@ OmekaMapBrowse.prototype = {
     },
 
     buildLayerFromLocation: function (locationData) {
-        var that = this;
         var geometry = JSON.parse(locationData.geometry_json);
-        var layer = this.addLayerFromGeometry(geometry, {title: locationData.title, alt: locationData.title}, this.buildLocationContent(locationData));
-        // The sidebar list groups by _geolocationItemId; _geolocationTitle labels the
-        // item (its header or single entry) and _geolocationLabel labels each location
-        // sub-entry.
-        layer._geolocationTitle = locationData.title || '';
-        layer._geolocationItemId = locationData.itemId;
-        layer._geolocationLabel = locationData.label || '';
-        // Reverse of the list→map link: when a feature's popup opens (e.g. from a
-        // map click), highlight its row in the sidebar list.
-        layer.on('popupopen', function () {
-            that._highlightListItem(layer);
-        });
-    },
-
-    // Mark a layer's sidebar row as current and scroll it into view. The row
-    // reference is set on the layer in buildListLinks.
-    _highlightListItem: function (layer) {
-        if (!this._listContainer) {
-            return;
-        }
-        this._listContainer.find('.current').removeClass('current');
-        var item = layer._geolocationListItem;
-        if (!item || !item.length) {
-            return;
-        }
-        item.addClass('current');
-        // Bring the row to the top of the list's own scroll box — not
-        // scrollIntoView, which would also scroll the page off the popup.
-        var box = this._listContainer[0];
-        box.scrollTop += item[0].getBoundingClientRect().top - box.getBoundingClientRect().top;
+        var layer = this.addLayerFromGeometry(geometry, {title: locationData.title}, this.buildLocationContent(locationData));
+        this._registerListLayer(layer, {title: locationData.title, itemId: locationData.itemId, label: locationData.label});
     },
 
     buildLocationContent: function (locationData) {
@@ -281,114 +379,29 @@ OmekaMapBrowse.prototype = {
             popup.append(jQuery('<p class="geolocation-popup-description">').text(locationData.snippet));
         }
         return popup[0];
-    },
-
-    buildListLinks: function (container) {
-        var that = this;
-        // Kept so a clicked entry can clear the "current" mark from every other
-        // entry, including those in nested sub-lists.
-        this._listContainer = container;
-        var locationString = container.data('locationString') || 'Location';
-        var list = jQuery('<ul></ul>');
-        list.appendTo(container);
-
-        // Group locations by item, preserving first-appearance (load) order.
-        var items = [];
-        var itemsById = {};
-        jQuery.each(this.locations, function (index, layer) {
-            var itemId = layer._geolocationItemId;
-            if (!itemsById[itemId]) {
-                itemsById[itemId] = {title: layer._geolocationTitle, layers: []};
-                items.push(itemsById[itemId]);
-            }
-            itemsById[itemId].layers.push(layer);
-        });
-
-        jQuery.each(items, function (index, item) {
-            // A single unlabeled location has nothing to distinguish, so show one
-            // clickable line (the item) rather than a redundant header + sub-entry.
-            if (item.layers.length === 1 && !item.layers[0]._geolocationLabel) {
-                var only = item.layers[0];
-                only._geolocationListItem = that._buildListItem(list, item.title, function () { that._focusLayer(only); });
-                return;
-            }
-            // Otherwise a non-clickable item header with its location(s) as clickable
-            // sub-entries: labels surface here, and multi-location fallbacks are numbered.
-            var header = jQuery('<li></li>').appendTo(list);
-            jQuery('<span></span>').addClass('item-group').text(item.title).appendTo(header);
-            var subList = jQuery('<ul></ul>').appendTo(header);
-            jQuery.each(item.layers, function (i, layer) {
-                var label = layer._geolocationLabel || (locationString + ' ' + (i + 1));
-                layer._geolocationListItem = that._buildListItem(subList, label, function () { that._focusLayer(layer); });
-            });
-        });
-    },
-
-    // Frame a single location and open its popup.
-    _focusLayer: function (layer) {
-        var openPopup = function () { layer.openPopup(); };
-        if (layer instanceof L.Marker) {
-            if (this.clusterGroup) {
-                // A clustered marker may be hidden in a cluster. Expand it first,
-                // then open the popup from zoomToShowLayer's callback.
-                this.clusterGroup.zoomToShowLayer(layer, openPopup);
-            } else {
-                // openPopup() pans the popup into view by itself, so no separate
-                // map move is needed here.
-                openPopup();
-            }
-        } else {
-            // A shape may be collapsed (by deflate) until it's framed, so
-            // fitBounds brings it into view and the popup opens on 'moveend'.
-            // If it's already framed, fitBounds won't move the map and no
-            // 'moveend' fires, so detect that via 'movestart' (synchronous for
-            // a real move) and open now, clearing the pending handlers so
-            // neither can fire on a later move.
-            var moved = false;
-            var onMoveStart = function () { moved = true; };
-            this.map.once('movestart', onMoveStart);
-            this.map.once('moveend', openPopup);
-            this.map.fitBounds(layer.getBounds());
-            if (!moved) {
-                this.map.off('movestart', onMoveStart);
-                this.map.off('moveend', openPopup);
-                openPopup();
-            }
-        }
-    },
-
-    _buildListItem: function (list, title, onClick) {
-        var that = this;
-        var link = jQuery('<a></a>')
-            .addClass('item-link')
-            .attr('href', 'javascript:void(0);')
-            .attr('role', 'button')
-            .text(title);
-        var item = jQuery('<li></li>').append(link);
-        link.bind('click', {}, function () {
-            // Mark just this entry as current so the user can see which location
-            // they're viewing.
-            that._listContainer.find('.current').removeClass('current');
-            item.addClass('current');
-            onClick();
-        });
-        item.appendTo(list);
-        return item;
     }
 };
 
 function OmekaMapSingle(mapDivId, center, options) {
+    var that = this;
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
     if (options.locations && options.locations.length) {
-        for (var i = 0; i < options.locations.length; i++) {
-            var pt = options.locations[i];
+        jQuery.each(options.locations, function (i, pt) {
             // Name fallback: location label, else the item title (addLayerFromGeometry
             // applies the generic "Map location" fallback if both are empty).
-            this.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: pt.label || pt.itemTitle}, pt.popupHtml);
-        }
+            var layer = that.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: pt.label || pt.itemTitle}, pt.popupHtml);
+            that._registerListLayer(layer, {title: pt.itemTitle, itemId: pt.itemId, label: pt.label});
+        });
         this.fitLocations();
+        // The helper sets options.list only when geolocation_show_item_list is on.
+        if (options.list) {
+            var listDiv = jQuery('#' + options.list);
+            if (listDiv.length) {
+                this.buildListLinks(listDiv);
+            }
+        }
     }
 }
 

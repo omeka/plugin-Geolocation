@@ -306,6 +306,15 @@
         <?php echo $view->formText('item_map_height', get_option('geolocation_item_map_height')); ?>
     </div>
 </div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_show_item_list"><?php echo __('Show location list on item pages'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Show a keyboard-accessible list of the item\'s locations beside its map. Recommended for accessibility.'); ?></p>
+        <?php echo $view->formCheckbox('geolocation_show_item_list', true, ['checked' => (bool) get_option('geolocation_show_item_list')]); ?>
+    </div>
+</div>
 </fieldset>
 
 <fieldset>

@@ -23,12 +23,16 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         // has no label, so an unlabeled marker is never a nameless button.
         $itemTitle = metadata($item, 'display_title', ['no_escape' => true]);
 
+        $showList = (bool) get_option('geolocation_show_item_list');
+        $listId = "$divId-links";
+
         $points = [];
         foreach ($locations as $loc) {
             $point = [
                 'geometry_json' => $loc->geometry_json,
                 'label'         => $loc->label,
                 'itemTitle'     => $itemTitle,
+                'itemId'        => (int) $item->id,
             ];
             if ($loc->label !== '') {
                 $point['popupHtml'] = '<div class="geolocation-popup">'
@@ -41,6 +45,10 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         $options = [];
         $options['basemap'] = get_option('geolocation_basemap');
         $options['locations'] = $points;
+        if ($showList) {
+            // Wires up the keyboard-accessible location list.
+            $options['list'] = $listId;
+        }
         $options = $this->view->geolocationMapOptions($options);
         $center = js_escape($center);
         $varDivId = Inflector::variablize($divId);
@@ -53,6 +61,14 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
         ];
 
         $html = '<div ' . tag_attributes($divAttrs) . '></div>';
+        if ($showList) {
+            $html .= '<div id="' . html_escape($listId) . '" class="geolocation-item-links"'
+                   . ' data-location-string="' . html_escape(__('Location')) . '">'
+                   . '<h3>' . __('Locations') . '</h3></div>';
+        }
+        // Live region for the popup open/close announcements the map JS emits,
+        // useful whether or not the list is shown.
+        $html .= $this->view->geolocationSrAlerts($divId);
         $js = "var $varDivId" . "OmekaMapSingle = new OmekaMapSingle(" . js_escape($divId) . ", $center, $options); ";
         $html .= "<script type='text/javascript'>$js</script>";
 
