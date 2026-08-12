@@ -175,6 +175,3 @@ div.map-notification {
     background-color: rgba(51, 136, 204, 0.15);
     box-shadow: inset 3px 0 0 #3388cc;
 }
-.geolocation-item-links h3:first-child {
-    margin-top: 0;
-}

@@ -62,9 +62,9 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
 
         $html = '<div ' . tag_attributes($divAttrs) . '></div>';
         if ($showList) {
-            $html .= '<div id="' . html_escape($listId) . '" class="geolocation-item-links"'
-                   . ' data-location-string="' . html_escape(__('Location')) . '">'
-                   . '<h3>' . __('Locations') . '</h3></div>';
+            $html .= '<div id="' . html_escape($listId) . '" class="geolocation-item-links" role="group"'
+                   . ' aria-label="' . html_escape(__('Locations')) . '"'
+                   . ' data-location-string="' . html_escape(__('Location')) . '"></div>';
         }
         // Live region for the popup open/close announcements the map JS emits,
         // useful whether or not the list is shown.
