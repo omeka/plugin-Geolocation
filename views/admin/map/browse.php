@@ -1,5 +1,5 @@
 <?php
-queue_css_file('geolocation-items-map');
+// geolocation-items-map.css is queued globally in GeolocationPlugin::_head().
 
 $title = __("Browse Items on the Map").' (' . html_escape($totalItems).' '.__('total').')';
 

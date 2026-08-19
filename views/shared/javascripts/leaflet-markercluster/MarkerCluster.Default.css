@@ -55,8 +55,9 @@
 	border-radius: 15px;
 	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
 	/* Standardize the count to black; without this it inherits the theme's
-	   text color and is often illegible on the pastel backgrounds. */
-	color: #000;
+	   text color; the !important defends against high-specificity theme rules
+	   (e.g. `#content div`) that would otherwise drop it below contrast. */
+	color: #000 !important;
 	}
 .marker-cluster span {
 	line-height: 30px;

@@ -95,12 +95,16 @@ img.leaflet-marker-shadow {
     box-sizing: border-box;
 }
 
-/* Popup title/thumbnail links — legible on the white popup background. */
-.geolocation-popup .view-item {
+/* Popup title/thumbnail and exhibit item links: legible on the white popup
+   background, and kept consistent between the two link types. */
+.geolocation-popup .view-item,
+.geolocation-popup .exhibit-item-link {
     color: #0071a7 !important;
 }
 .geolocation-popup .view-item:hover,
-.geolocation-popup .view-item:focus {
+.geolocation-popup .view-item:focus,
+.geolocation-popup .exhibit-item-link:hover,
+.geolocation-popup .exhibit-item-link:focus {
     color: #004d70 !important;
 }
 
@@ -123,4 +127,26 @@ img.leaflet-marker-shadow {
 .leaflet-container .leaflet-popup-close-button:hover,
 .leaflet-container .leaflet-popup-close-button:focus {
     color: #000 !important;
+}
+
+/* Attribution links: legible on the control's translucent-white background. */
+.leaflet-container .leaflet-control-attribution a {
+    color: #0071a7 !important;
+}
+.leaflet-container .leaflet-control-attribution a:hover,
+.leaflet-container .leaflet-control-attribution a:focus {
+    color: #004d70 !important;
+}
+
+/* Draw-action links (Finish/Cancel/Delete): white text on a dark bar. Self-contained
+   because Leaflet.draw's default (#fff on #919187) already fails contrast, and themes
+   override the color on top of that. */
+.leaflet-container .leaflet-draw-actions a {
+    background-color: #595959 !important;
+    color: #fff !important;
+}
+.leaflet-container .leaflet-draw-actions a:hover,
+.leaflet-container .leaflet-draw-actions a:focus {
+    background-color: #333 !important;
+    color: #fff !important;
 }

@@ -85,15 +85,18 @@ OmekaMap.prototype = {
             var srClosedText = parts.concat(srAlertsDiv.data('closedString')).join(' ');
             // Leaflet popup events give no screen reader feedback; announce the
             // layer title, coordinates, and open/close status.
+            // Move focus into the popup: the first focusable element in the
+            // content (media, then the item link), else the close button.
+            var focusIntoPopup = function (popupEl) {
+                if (!popupEl) { return; }
+                var content = popupEl.querySelector('.leaflet-popup-content');
+                var target = (content && content.querySelector('a[href], button, input, select, textarea, audio, video, [tabindex]'))
+                    || popupEl.querySelector('.leaflet-popup-close-button');
+                if (target) { target.focus(); }
+            };
             layer.addEventListener('popupopen', function (event) {
                 srAlertsDiv.text(srOpenedText);
-                // Move focus into the popup so keyboard users land on the close
-                // control instead of the next feature.
-                var popupEl = event.popup.getElement();
-                var closeButton = popupEl && popupEl.querySelector('.leaflet-popup-close-button');
-                if (closeButton) {
-                    closeButton.focus();
-                }
+                focusIntoPopup(event.popup.getElement());
             });
             layer.addEventListener('popupclose', function () {
                 srAlertsDiv.text(srClosedText);
@@ -106,10 +109,14 @@ OmekaMap.prototype = {
             });
             // Popup dimensions are calculated before images load; update on
             // first open so the popup resizes correctly once the image loads.
+            // update() re-renders the content and drops focus, so restore it.
             layer.once('popupopen', function (event) {
                 var popup = event.popup;
                 jQuery(popup.getElement()).find('img').one('load', function () {
+                    var popupEl = popup.getElement();
+                    var hadFocus = popupEl && popupEl.contains(document.activeElement);
                     popup.update();
+                    if (hadFocus) { focusIntoPopup(popup.getElement()); }
                 });
             });
         }
@@ -161,6 +168,17 @@ OmekaMap.prototype = {
         jQuery(this.map.getContainer()).trigger('o:geolocation:init_map', this);
 
         new OmekaFitControl({ position: 'topleft', omekaMap: this }).addTo(this.map);
+
+        // Correct Leaflet's cached size once layout settles, in case the theme sized
+        // the container after init; otherwise tiles don't fill until a manual resize.
+        // Maps built after load (e.g. exhibit maps in a load handler) sync now;
+        // others sync once load settles. .one() so the handler doesn't linger.
+        var map = this.map;
+        if (document.readyState === 'complete') {
+            map.invalidateSize();
+        } else {
+            jQuery(window).one('load', function () { map.invalidateSize(); });
+        }
     },
 
     // The location list is the keyboard/screen-reader path to each feature: a
@@ -369,7 +387,7 @@ OmekaMapBrowse.prototype = {
         var headerText = locationData.label || locationData.title;
         popup.append(jQuery('<div class="geolocation-popup-header">').text(headerText));
         if (locationData.thumbnailUrl) {
-            var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: locationData.title});
+            var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: locationData.fileAlt || locationData.title});
             var thumbLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).append(img);
             popup.append(jQuery('<div class="geolocation-popup-thumbnail">').append(thumbLink));
         }
