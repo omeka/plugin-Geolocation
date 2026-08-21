@@ -169,12 +169,19 @@ OmekaMap.prototype = {
 
         new OmekaFitControl({ position: 'topleft', omekaMap: this }).addTo(this.map);
 
-        // Correct Leaflet's cached size once layout settles, in case the theme sized
-        // the container after init; otherwise tiles don't fill until a manual resize.
-        // Maps built after load (e.g. exhibit maps in a load handler) sync now;
-        // others sync once load settles. .one() so the handler doesn't linger.
+        // Some themes size the map container after Leaflet initializes, so Leaflet
+        // caches a wrong size and tiles don't fill until a resize. Watch the
+        // container and re-sync after it settles (debounced, so the initial growth
+        // doesn't thrash tile loading); this also covers late or repeated sizing
+        // that a one-shot on window load would miss.
         var map = this.map;
-        if (document.readyState === 'complete') {
+        if (window.ResizeObserver) {
+            var settle;
+            new ResizeObserver(function () {
+                clearTimeout(settle);
+                settle = setTimeout(function () { map.invalidateSize(); }, 200);
+            }).observe(this.map.getContainer());
+        } else if (document.readyState === 'complete') {
             map.invalidateSize();
         } else {
             jQuery(window).one('load', function () { map.invalidateSize(); });

@@ -14,7 +14,10 @@ foreach ($attachments as $attachment):
     $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
 
     if ($file):
-        $body = $this->exhibitAttachment($attachment, [], [], true);
+        // Prefer the file's configured alt, falling back to the item title (matching
+        // the browse map); exhibitAttachment/file_image otherwise leaves alt blank.
+        $alt = $file->getAltText() ?: $title;
+        $body = $this->exhibitAttachment($attachment, ['imgAttributes' => ['alt' => $alt]], [], true);
     else:
         $body = $this->exhibitAttachmentCaption($attachment);
     endif;

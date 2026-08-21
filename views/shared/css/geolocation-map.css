@@ -150,3 +150,17 @@ img.leaflet-marker-shadow {
     background-color: #333 !important;
     color: #fff !important;
 }
+
+/* Draw tooltips (the "click to..." hints shown while drawing): a more opaque
+   background and forced text colors so both the main line and the subtext stay
+   legible on any theme, including themes that recolor #content text. */
+.leaflet-container .leaflet-draw-tooltip {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    color: #fff !important;
+}
+.leaflet-container .leaflet-draw-tooltip-subtext {
+    color: #f8d5e4 !important;
+}
+.leaflet-container .leaflet-draw-tooltip:before {
+    border-right-color: rgba(0, 0, 0, 0.85) !important;
+}
