@@ -6,6 +6,16 @@
     clear: both;
     overflow: hidden;
     margin-bottom: 1em;
+    /* Some themes make the browse #content a flex (or grid) container — e.g.
+       Thanks, Roy's `.browse #content { display: flex }`. As a flex item with no
+       explicit basis this block collapses toward its content width, so the map
+       initializes near-zero-width; Leaflet then caches that wrong size and, on
+       the later resize, shifts the map pane instead of re-fitting, leaving a
+       zoomed-out, offset view. Claim the full row so the map sizes correctly
+       from the start. Harmless in normal block flow, where width is 100% anyway. */
+    flex-basis: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #map_browse {
