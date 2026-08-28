@@ -5,7 +5,21 @@
 #geolocation-browse {
     clear: both;
     overflow: hidden;
+    /* Keep the map off the pagination above it. Some themes give that pagination
+       no bottom spacing, so the map butts right against it; padding (not margin,
+       which the clear/float above can swallow) reliably holds the gap. */
+    padding-top: 1em;
     margin-bottom: 1em;
+    /* Some themes make the browse #content a flex (or grid) container — e.g.
+       Thanks, Roy's `.browse #content { display: flex }`. As a flex item with no
+       explicit basis this block collapses toward its content width, so the map
+       initializes near-zero-width; Leaflet then caches that wrong size and, on
+       the later resize, shifts the map pane instead of re-fitting, leaving a
+       zoomed-out, offset view. Claim the full row so the map sizes correctly
+       from the start. Harmless in normal block flow, where width is 100% anyway. */
+    flex-basis: 100%;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 #map_browse {
@@ -32,10 +46,30 @@
     padding: 10px 0 10px 0;
 }
 
+/* On mobile the list stacks above the map; cap it so a long list stays a
+   scrollable region instead of expanding the whole page. The
+   desktop layout (min-width:768px, below) sets its own height/overflow. */
+@media screen and (max-width: 767px) {
+    #map-links {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+}
+
 #map-links li a {
     display:block;
     text-decoration:none;
     border-bottom: 0 !important;
+}
+
+/* Keep the link's normal color on hover — a theme's lightened hover color can
+   fall below contrast. The sidebar sits on the theme's own
+   background, so rather than impose an absolute color we revert to the
+   inherited text color and use underline as the non-color hover affordance. */
+#map-links li a:hover,
+#map-links li a:focus {
+    color: inherit;
+    text-decoration: underline;
 }
 
 /* Item lines are bold — a group header (label) or a single unlabeled item (link) —
@@ -107,4 +141,51 @@ div.map-notification {
         width: 100%;
         float: none;
     }
+}
+
+/* Item-page location list, mirroring the browse list. Self-contained so the
+   browse rules above are untouched; sits below the map, not in a floated column. */
+.geolocation-item-links {
+    clear: both;
+    padding: 10px 0;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.geolocation-item-links ul {
+    margin: 0;
+    padding: 0;
+}
+.geolocation-item-links li {
+    overflow: hidden;
+    display: block;
+    border-radius: 3px;
+    padding: 2px 5px;
+    box-sizing: border-box;
+    margin-bottom: 2px;
+    line-height: 1.4;
+}
+.geolocation-item-links li a {
+    display: block;
+    text-decoration: none;
+    border-bottom: 0 !important;
+}
+.geolocation-item-links li a:hover,
+.geolocation-item-links li a:focus {
+    color: inherit;
+    text-decoration: underline;
+}
+.geolocation-item-links > ul > li > a,
+.geolocation-item-links .item-group {
+    font-weight: bold;
+}
+.geolocation-item-links .item-group {
+    display: block;
+}
+.geolocation-item-links li ul {
+    margin: 2px 0 0 18px;
+    padding: 0;
+}
+.geolocation-item-links li.current {
+    background-color: rgba(51, 136, 204, 0.15);
+    box-shadow: inset 3px 0 0 #3388cc;
 }

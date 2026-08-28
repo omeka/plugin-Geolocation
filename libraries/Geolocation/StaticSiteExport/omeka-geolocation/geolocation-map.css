@@ -62,5 +62,6 @@ img.leaflet-marker-icon,
 img.leaflet-marker-shadow {
     padding: 0 !important;
     border: 0 !important;
+    border-radius: 0 !important;
     background-color: transparent !important;
 }

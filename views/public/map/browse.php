@@ -1,5 +1,5 @@
 <?php
-queue_css_file('geolocation-items-map');
+// geolocation-items-map.css is queued globally in GeolocationPlugin::_head().
 
 $title = __('Browse Items on the Map') . ' ' . __('(%s total)', $totalItems);
 echo head(['title' => $title, 'bodyclass' => 'map browse']);
@@ -28,7 +28,7 @@ echo pagination_links();
     <?php if ($showBrowseList): ?>
     <div id="map-links" data-location-string="<?php echo __('Location'); ?>"><h2><?php echo __('Items'); ?></h2></div>
     <?php endif; ?>
-    <div id="geolocation-sr-alerts" class="sr-only" aria-live="polite" aria-atomic="true" data-lat-string="<?php echo __('Latitude'); ?>" data-long-string="<?php echo __('Longitude'); ?>" data-opened-string="<?php echo __('Opened.'); ?>" data-closed-string="<?php echo __('Closed.'); ?>"></div>
+    <?php echo $this->geolocationSrAlerts('map_browse'); ?>
 </div>
 
 <?php echo foot(); ?>
