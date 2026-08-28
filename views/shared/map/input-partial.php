@@ -16,7 +16,7 @@ $options = $this->geolocationMapOptions($options);
     </div>
 </div>
 <div id="geolocation-sr-alerts" class="sr-only" aria-live="polite" aria-atomic="true"></div>
-<div id="omeka-map-form" class="geolocation-map" data-locations="<?php echo html_escape(json_encode($existingLocations)); ?>"></div>
+<div id="omeka-map-form" class="geolocation-map" role="region" aria-roledescription="map" aria-label="<?php echo html_escape(__('Geolocation map')); ?>" data-locations="<?php echo html_escape(json_encode($existingLocations)); ?>"></div>
 
 <?php
 echo js_tag('geocoder');

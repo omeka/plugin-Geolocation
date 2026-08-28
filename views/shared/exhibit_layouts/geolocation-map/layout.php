@@ -52,4 +52,4 @@ jQuery(window).on('load', function () {
     geolocation_map.fitLocations();
 });
 </script>
-<div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"></div>
+<div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map" role="region" aria-roledescription="map" aria-label="<?php echo html_escape(__('Geolocation map')); ?>"></div>
