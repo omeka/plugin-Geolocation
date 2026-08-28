@@ -5,6 +5,10 @@
 #geolocation-browse {
     clear: both;
     overflow: hidden;
+    /* Keep the map off the pagination above it. Some themes give that pagination
+       no bottom spacing, so the map butts right against it; padding (not margin,
+       which the clear/float above can swallow) reliably holds the gap. */
+    padding-top: 1em;
     margin-bottom: 1em;
     /* Some themes make the browse #content a flex (or grid) container — e.g.
        Thanks, Roy's `.browse #content { display: flex }`. As a flex item with no
