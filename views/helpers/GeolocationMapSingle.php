@@ -61,7 +61,7 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
             'style' => $style,
             'role'  => 'region',
             'aria-roledescription' => 'map',
-            'aria-label' => __('Geolocation map'),
+            'aria-label' => __('Geolocation'),
         ];
 
         $html = '<div ' . tag_attributes($divAttrs) . '></div>';
