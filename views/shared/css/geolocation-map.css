@@ -77,5 +77,90 @@ img.leaflet-marker-icon,
 img.leaflet-marker-shadow {
     padding: 0 !important;
     border: 0 !important;
+    border-radius: 0 !important;
     background-color: transparent !important;
+}
+
+/* Plugin-owned map widgets: theme-independent defaults.
+   The plugin renders these, so it styles them rather than relying on theme
+   inheritance. Foreground colors use !important because themes commonly set
+   link/text color with ID-scoped rules (e.g. #content a) that class selectors
+   can't outweigh; no theme deliberately styles Leaflet internals, so this
+   overrides only leaked generic rules, not intentional theme styling. */
+
+/* Contribution/label popup input — stay usably wide on every theme. min-width
+   beats a theme's `width`, so no !important is needed here. */
+.geolocation-popup-label {
+    min-width: 12em;
+    box-sizing: border-box;
+}
+
+/* Popup title/thumbnail and exhibit item links: legible on the white popup
+   background, and kept consistent between the two link types. */
+.geolocation-popup .view-item,
+.geolocation-popup .exhibit-item-link {
+    color: #0071a7 !important;
+}
+.geolocation-popup .view-item:hover,
+.geolocation-popup .view-item:focus,
+.geolocation-popup .exhibit-item-link:hover,
+.geolocation-popup .exhibit-item-link:focus {
+    color: #004d70 !important;
+}
+
+/* Leaflet nav/draw controls, the fit-all control (its SVG uses currentColor),
+   and the popup close button — dark foreground on Leaflet's white control
+   chrome so theme colors can't wash them out. */
+.leaflet-container .leaflet-bar a,
+.leaflet-container .leaflet-draw-toolbar a {
+    color: #333 !important;
+}
+.leaflet-container .leaflet-bar a:hover,
+.leaflet-container .leaflet-bar a:focus,
+.leaflet-container .leaflet-draw-toolbar a:hover,
+.leaflet-container .leaflet-draw-toolbar a:focus {
+    color: #000 !important;
+}
+.leaflet-container .leaflet-popup-close-button {
+    color: #666 !important;
+}
+.leaflet-container .leaflet-popup-close-button:hover,
+.leaflet-container .leaflet-popup-close-button:focus {
+    color: #000 !important;
+}
+
+/* Attribution links: legible on the control's translucent-white background. */
+.leaflet-container .leaflet-control-attribution a {
+    color: #0071a7 !important;
+}
+.leaflet-container .leaflet-control-attribution a:hover,
+.leaflet-container .leaflet-control-attribution a:focus {
+    color: #004d70 !important;
+}
+
+/* Draw-action links (Finish/Cancel/Delete): white text on a dark bar. Self-contained
+   because Leaflet.draw's default (#fff on #919187) already fails contrast, and themes
+   override the color on top of that. */
+.leaflet-container .leaflet-draw-actions a {
+    background-color: #595959 !important;
+    color: #fff !important;
+}
+.leaflet-container .leaflet-draw-actions a:hover,
+.leaflet-container .leaflet-draw-actions a:focus {
+    background-color: #333 !important;
+    color: #fff !important;
+}
+
+/* Draw tooltips (the "click to..." hints shown while drawing): a more opaque
+   background and forced text colors so both the main line and the subtext stay
+   legible on any theme, including themes that recolor #content text. */
+.leaflet-container .leaflet-draw-tooltip {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+    color: #fff !important;
+}
+.leaflet-container .leaflet-draw-tooltip-subtext {
+    color: #f8d5e4 !important;
+}
+.leaflet-container .leaflet-draw-tooltip:before {
+    border-right-color: rgba(0, 0, 0, 0.85) !important;
 }

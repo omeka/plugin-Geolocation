@@ -240,7 +240,7 @@
 </div>
 <div class="field">
     <div class="two columns alpha">
-        <label for="per_page"><?php echo __('Default Radius'); ?></label>
+        <label for="geolocation_default_radius"><?php echo __('Default Radius'); ?></label>
     </div>
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The size of the default radius to use on the items advanced search page. See below for whether to measure in miles or kilometers.'); ?></p>
@@ -263,6 +263,15 @@
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('Show close or overlapping locations as clusters.'); ?></p>
         <?php echo $view->formCheckbox('cluster', true, ['checked' => (bool) get_option('geolocation_cluster')]); ?>
+    </div>
+</div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_show_browse_list"><?php echo __('Show item list on browse map'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Show a list of items beside the browse map. When off, the map fills the width.'); ?></p>
+        <?php echo $view->formCheckbox('geolocation_show_browse_list', true, ['checked' => (bool) get_option('geolocation_show_browse_list')]); ?>
     </div>
 </div>
 </fieldset>
@@ -295,6 +304,15 @@
     <div class="inputs five columns omega">
         <p class="explanation"><?php echo __('The height of the map displayed on your items/show page. If left blank, the default height of 300px will be used.'); ?></p>
         <?php echo $view->formText('item_map_height', get_option('geolocation_item_map_height')); ?>
+    </div>
+</div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_show_item_list"><?php echo __('Show location list on item pages'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Show a keyboard-accessible list of the item\'s locations beside its map. Recommended for accessibility.'); ?></p>
+        <?php echo $view->formCheckbox('geolocation_show_item_list', true, ['checked' => (bool) get_option('geolocation_show_item_list')]); ?>
     </div>
 </div>
 </fieldset>
