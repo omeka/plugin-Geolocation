@@ -35,63 +35,6 @@ foreach ($attachments as $attachment):
 endforeach;
 $sequenceMode = !empty($options['sequence']) && count($locations) > 0;
 ?>
-<script type="text/javascript">
-jQuery(window).on('load', function () {
-    var geolocation_map = new OmekaMap(
-        <?php echo json_encode($divId); ?>,
-        <?php echo json_encode($center); ?>,
-        <?php echo $this->geolocationMapOptions(); ?>);
-    geolocation_map.initMap();
-    var map_locations = <?php echo json_encode($locations); ?>;
-<?php if ($sequenceMode): ?>
-    var layers = [];
-    for (var i = 0; i < map_locations.length; i++) {
-        var locationData = map_locations[i];
-        layers.push(geolocation_map.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html));
-    }
-    var currentIndex = 0;
-    var total = layers.length;
-    var prevBtn = jQuery('#<?php echo $divId; ?>-prev');
-    var nextBtn = jQuery('#<?php echo $divId; ?>-next');
-    var counter = jQuery('#<?php echo $divId; ?>-counter');
-    var pendingPopupOpen = null;
-    function goToStep(index) {
-        currentIndex = index;
-        var layer = layers[currentIndex];
-        var geometry = JSON.parse(map_locations[currentIndex].geometry_json);
-        if (pendingPopupOpen) {
-            geolocation_map.map.off('moveend', pendingPopupOpen);
-        }
-        pendingPopupOpen = function () {
-            pendingPopupOpen = null;
-            layer.openPopup();
-        };
-        geolocation_map.map.once('moveend', pendingPopupOpen);
-        if (geometry.type === 'Point') {
-            geolocation_map.map.flyTo(layer.getLatLng());
-        } else {
-            geolocation_map.map.flyToBounds(layer.getBounds(), {padding: [25, 25]});
-        }
-        counter.text((currentIndex + 1) + ' / ' + total);
-        prevBtn.prop('disabled', currentIndex === 0);
-        nextBtn.prop('disabled', currentIndex === total - 1);
-    }
-    prevBtn.on('click', function () {
-        if (currentIndex > 0) goToStep(currentIndex - 1);
-    });
-    nextBtn.on('click', function () {
-        if (currentIndex < total - 1) goToStep(currentIndex + 1);
-    });
-    goToStep(0);
-<?php else: ?>
-    for (var i = 0; i < map_locations.length; i++) {
-        var locationData = map_locations[i];
-        geolocation_map.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html);
-    }
-    geolocation_map.fitLocations();
-<?php endif; ?>
-});
-</script>
 <?php if ($sequenceMode): ?>
 <div class="geolocation-sequence-nav" aria-label="<?php echo __('Location sequence navigation'); ?>">
     <button id="<?php echo $divId; ?>-prev" class="geolocation-sequence-prev" type="button" disabled><?php echo __('Previous'); ?></button>
@@ -99,4 +42,8 @@ jQuery(window).on('load', function () {
     <button id="<?php echo $divId; ?>-next" class="geolocation-sequence-next" type="button"<?php if (count($locations) === 1): ?> disabled<?php endif; ?>><?php echo __('Next'); ?></button>
 </div>
 <?php endif; ?>
-<div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"></div>
+<div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"
+     data-center="<?php echo html_escape(json_encode($center)); ?>"
+     data-options="<?php echo html_escape($this->geolocationMapOptions()); ?>"
+     data-locations="<?php echo html_escape(json_encode($locations)); ?>"<?php if ($sequenceMode): ?>
+     data-sequence="1"<?php endif; ?>></div>

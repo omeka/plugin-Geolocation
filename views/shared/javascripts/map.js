@@ -96,6 +96,51 @@ OmekaMap.prototype = {
         return layer;
     },
 
+    initLocations: function (layers, controls) {
+        if (jQuery('#' + this.mapDivId).data('sequence')) {
+            this.initSequenceNav(layers, controls);
+        } else {
+            this.fitLocations();
+        }
+    },
+
+    initSequenceNav: function (layers, controls) {
+        var map = this.map;
+        var currentIndex = 0;
+        var total = layers.length;
+        var pendingPopupOpen = null;
+
+        function goToStep(index) {
+            currentIndex = index;
+            var layer = layers[currentIndex];
+            if (pendingPopupOpen) {
+                map.off('moveend', pendingPopupOpen);
+            }
+            pendingPopupOpen = function () {
+                pendingPopupOpen = null;
+                layer.openPopup();
+            };
+            map.once('moveend', pendingPopupOpen);
+            if (layer instanceof L.Marker) {
+                map.flyTo(layer.getLatLng());
+            } else {
+                map.flyToBounds(layer.getBounds(), {padding: [25, 25]});
+            }
+            controls.counter.text((currentIndex + 1) + ' / ' + total);
+            controls.prevBtn.prop('disabled', currentIndex === 0);
+            controls.nextBtn.prop('disabled', currentIndex === total - 1);
+        }
+
+        controls.prevBtn.on('click', function () {
+            if (currentIndex > 0) goToStep(currentIndex - 1);
+        });
+        controls.nextBtn.on('click', function () {
+            if (currentIndex < total - 1) goToStep(currentIndex + 1);
+        });
+
+        goToStep(0);
+    },
+
     initMap: function () {
         var customMap = this.options.custom_map;
 
@@ -422,3 +467,25 @@ OmekaMapForm.prototype = {
         this.map.invalidateSize();
     }
 };
+
+// Exhibit layout maps declare their config via data attributes on the map
+// div and are auto-initialized here; does nothing when no exhibit geolocation map is present.
+jQuery(window).on('load', function () {
+    jQuery('.exhibit-geolocation-map[data-center]').each(function () {
+        var div = jQuery(this);
+        var divId = div.attr('id');
+        var geolocationMap = new OmekaMap(divId, div.data('center'), div.data('options'));
+        geolocationMap.initMap();
+        var mapLocations = div.data('locations');
+        var layers = [];
+        for (var i = 0; i < mapLocations.length; i++) {
+            var locationData = mapLocations[i];
+            layers.push(geolocationMap.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html));
+        }
+        geolocationMap.initLocations(layers, {
+            prevBtn: jQuery('#' + divId + '-prev'),
+            nextBtn: jQuery('#' + divId + '-next'),
+            counter: jQuery('#' + divId + '-counter')
+        });
+    });
+});
