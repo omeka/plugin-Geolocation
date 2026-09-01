@@ -2,3 +2,20 @@
     width: 100%;
     height: 450px;
 }
+
+.layout-geolocation-map .geolocation-sequence-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin-bottom: 0.5em;
+}
+
+.layout-geolocation-map .geolocation-sequence-counter {
+    min-width: 4em;
+    text-align: center;
+}
+
+.layout-geolocation-map .geolocation-sequence-nav button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
