@@ -3,6 +3,12 @@
     height: 500px;
     clear: both;
 }
+
+#search_block #submit_search_advanced {
+    clear: both;
+    display: block;
+}
+
 #geolocation_address {
     width: 80%;
     float: none;
