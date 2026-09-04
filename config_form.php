@@ -34,55 +34,108 @@
 
 <div class="field">
     <div class="two columns alpha">
+        <label for="geocoder"><?php echo __('Geocoder'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Service to use for looking up coordinates from addresses.'); ?></p>
+        <?php
+        echo $view->formSelect('geocoder', get_option('geolocation_geocoder'), [], [
+            'nominatim' => __('OpenStreetMap Nominatim'),
+            'photon' => __('Photon'),
+        ]);
+        ?>
+    </div>
+</div>
+</fieldset>
+
+<fieldset id="basemap-settings">
+<legend><?php echo __('Base Map Settings'); ?></legend>
+<div class="field">
+    <div class="two columns alpha">
         <label for="basemap"><?php echo __('Base Map'); ?></label>
     </div>
     <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('The type of map to display'); ?></p>
+        <p class="explanation">
+        <?php
+        echo __('The type of map to display.') . ' ';
+        echo __('"OpenStreetMap Standard" is the default.') . ' ';
+        echo __('Busy sites are encouraged to choose a provider that requires its own credentials, rather than rely on the shared OpenStreetMap tiles.') . ' ';
+        echo __('To help visitors with low vision, consider "Esri National Geographic World Map" or "OpenTopoMap", which have high contrast between map features.');
+        ?>
+        </p>
         <?php
         echo $view->formSelect('basemap', get_option('geolocation_basemap'), [], [
             __('OpenStreetMap') => [
-                'OpenStreetMap' => __('Standard'),
-                'OpenStreetMap.HOT' => __('Humanitarian'),
+                'OpenStreetMap' => __('OpenStreetMap Standard'),
+                'OpenStreetMap.HOT' => __('OpenStreetMap Humanitarian'),
             ],
             __('OpenTopoMap') => [
                 'OpenTopoMap' => __('OpenTopoMap'),
             ],
-            __('Stamen') => [
-                'Stadia.StamenToner' => __('Toner'),
-                'Stadia.StamenTonerBackground' => __('Toner (background)'),
-                'Stadia.StamenTonerLite' => __('Toner (lite)'),
-                'Stadia.StamenWatercolor' => __('Watercolor'),
-                'Stadia.StamenTerrain' => __('Terrain'),
-                'Stadia.StamenTerrainBackground' => __('Terrain (background)'),
+            __('Stamen (requires a Stadia account)') => [
+                'Stadia.StamenToner' => __('Stamen Toner'),
+                'Stadia.StamenTonerBackground' => __('Stamen Toner (background)'),
+                'Stadia.StamenTonerLite' => __('Stamen Toner (lite)'),
+                'Stadia.StamenWatercolor' => __('Stamen Watercolor'),
+                'Stadia.StamenTerrain' => __('Stamen Terrain'),
+                'Stadia.StamenTerrainBackground' => __('Stamen Terrain (background)'),
             ],
             __('Esri') => [
-                'Esri.WorldStreetMap' => __('World Street Map'),
-                'Esri.DeLorme' => __('DeLorme'),
-                'Esri.WorldTopoMap' => __('World Topographic Map'),
-                'Esri.WorldImagery' => __('World Imagery'),
-                'Esri.WorldTerrain' => __('World Terrain'),
-                'Esri.WorldShadedRelief' => __('World Shaded Relief'),
-                'Esri.WorldPhysical' => __('World Physical Map'),
-                'Esri.OceanBasemap' => __('Ocean Basemap'),
-                'Esri.NatGeoWorldMap' => __('National Geographic World Map'),
-                'Esri.WorldGrayCanvas' => __('Light Gray Canvas'),
+                'Esri.WorldStreetMap' => __('Esri World Street Map'),
+                'Esri.WorldTopoMap' => __('Esri World Topographic Map'),
+                'Esri.WorldImagery' => __('Esri World Imagery'),
+                'Esri.WorldTerrain' => __('Esri World Terrain'),
+                'Esri.WorldShadedRelief' => __('Esri World Shaded Relief'),
+                'Esri.WorldPhysical' => __('Esri World Physical Map'),
+                'Esri.OceanBasemap' => __('Esri Ocean Basemap'),
+                'Esri.NatGeoWorldMap' => __('Esri National Geographic World Map'),
+                'Esri.WorldGrayCanvas' => __('Esri Light Gray Canvas'),
             ],
-            __('CartoDB') => [
-                'CartoDB.Voyager' => __('Voyager'),
-                'CartoDB.VoyagerNoLabels' => __('Voyager (no labels)'),
-                'CartoDB.Positron' => __('Positron'),
-                'CartoDB.PositronNoLabels' => __('Positron (no labels)'),
-                'CartoDB.DarkMatter' => __('Dark Matter'),
-                'CartoDB.DarkMatterNoLabels' => __('Dark Matter (no labels)'),
+            __('CARTO (requires an API key)') => [
+                'CartoDB.Voyager' => __('CARTO Voyager'),
+                'CartoDB.VoyagerNoLabels' => __('CARTO Voyager (no labels)'),
+                'CartoDB.Positron' => __('CARTO Positron'),
+                'CartoDB.PositronNoLabels' => __('CARTO Positron (no labels)'),
+                'CartoDB.DarkMatter' => __('CARTO Dark Matter'),
+                'CartoDB.DarkMatterNoLabels' => __('CARTO Dark Matter (no labels)'),
             ],
-            __('Mapbox') => [
-                'MapBox' => __('Mapbox (see settings below)'),
+            __('Mapbox (requires an access token)') => [
+                'MapBox' => __('Mapbox'),
             ],
         ]);
         ?>
     </div>
 </div>
 
+<div class="field stadia-settings">
+    <div class="two columns alpha">
+        <span class="label"><?php echo __('Stadia Maps Account'); ?></span>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+        <?php
+        echo __('Stamen base maps are hosted by Stadia Maps, and Geolocation authorizes them by registered domain rather than by API key. Register this site\'s domain with a Stadia account at %s.',
+            '<a target="_blank" href="https://client.stadiamaps.com/signup/">https://client.stadiamaps.com/signup/</a>'
+        );
+        ?>
+        </p>
+    </div>
+</div>
+<div class="field carto-settings">
+    <div class="two columns alpha">
+        <label for="carto_api_key"><?php echo __('CARTO API Key'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+        <?php
+        echo __('CARTO requires an API key for its basemaps. Without one the tiles are watermarked, so Geolocation displays the default base map instead. Request a key at %s.',
+            '<a target="_blank" href="https://carto.com/basemaps/apikey/">https://carto.com/basemaps/apikey/</a>'
+        );
+        ?>
+        </p>
+        <?php echo $view->formText('carto_api_key', get_option('geolocation_carto_api_key')); ?>
+    </div>
+</div>
 <div class="field mapbox-settings">
     <div class="two columns alpha">
         <label for="mapbox_access_token"><?php echo __('Mapbox Access Token'); ?></label>
@@ -107,22 +160,8 @@
         <?php echo $view->formText('mapbox_map_id', get_option('geolocation_mapbox_map_id')); ?>
     </div>
 </div>
-
-<div class="field">
-    <div class="two columns alpha">
-        <label for="geocoder"><?php echo __('Geocoder'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('Service to use for looking up coordinates from addresses.'); ?></p>
-        <?php
-        echo $view->formSelect('geocoder', get_option('geolocation_geocoder'), [], [
-            'nominatim' => __('OpenStreetMap Nominatim'),
-            'photon' => __('Photon'),
-        ]);
-        ?>
-    </div>
-</div>
 </fieldset>
+
 
 <fieldset id="custom-map-settings">
 <legend><?php echo __('Custom Map Overlay'); ?></legend>
@@ -340,8 +379,12 @@
 </div>
 </fieldset>
 <script type="text/javascript">
-function toggleMapboxSettings() {
-    jQuery('.mapbox-settings').toggle(jQuery('#basemap').val() === 'MapBox');
+function toggleBasemapKeySettings() {
+    var basemap = jQuery('#basemap').val();
+    var provider = basemap.indexOf('.') === -1 ? basemap : basemap.split('.')[0];
+    jQuery('.mapbox-settings').toggle(provider === 'MapBox');
+    jQuery('.carto-settings').toggle(provider === 'CartoDB');
+    jQuery('.stadia-settings').toggle(provider === 'Stadia');
 }
 function toggleCustomMapSettings() {
     var mapType = jQuery('#custom_map-type').val();
@@ -353,9 +396,9 @@ function toggleCustomMapSettings() {
     }
 }
 jQuery(document).ready(function () {
-    toggleMapboxSettings();
+    toggleBasemapKeySettings();
     toggleCustomMapSettings();
-    jQuery('#basemap').on('change', toggleMapboxSettings);
+    jQuery('#basemap').on('change', toggleBasemapKeySettings);
     jQuery('#custom_map-type').on('change', toggleCustomMapSettings);
 });
 </script>
