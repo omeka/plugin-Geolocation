@@ -14,11 +14,39 @@ class Geolocation_View_Helper_GeolocationMapOptions extends Zend_View_Helper_Abs
             $options['basemap'] = get_option('geolocation_basemap');
         }
 
-        if ($options['basemap'] === 'MapBox') {
-            $options['basemapOptions']['accessToken'] = get_option('geolocation_mapbox_access_token');
+        // The JS needs to know the default so it can fall back to it when the
+        // stored basemap is one the tile provider library no longer defines.
+        $options['defaultBasemap'] = GeolocationPlugin::DEFAULT_BASEMAP;
 
-            $type = isset($options['mapType']) ? $options['mapType'] : null;
-            $options['basemapOptions']['id'] = $this->_getMapboxMapId($type);
+        // Carto and Mapbox each need the site's own credential, passed into the
+        // provider URL template. Stadia needs none here: it authorizes by the
+        // domain registered with the site's Stadia account, which requires no
+        // request parameter at all.
+        $credential = null;
+        $basemapParts = explode('.', $options['basemap'], 2);
+        switch ($basemapParts[0]) {
+            case 'CartoDB':
+                $credential = trim((string) get_option('geolocation_carto_api_key'));
+                $options['basemapOptions']['apikey'] = $credential;
+                break;
+            case 'MapBox':
+                $credential = trim((string) get_option('geolocation_mapbox_access_token'));
+                $options['basemapOptions']['accessToken'] = $credential;
+
+                $type = isset($options['mapType']) ? $options['mapType'] : null;
+                $options['basemapOptions']['id'] = $this->_getMapboxMapId($type);
+                break;
+        }
+
+        // Without its credential neither provider gives a usable map: Carto
+        // watermarks the tiles and Mapbox serves none at all. Carto's watermark
+        // still loads, so the browser cannot detect it, and Mapbox's provider is
+        // defined so the fallback in map.js never fires — this is the only place
+        // either problem is visible. Substitute the default, leaving the stored
+        // setting alone so adding the credential restores the admin's choice.
+        if ($credential === '') {
+            $options['basemap'] = GeolocationPlugin::DEFAULT_BASEMAP;
+            $options['basemapOptions'] = [];
         }
 
         if (!array_key_exists('cluster', $options)) {

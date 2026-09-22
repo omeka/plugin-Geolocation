@@ -180,7 +180,17 @@ OmekaMap.prototype = {
         this.locationBounds = L.latLngBounds();
         this.locations = [];
 
-        L.tileLayer.provider(this.options.basemap, this.options.basemapOptions).addTo(this.map);
+        // leaflet-providers throws for a provider or variant it does not
+        // define, which would kill map init outright. That can happen with a
+        // perfectly valid stored setting: plugin files are replaced before the
+        // admin runs the upgrade, so old options can meet a new library.
+        var basemap;
+        try {
+            basemap = L.tileLayer.provider(this.options.basemap, this.options.basemapOptions);
+        } catch (e) {
+            basemap = L.tileLayer.provider(this.options.defaultBasemap);
+        }
+        basemap.addTo(this.map);
 
         if (customMap) {
             if (customMap.type === 'tiled' && customMap.tile_url) {

@@ -3,7 +3,7 @@
 class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 {
     const DEFAULT_LOCATIONS_PER_PAGE = 10;
-    const DEFAULT_BASEMAP = 'CartoDB.Voyager';
+    const DEFAULT_BASEMAP = 'OpenStreetMap';
     const DEFAULT_GEOCODER = 'nominatim';
 
     protected $_hooks = [
@@ -95,6 +95,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_show_item_list');
         delete_option('geolocation_mapbox_access_token');
         delete_option('geolocation_mapbox_map_id');
+        delete_option('geolocation_carto_api_key');
         delete_option('geolocation_cluster');
         delete_option('geolocation_item_map_enable');
         delete_option('geolocation_custom_map');
@@ -178,6 +179,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $db->query("ALTER TABLE `$db->Location` MODIFY COLUMN `geometry_json` TEXT NOT NULL");
             set_option('geolocation_show_browse_list', '1');
             set_option('geolocation_show_item_list', '1');
+
+            // Esri retired the DeLorme service, so it 404s and no key can fix
+            // it. leaflet-providers dropped the layer too, and the library
+            // throws on a provider it does not define, so a site left on it
+            // would get a dead map rather than merely missing tiles.
+            if (get_option('geolocation_basemap') === 'Esri.DeLorme') {
+                set_option('geolocation_basemap', self::DEFAULT_BASEMAP);
+            }
         }
     }
 
@@ -231,6 +240,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_show_item_list', $_POST['geolocation_show_item_list']);
         set_option('geolocation_mapbox_access_token', $_POST['mapbox_access_token']);
         set_option('geolocation_mapbox_map_id', $_POST['mapbox_map_id']);
+        set_option('geolocation_carto_api_key', $_POST['carto_api_key']);
         set_option('geolocation_cluster', $_POST['cluster']);
         set_option('geolocation_geocoder', $_POST['geocoder']);
 
