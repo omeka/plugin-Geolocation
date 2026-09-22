@@ -60,7 +60,7 @@
         echo __('The type of map to display.') . ' ';
         echo __('"OpenStreetMap Standard" is the default.') . ' ';
         echo __('Busy sites are encouraged to choose a provider that requires its own credentials, rather than rely on the shared OpenStreetMap tiles.') . ' ';
-        echo __('To help visitors with low vision, consider "Esri National Geographic World Map" or "OpenTopoMap", which have high contrast between map features.');
+        echo __('To help visitors with low vision, consider "Esri National Geographic World Map" or "OpenTopoMap", which have higher contrast between map features.');
         ?>
         </p>
         <?php
