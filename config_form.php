@@ -49,10 +49,10 @@
 </fieldset>
 
 <fieldset id="basemap-settings">
-<legend><?php echo __('Base Map Settings'); ?></legend>
+<legend><?php echo __('Basemap Settings'); ?></legend>
 <div class="field">
     <div class="two columns alpha">
-        <label for="basemap"><?php echo __('Base Map'); ?></label>
+        <label for="basemap"><?php echo __('Basemap'); ?></label>
     </div>
     <div class="inputs five columns omega">
         <p class="explanation">
@@ -114,7 +114,7 @@
     <div class="inputs five columns omega">
         <p class="explanation">
         <?php
-        echo __('Stamen base maps are hosted by Stadia Maps, and Geolocation authorizes them by registered domain rather than by API key. Register this site\'s domain with a Stadia account at %s.',
+        echo __('Stamen basemaps are hosted by Stadia Maps, and Geolocation authorizes them by registered domain rather than by API key. Register this site\'s domain with a Stadia account at %s.',
             '<a target="_blank" href="https://client.stadiamaps.com/signup/">https://client.stadiamaps.com/signup/</a>'
         );
         ?>
@@ -128,7 +128,7 @@
     <div class="inputs five columns omega">
         <p class="explanation">
         <?php
-        echo __('CARTO requires an API key for its basemaps. Without one the tiles are watermarked, so Geolocation displays the default base map instead. Request a key at %s.',
+        echo __('CARTO requires an API key for its basemaps. Without one the tiles are watermarked, so Geolocation displays the default basemap instead. Request a key at %s.',
             '<a target="_blank" href="https://carto.com/basemaps/apikey/">https://carto.com/basemaps/apikey/</a>'
         );
         ?>
