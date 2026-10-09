@@ -2,7 +2,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
     // Iterate all locations maps on the page.
     document.querySelectorAll('.geolocation-locations-map').forEach(async (mapDiv) => {
         const relUrl = mapDiv.dataset.relUrl;
-        const locationsResponse = await fetch(mapDiv.dataset.locationsUrl);
+        const locationsUrl = new URL(mapDiv.dataset.locationsUrl, document.baseURI);
+        if (locationsUrl.origin !== window.location.origin) {
+            return;
+        }
+        const locationsResponse = await fetch(locationsUrl);
         const locationsData = await locationsResponse.json();
 
         const map = L.map(mapDiv, {
