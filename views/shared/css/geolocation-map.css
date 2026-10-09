@@ -45,11 +45,13 @@ div#geolocation {
 
 .geolocation-popup {
     width: 200px;
-    padding: 0 20px 13px;
+    /* Top padding spaces the content of a popup with no header. A header
+       cancels it with a negative margin so it still bleeds to the edge. */
+    padding: 13px 20px;
 }
 
 .geolocation-popup-header {
-    margin: 0 -20px 13px;
+    margin: -13px -20px 13px;
     padding: 8px 20px;
     background: #e3e3e3;
     font-weight: bold;

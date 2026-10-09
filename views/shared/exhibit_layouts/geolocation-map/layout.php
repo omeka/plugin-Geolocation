@@ -24,9 +24,11 @@ foreach ($attachments as $attachment):
 
     $itemLocations = $locationTable->findBy(['item_id' => $item->id]);
     foreach ($itemLocations as $location):
-        $headerText = $location->label ? html_escape($location->label) : html_escape($title);
+        $header = $location->label !== ''
+                ? '<div class="geolocation-popup-header">' . html_escape($location->label) . '</div>'
+                : '';
         $html = '<div class="geolocation-popup">'
-              . '<div class="geolocation-popup-header">' . $headerText . '</div>'
+              . $header
               . $body
               . '<div class="geolocation-popup-title">' . $titleLink . '</div>'
               . '</div>';

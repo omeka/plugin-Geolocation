@@ -446,8 +446,10 @@ OmekaMapBrowse.prototype = {
 
     buildLocationContent: function (locationData) {
         var popup = jQuery('<div class="geolocation-popup">');
-        var headerText = locationData.label || locationData.title;
-        popup.append(jQuery('<div class="geolocation-popup-header">').text(headerText));
+        // A header would repeat the linked title below until the location is labeled.
+        if (locationData.label) {
+            popup.append(jQuery('<div class="geolocation-popup-header">').text(locationData.label));
+        }
         if (locationData.thumbnailUrl) {
             var img = jQuery('<img>').attr({src: locationData.thumbnailUrl, alt: locationData.fileAlt || locationData.title});
             var thumbLink = jQuery('<a>').addClass('view-item').attr('href', locationData.itemUrl).append(img);
@@ -469,9 +471,13 @@ function OmekaMapSingle(mapDivId, center, options) {
     this.initMap();
     if (options.locations && options.locations.length) {
         jQuery.each(options.locations, function (i, pt) {
-            // Name fallback: location label, else the item title (addLayerFromGeometry
-            // applies the generic "Map location" fallback if both are empty).
-            var layer = that.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: pt.label || pt.itemTitle}, pt.popupHtml);
+            // An unlabeled location falls back to the item title for both its accessible
+            // name and its popup header. Every location gets a popup so activating it
+            // always opens and announces something.
+            var name = pt.label || pt.itemTitle;
+            var popup = jQuery('<div class="geolocation-popup">')
+                .append(jQuery('<div class="geolocation-popup-header">').text(name))[0];
+            var layer = that.addLayerFromGeometry(JSON.parse(pt.geometry_json), {title: name}, popup);
             that._registerListLayer(layer, {title: pt.itemTitle, itemId: pt.itemId, label: pt.label});
         });
         this.fitLocations();
