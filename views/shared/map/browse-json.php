@@ -7,7 +7,8 @@ foreach (loop('item') as $item):
     // Configured alt for the thumbnail's file (custom alt, else the site's alt element), used in
     // preference to the item title so it isn't overridden. Same file the thumbnail comes from.
     $fileAlt = ($file = $item->getFile()) ? $file->getAltText() : '';
-    $snippet = (string) metadata($item, ['Dublin Core', 'Description'], ['snippet' => 150]);
+    // no_escape because the JS writes the snippet with .text(), which escapes it again.
+    $snippet = (string) metadata($item, ['Dublin Core', 'Description'], ['snippet' => 150, 'no_escape' => true]);
     $itemUrl = record_url($item, 'show', true);
     foreach ($itemLocations as $location):
         $output[] = [
