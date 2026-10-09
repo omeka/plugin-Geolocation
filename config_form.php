@@ -254,6 +254,23 @@
 <legend><?php echo __('Browse Map Settings'); ?></legend>
 <div class="field">
     <div class="two columns alpha">
+        <label for="geolocation_link_to_nav"><?php echo __('Add Link to Map on Items/Browse Navigation'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">
+        <?php
+        $browseMapUrl = public_url('items/map');
+        echo __('Add a link to the items map on all the items/browse pages.') . ' ';
+        echo __('The map is also part of the main navigation, as "Map", and can be shown, hidden, or moved under Appearance > Navigation. To link to it from anywhere else, use %s.',
+            '<a href="' . html_escape($browseMapUrl) . '">' . html_escape($browseMapUrl) . '</a>'
+        );
+        ?>
+        </p>
+        <?php echo $view->formCheckbox('geolocation_link_to_nav', true, ['checked' => (bool) get_option('geolocation_link_to_nav')]); ?>
+    </div>
+</div>
+<div class="field">
+    <div class="two columns alpha">
         <label for="per_page"><?php echo __('Number of Locations Per Page'); ?></label>
     </div>
     <div class="inputs five columns omega">
@@ -275,24 +292,6 @@
         ?>
         </p>
         <?php echo $view->formCheckbox('auto_fit_browse', true, ['checked' => (bool) get_option('geolocation_auto_fit_browse')]); ?>
-    </div>
-</div>
-<div class="field">
-    <div class="two columns alpha">
-        <label for="geolocation_default_radius"><?php echo __('Default Radius'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('The size of the default radius to use on the items advanced search page. See below for whether to measure in miles or kilometers.'); ?></p>
-        <?php echo $view->formText('geolocation_default_radius', get_option('geolocation_default_radius')); ?>
-    </div>
-</div>
-<div class="field">
-    <div class="two columns alpha">
-        <label for="geolocation_use_metric_distances"><?php echo __('Use metric distances'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('Use metric distances in proximity search.'); ?></p>
-        <?php echo $view->formCheckbox('geolocation_use_metric_distances', true, ['checked' => (bool) get_option('geolocation_use_metric_distances')]); ?>
     </div>
 </div>
 <div class="field">
@@ -350,24 +349,36 @@
         <label for="geolocation_show_item_list"><?php echo __('Show location list on item pages'); ?></label>
     </div>
     <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('Show a keyboard-accessible list of the item\'s locations beside its map. Recommended for accessibility.'); ?></p>
+        <p class="explanation"><?php echo __('Show a keyboard-accessible list of the item\'s locations below its map. Recommended for accessibility.'); ?></p>
         <?php echo $view->formCheckbox('geolocation_show_item_list', true, ['checked' => (bool) get_option('geolocation_show_item_list')]); ?>
     </div>
 </div>
 </fieldset>
 
 <fieldset>
-<legend><?php echo __('Map Integration'); ?></legend>
+<legend><?php echo __('Search Settings'); ?></legend>
 <div class="field">
     <div class="two columns alpha">
-        <label for="geolocation_link_to_nav"><?php echo __('Add Link to Map on Items/Browse Navigation'); ?></label>
+        <label for="geolocation_default_radius"><?php echo __('Default Radius'); ?></label>
     </div>
     <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('Add a link to the items map on all the items/browse pages.'); ?></p>
-        <?php echo get_view()->formCheckbox('geolocation_link_to_nav', true, ['checked' => (bool) get_option('geolocation_link_to_nav')]); ?>
+        <p class="explanation"><?php echo __('The size of the default radius to use on the items advanced search page. See below for whether to measure in miles or kilometers.'); ?></p>
+        <?php echo $view->formText('geolocation_default_radius', get_option('geolocation_default_radius')); ?>
     </div>
 </div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_use_metric_distances"><?php echo __('Use metric distances'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Use metric distances in proximity search.'); ?></p>
+        <?php echo $view->formCheckbox('geolocation_use_metric_distances', true, ['checked' => (bool) get_option('geolocation_use_metric_distances')]); ?>
+    </div>
+</div>
+</fieldset>
 
+<fieldset>
+<legend><?php echo __('Map Integration'); ?></legend>
 <div class="field">
     <div class="two columns alpha">
         <label for="geolocation_add_map_to_contribution_form"><?php echo __('Add Map To Contribution Form'); ?></label>
