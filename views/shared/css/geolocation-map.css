@@ -65,6 +65,14 @@ div#geolocation {
     max-width: 100%;
 }
 
+/* Themes often pull linked images down (the default theme's `a img` has a
+   -2px bottom margin), which leaves the title flush against the thumbnail and
+   under the thumbnail's focus ring. Without a thumbnail, the header's bottom
+   margin absorbs this. */
+.geolocation-popup-title {
+    margin-top: 6px;
+}
+
 .leaflet-control-fit-all a {
     display: flex !important;
     align-items: center;
