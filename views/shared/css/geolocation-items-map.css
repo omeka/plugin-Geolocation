@@ -143,11 +143,15 @@ div.map-notification {
     }
 }
 
-/* Item-page location list, mirroring the browse list. Self-contained so the
-   browse rules above are untouched; sits below the map, not in a floated column. */
-.geolocation-item-links {
+/* Item-page location list: the item's locations, ungrouped, under a "Locations"
+   label below the map. Self-contained so the browse rules above are untouched. */
+.geolocation-item-links-label {
     clear: both;
-    padding: 10px 0;
+    margin: 10px 0 0;
+    font-weight: bold;
+}
+.geolocation-item-links {
+    padding: 4px 0 10px;
     max-height: 60vh;
     overflow-y: auto;
 }
@@ -173,17 +177,6 @@ div.map-notification {
 .geolocation-item-links li a:focus {
     color: inherit;
     text-decoration: underline;
-}
-.geolocation-item-links > ul > li > a,
-.geolocation-item-links .item-group {
-    font-weight: bold;
-}
-.geolocation-item-links .item-group {
-    display: block;
-}
-.geolocation-item-links li ul {
-    margin: 2px 0 0 18px;
-    padding: 0;
 }
 .geolocation-item-links li.current {
     background-color: rgba(51, 136, 204, 0.15);

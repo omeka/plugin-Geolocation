@@ -248,7 +248,7 @@ OmekaMap.prototype = {
     // opens its popup (sidestepping the fact that clustered/deflated features have
     // no individual focusable element until revealed). Generic across both the
     // browse and single-item maps, so it lives on the shared prototype.
-    buildListLinks: function (container) {
+    buildListLinks: function (container, options) {
         var that = this;
         // Kept so a clicked entry can clear the "current" mark from every other
         // entry, including those in nested sub-lists.
@@ -256,6 +256,13 @@ OmekaMap.prototype = {
         var locationString = container.data('locationString') || 'Location';
         var list = jQuery('<ul></ul>');
         list.appendTo(container);
+
+        // On an item page every location belongs to the same item, so list them
+        // directly; grouping them under the item title would only repeat the page.
+        if (options && options.groupByItem === false) {
+            this._buildLocationRows(list, this.locations, locationString);
+            return;
+        }
 
         // Group locations by item, preserving first-appearance (load) order.
         var items = [];
@@ -282,10 +289,17 @@ OmekaMap.prototype = {
             var header = jQuery('<li></li>').appendTo(list);
             jQuery('<span></span>').addClass('item-group').text(item.title).appendTo(header);
             var subList = jQuery('<ul></ul>').appendTo(header);
-            jQuery.each(item.layers, function (i, layer) {
-                var label = layer._geolocationLabel || (locationString + ' ' + (i + 1));
-                layer._geolocationListItem = that._buildListItem(subList, label, function () { that._focusLayer(layer); });
-            });
+            that._buildLocationRows(subList, item.layers, locationString);
+        });
+    },
+
+    // One row per location. An unlabeled location is numbered by its position
+    // among its item's locations ("Location 2").
+    _buildLocationRows: function (list, layers, locationString) {
+        var that = this;
+        jQuery.each(layers, function (i, layer) {
+            var label = layer._geolocationLabel || (locationString + ' ' + (i + 1));
+            layer._geolocationListItem = that._buildListItem(list, label, function () { that._focusLayer(layer); });
         });
     },
 
@@ -485,7 +499,7 @@ function OmekaMapSingle(mapDivId, center, options) {
         if (options.list) {
             var listDiv = jQuery('#' + options.list);
             if (listDiv.length) {
-                this.buildListLinks(listDiv);
+                this.buildListLinks(listDiv, {groupByItem: false});
             }
         }
     }

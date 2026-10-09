@@ -59,8 +59,11 @@ class Geolocation_View_Helper_GeolocationMapSingle extends Zend_View_Helper_Abst
 
         $html = '<div ' . tag_attributes($divAttrs) . '></div>';
         if ($showList) {
-            $html .= '<div id="' . html_escape($listId) . '" class="geolocation-item-links" role="group"'
-                   . ' aria-label="' . html_escape(__('Locations')) . '"'
+            // A label, not a heading: the map sits under an h2 on public pages and an h4 in the admin.
+            $labelId = "$listId-label";
+            $html .= '<p id="' . html_escape($labelId) . '" class="geolocation-item-links-label">' . html_escape(__('Locations')) . '</p>'
+                   . '<div id="' . html_escape($listId) . '" class="geolocation-item-links" role="group"'
+                   . ' aria-labelledby="' . html_escape($labelId) . '"'
                    . ' data-location-string="' . html_escape(__('Location')) . '"></div>';
         }
         // Live region for the popup open/close announcements the map JS emits,
