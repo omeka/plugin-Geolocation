@@ -65,6 +65,18 @@ div#geolocation {
     max-width: 100%;
 }
 
+/* Give the thumbnail link a box the size of its image. Firefox draws an inline
+   link's focus ring around its line of text, not the image inside it, and a
+   theme's negative margin on linked images would clip the ring. */
+.geolocation-popup-thumbnail a {
+    display: inline-block;
+    vertical-align: top;
+}
+.geolocation-popup-thumbnail img {
+    display: block;
+    margin: 0;
+}
+
 /* Themes often pull linked images down (the default theme's `a img` has a
    -2px bottom margin), which leaves the title flush against the thumbnail and
    under the thumbnail's focus ring. Without a thumbnail, the header's bottom
