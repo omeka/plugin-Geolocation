@@ -15,12 +15,15 @@ foreach ($attachments as $attachment):
 
     if ($file):
         // Prefer the file's configured alt, falling back to the item title (matching
-        // the browse map); exhibitAttachment/file_image otherwise leaves alt blank.
+        // the browse map); file_image otherwise leaves alt blank.
         $alt = $file->getAltText() ?: $title;
-        $body = $this->exhibitAttachment($attachment, ['imgAttributes' => ['alt' => $alt]], [], true);
+        $thumbnail = exhibit_builder_link_to_exhibit_item(file_image('square_thumbnail', ['alt' => $alt], $file), [], $item);
     else:
-        $body = $this->exhibitAttachmentCaption($attachment);
+        $thumbnail = '';
     endif;
+    // The curator's caption takes the description's place after the title, so exhibit
+    // popups follow the same order as the browse map's.
+    $caption = $this->exhibitAttachmentCaption($attachment);
 
     $itemLocations = $locationTable->findBy(['item_id' => $item->id]);
     foreach ($itemLocations as $location):
@@ -29,8 +32,9 @@ foreach ($attachments as $attachment):
                 : '';
         $html = '<div class="geolocation-popup">'
               . $header
-              . $body
+              . $thumbnail
               . '<div class="geolocation-popup-title">' . $titleLink . '</div>'
+              . $caption
               . '</div>';
         $locations[] = [
             'geometry_json' => $location->geometry_json,
