@@ -46,6 +46,15 @@
         ?>
     </div>
 </div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="cluster"><?php echo __('Enable location clustering'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Show close or overlapping locations as clusters.'); ?></p>
+        <?php echo $view->formCheckbox('cluster', true, ['checked' => (bool) get_option('geolocation_cluster')]); ?>
+    </div>
+</div>
 </fieldset>
 
 <fieldset id="basemap-settings">
@@ -292,15 +301,6 @@
         ?>
         </p>
         <?php echo $view->formCheckbox('auto_fit_browse', true, ['checked' => (bool) get_option('geolocation_auto_fit_browse')]); ?>
-    </div>
-</div>
-<div class="field">
-    <div class="two columns alpha">
-        <label for="cluster"><?php echo __('Enable location clustering'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('Show close or overlapping locations as clusters.'); ?></p>
-        <?php echo $view->formCheckbox('cluster', true, ['checked' => (bool) get_option('geolocation_cluster')]); ?>
     </div>
 </div>
 <div class="field">
