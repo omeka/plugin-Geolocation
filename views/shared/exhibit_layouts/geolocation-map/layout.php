@@ -46,9 +46,11 @@ $sequenceMode = !empty($options['sequence']) && count($locations) > 0;
 ?>
 <?php if ($sequenceMode): ?>
 <div class="geolocation-sequence-nav" aria-label="<?php echo __('Location sequence navigation'); ?>">
+    <button id="<?php echo $divId; ?>-first" class="geolocation-sequence-first" type="button" disabled><?php echo __('First'); ?></button>
     <button id="<?php echo $divId; ?>-prev" class="geolocation-sequence-prev" type="button" disabled><?php echo __('Previous'); ?></button>
     <span id="<?php echo $divId; ?>-counter" class="geolocation-sequence-counter">1 / <?php echo count($locations); ?></span>
     <button id="<?php echo $divId; ?>-next" class="geolocation-sequence-next" type="button"<?php if (count($locations) === 1): ?> disabled<?php endif; ?>><?php echo __('Next'); ?></button>
+    <button id="<?php echo $divId; ?>-last" class="geolocation-sequence-last" type="button"<?php if (count($locations) === 1): ?> disabled<?php endif; ?>><?php echo __('Last'); ?></button>
 </div>
 <?php endif; ?>
 <div id="<?php echo $divId; ?>" class="geolocation-map exhibit-geolocation-map"

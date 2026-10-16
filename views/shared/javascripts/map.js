@@ -167,15 +167,23 @@ OmekaMap.prototype = {
                 map.flyToBounds(layer.getBounds(), {padding: [25, 25]});
             }
             controls.counter.text((currentIndex + 1) + ' / ' + total);
+            controls.firstBtn.prop('disabled', currentIndex === 0);
             controls.prevBtn.prop('disabled', currentIndex === 0);
             controls.nextBtn.prop('disabled', currentIndex === total - 1);
+            controls.lastBtn.prop('disabled', currentIndex === total - 1);
         }
 
+        controls.firstBtn.on('click', function () {
+            if (currentIndex > 0) goToStep(0);
+        });
         controls.prevBtn.on('click', function () {
             if (currentIndex > 0) goToStep(currentIndex - 1);
         });
         controls.nextBtn.on('click', function () {
             if (currentIndex < total - 1) goToStep(currentIndex + 1);
+        });
+        controls.lastBtn.on('click', function () {
+            if (currentIndex < total - 1) goToStep(total - 1);
         });
 
         goToStep(0);
@@ -664,8 +672,10 @@ jQuery(window).on('load', function () {
             layers.push(geolocationMap.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html));
         }
         geolocationMap.initLocations(layers, {
+            firstBtn: jQuery('#' + divId + '-first'),
             prevBtn: jQuery('#' + divId + '-prev'),
             nextBtn: jQuery('#' + divId + '-next'),
+            lastBtn: jQuery('#' + divId + '-last'),
             counter: jQuery('#' + divId + '-counter')
         });
     });
