@@ -138,6 +138,43 @@ OmekaMap.prototype = {
         var total = layers.length;
         var pendingPopupOpen = null;
 
+        // Height of the layer's popup as Leaflet will render it (wrapper, tip and
+        // bottom margin), measured from a hidden copy so nothing opens or announces.
+        function measurePopupHeight(layer) {
+            var popup = layer.getPopup();
+            var content = popup.getContent();
+            var el = jQuery('<div class="leaflet-popup"><div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content"></div></div><div class="leaflet-popup-tip-container"></div></div>')
+                .css({position: 'absolute', visibility: 'hidden', left: 0, top: 0});
+            var contentEl = el.find('.leaflet-popup-content');
+            contentEl.append(typeof content === 'string' ? content : jQuery(content).clone());
+            el.appendTo(map.getPanes().popupPane);
+            // Apply the popup's maxHeight cap the same way Leaflet does.
+            var maxHeight = popup.options.maxHeight;
+            if (maxHeight && contentEl[0].offsetHeight > maxHeight) {
+                contentEl.css('height', maxHeight + 'px');
+            }
+            var height = el.outerHeight(true);
+            el.remove();
+            return height;
+        }
+
+        // Center the map below the marker by enough that its popup opens fully in
+        // view, so Leaflet has no need to autopan once the flight ends.
+        function centerWithRoomForPopup(layer) {
+            var popup = layer.getPopup();
+            var size = map.getSize();
+            var padding = L.point(popup.options.autoPanPadding);
+            var offset = L.point(popup.options.offset);
+            var anchor = L.point(layer.options.icon.options.popupAnchor || [0, 0]);
+            // Container y the marker needs so the popup's top clears the padding.
+            // Autopan only checks the popup, which sits above the marker, so the
+            // marker can go nearly to the bottom edge before a pan is unavoidable.
+            var markerY = padding.y + measurePopupHeight(layer) - offset.y - anchor.y;
+            markerY = Math.min(Math.max(markerY, size.y / 2), size.y - 10);
+            var point = map.project(layer.getLatLng()).subtract([0, markerY - size.y / 2]);
+            return map.unproject(point);
+        }
+
         function goToStep(index) {
             currentIndex = index;
             var layer = layers[currentIndex];
@@ -162,7 +199,7 @@ OmekaMap.prototype = {
             };
             map.once('moveend', pendingPopupOpen);
             if (layer instanceof L.Marker) {
-                map.flyTo(layer.getLatLng());
+                map.flyTo(centerWithRoomForPopup(layer));
             } else {
                 map.flyToBounds(layer.getBounds(), {padding: [25, 25]});
             }
@@ -669,7 +706,15 @@ jQuery(window).on('load', function () {
         var layers = [];
         for (var i = 0; i < mapLocations.length; i++) {
             var locationData = mapLocations[i];
-            layers.push(geolocationMap.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html));
+            var layer = geolocationMap.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html);
+            // Cap the popup's content so a long caption scrolls inside it instead
+            // of running past the map's bottom edge. The cap leaves room for
+            // autopan's padding above and below, plus the popup's tip and bottom
+            // margin (40px together in leaflet.css).
+            var popup = layer.getPopup();
+            popup.options.maxHeight = geolocationMap.map.getSize().y
+                - 2 * L.point(popup.options.autoPanPadding).y - 40;
+            layers.push(layer);
         }
         geolocationMap.initLocations(layers, {
             firstBtn: jQuery('#' + divId + '-first'),

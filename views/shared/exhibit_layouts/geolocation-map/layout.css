@@ -16,6 +16,14 @@
     height: 450px;
 }
 
+/* Popup thumbnails are always square_thumbnail derivatives, so reserve their
+   square before the image loads. Leaflet then sizes and pans the popup once,
+   instead of again when the image arrives. */
+.layout-geolocation-map .geolocation-popup .exhibit-item-link img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+}
+
 .layout-geolocation-map .geolocation-sequence-nav {
     display: flex;
     align-items: center;
