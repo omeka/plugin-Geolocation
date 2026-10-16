@@ -133,6 +133,7 @@ OmekaMap.prototype = {
 
     initSequenceNav: function (layers, controls) {
         var map = this.map;
+        var clusterGroup = this.clusterGroup;
         var currentIndex = 0;
         var total = layers.length;
         var pendingPopupOpen = null;
@@ -145,7 +146,19 @@ OmekaMap.prototype = {
             }
             pendingPopupOpen = function () {
                 pendingPopupOpen = null;
-                layer.openPopup();
+                if (clusterGroup && layer instanceof L.Marker) {
+                    // A marker hidden inside a cluster has no icon to anchor
+                    // a popup; zoom into its cluster first. The callback can
+                    // fire after the user has moved on to another step, so
+                    // only open the popup if this step is still current.
+                    clusterGroup.zoomToShowLayer(layer, function () {
+                        if (layer === layers[currentIndex]) {
+                            layer.openPopup();
+                        }
+                    });
+                } else {
+                    layer.openPopup();
+                }
             };
             map.once('moveend', pendingPopupOpen);
             if (layer instanceof L.Marker) {
