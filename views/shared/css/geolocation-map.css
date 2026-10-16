@@ -39,8 +39,12 @@ div#geolocation {
     padding: 0;
 }
 
+/* Leaflet sizes popup content 1px wider than it measures. Our popup has a fixed
+   width, so fit the content to it exactly, or a 1px strip shows beside the header.
+   !important because Leaflet sets the width inline. */
 .leaflet-popup-content:has(.geolocation-popup) {
     margin: 0;
+    width: auto !important;
 }
 
 .geolocation-popup {
