@@ -256,15 +256,20 @@ OmekaMap.prototype = {
         }
         basemap.addTo(this.map);
 
+        var overlay;
         if (customMap) {
             if (customMap.type === 'tiled' && customMap.tile_url) {
-                L.tileLayer(customMap.tile_url, customMap).addTo(this.map);
+                overlay = L.tileLayer(customMap.tile_url, customMap).addTo(this.map);
             } else if (customMap.type === 'wms' && customMap.wms_url && customMap.layers) {
                 if (customMap.transparent) {
                     customMap.format = 'image/png';
                 }
-                L.tileLayer.wms(customMap.wms_url, customMap).addTo(this.map);
+                overlay = L.tileLayer.wms(customMap.wms_url, customMap).addTo(this.map);
             }
+        }
+        // Past its last tiles, scale the basemap up instead of hiding it.
+        if (overlay && basemap.options.maxZoom < overlay.options.maxZoom) {
+            L.setOptions(basemap, {maxNativeZoom: basemap.options.maxZoom, maxZoom: overlay.options.maxZoom});
         }
 
         if (this.options.cluster) {
