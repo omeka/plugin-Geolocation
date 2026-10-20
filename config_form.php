@@ -46,6 +46,15 @@
         ?>
     </div>
 </div>
+<div class="field">
+    <div class="two columns alpha">
+        <label for="cluster"><?php echo __('Enable location clustering'); ?></label>
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Show close or overlapping locations as clusters.'); ?></p>
+        <?php echo $view->formCheckbox('cluster', true, ['checked' => (bool) get_option('geolocation_cluster')]); ?>
+    </div>
+</div>
 </fieldset>
 
 <fieldset id="basemap-settings">
@@ -271,10 +280,10 @@
 </div>
 <div class="field">
     <div class="two columns alpha">
-        <label for="per_page"><?php echo __('Number of Locations Per Page'); ?></label>
+        <label for="per_page"><?php echo __('Number of Items Per Page'); ?></label>
     </div>
     <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('The number of locations displayed per page when browsing the map.'); ?></p>
+        <p class="explanation"><?php echo __('The number of items displayed per page on the browse map.'); ?></p>
         <?php echo $view->formText('per_page', get_option('geolocation_per_page')); ?>
     </div>
 </div>
@@ -292,15 +301,6 @@
         ?>
         </p>
         <?php echo $view->formCheckbox('auto_fit_browse', true, ['checked' => (bool) get_option('geolocation_auto_fit_browse')]); ?>
-    </div>
-</div>
-<div class="field">
-    <div class="two columns alpha">
-        <label for="cluster"><?php echo __('Enable location clustering'); ?></label>
-    </div>
-    <div class="inputs five columns omega">
-        <p class="explanation"><?php echo __('Show close or overlapping locations as clusters.'); ?></p>
-        <?php echo $view->formCheckbox('cluster', true, ['checked' => (bool) get_option('geolocation_cluster')]); ?>
     </div>
 </div>
 <div class="field">
