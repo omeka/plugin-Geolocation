@@ -198,7 +198,13 @@ OmekaMap.prototype = {
                 }
             };
             map.once('moveend', pendingPopupOpen);
-            if (layer instanceof L.Marker) {
+            if (layer instanceof L.Marker && layer._preSpiderfyLatlng && map.hasLayer(layer)) {
+                // The marker is showing as part of a spiderfied cluster. flyTo
+                // always fires zoomstart/zoomend, even at the same zoom, and
+                // markercluster unspiderfies on those; panTo fires neither, so
+                // the cluster stays open between steps within it.
+                map.panTo(centerWithRoomForPopup(layer));
+            } else if (layer instanceof L.Marker) {
                 map.flyTo(centerWithRoomForPopup(layer));
             } else {
                 map.flyToBounds(layer.getBounds(), {padding: [25, 25]});
