@@ -718,6 +718,23 @@ jQuery(window).on('load', function () {
         for (var i = 0; i < mapLocations.length; i++) {
             var locationData = mapLocations[i];
             var layer = geolocationMap.addLayerFromGeometry(JSON.parse(locationData.geometry_json), {}, locationData.html);
+            // Draw every point of a shape, not just those near the view, so it
+            // stays whole while the map flies (see the SVG overflow rule in
+            // layout.css). Multi-part geometries are groups of paths.
+            (layer instanceof L.Path ? [layer] : layer.getLayers ? layer.getLayers() : []).forEach(function (path) {
+                if (path instanceof L.Path) {
+                    // Leaflet's noClip option alone isn't enough: _clipPoints
+                    // still skips a shape entirely when it lies outside the area
+                    // drawn at the last moveend. Keep every point instead, as
+                    // noClip's own branch does, minus that check.
+                    path._clipPoints = function () {
+                        this._parts = this._rings;
+                    };
+                    if (path._map) {
+                        path.redraw();
+                    }
+                }
+            });
             // Cap the popup's content so a long caption scrolls inside it instead
             // of running past the map's bottom edge. The cap leaves room for
             // autopan's padding above and below, plus the popup's tip and bottom

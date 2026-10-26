@@ -16,6 +16,13 @@
     height: 450px;
 }
 
+/* Shapes are drawn whole (see the _clipPoints override in map.js) so they stay
+   visible while the map flies between steps; let them render past the SVG's
+   own box. */
+.layout-geolocation-map .leaflet-overlay-pane svg {
+    overflow: visible;
+}
+
 /* Popup thumbnails are always square_thumbnail derivatives, so reserve their
    square before the image loads. Leaflet then sizes and pans the popup once,
    instead of again when the image arrives. */
