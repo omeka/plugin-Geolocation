@@ -620,17 +620,6 @@ function OmekaMapForm(mapDivId, center, options) {
         }
     });
 
-    this.map.on(L.Draw.Event.EDITED, function (event) {
-        event.layers.eachLayer(function (layer) {
-            layer._locationData.geometry_json = JSON.stringify(layer.toGeoJSON().geometry);
-            if (layer instanceof L.Marker) {
-                var latlng = layer.getLatLng();
-                layer._locationData.latitude = latlng.lat;
-                layer._locationData.longitude = latlng.lng;
-            }
-        });
-    });
-
     this.map.on('zoomend', function () {
         var zoom = that.map.getZoom();
         that.drawnItems.eachLayer(function (layer) {
@@ -641,6 +630,11 @@ function OmekaMapForm(mapDivId, center, options) {
     jQuery(this.jsonInput).closest('form').on('submit', function () {
         var data = [];
         that.drawnItems.eachLayer(function (layer) {
+            // Read each feature's geometry from the map, so a move or reshape is
+            // kept even if the editor's own Save was never clicked. The server
+            // derives latitude and longitude from it. false turns off Leaflet's
+            // rounding, so an untouched feature is saved exactly as it was stored.
+            layer._locationData.geometry_json = JSON.stringify(layer.toGeoJSON(false).geometry);
             data.push(layer._locationData);
         });
         jQuery(that.jsonInput).val(JSON.stringify(data));
