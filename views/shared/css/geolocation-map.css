@@ -47,6 +47,13 @@ div#geolocation {
     width: auto !important;
 }
 
+/* Exhibit popups have a maximum height, so long ones scroll. In browsers where
+   the scrollbar takes up width, it squeezes the fixed-width content, which then
+   overflows sideways and gets a horizontal scrollbar too. Hide that one. */
+.leaflet-popup-scrolled:has(.geolocation-popup) {
+    overflow-x: hidden;
+}
+
 .geolocation-popup {
     width: 200px;
     /* Top padding spaces the content of a popup with no header. A header
