@@ -76,6 +76,15 @@ div#geolocation {
     max-width: 100%;
 }
 
+/* Themes often set a tall paragraph line height (24px in the default theme), and
+   Leaflet adds a 1.3em margin around each paragraph in a popup. Together they
+   double-space the small popup text, so tighten both here. The extra class
+   outranks theme rules such as the default theme's .exhibit-item-caption p. */
+.leaflet-popup-content .geolocation-popup p {
+    line-height: 1.4;
+    margin: 0.5em 0;
+}
+
 /* Give the thumbnail link a box the size of its image. Firefox draws an inline
    link's focus ring around its line of text, not the image inside it, and a
    theme's negative margin on linked images would clip the ring. */
