@@ -9,6 +9,11 @@ $locationTable = get_db()->getTable('Location');
 $locations = [];
 foreach ($attachments as $attachment):
     $item = $attachment->getItem();
+    // There is no item when it's private and the visitor can't see it, or when it
+    // was deleted. Leave it off the map.
+    if (!$item):
+        continue;
+    endif;
     $file = $attachment->getFile();
     $title = metadata($item, 'display_title', ['no_escape' => true]);
     $titleLink = exhibit_builder_link_to_exhibit_item(null, [], $item);
