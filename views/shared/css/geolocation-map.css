@@ -34,9 +34,13 @@ div#geolocation {
     padding:0;
 }
 
+/* The popup's bottom spacing goes on this wrapper, not inside the content.
+   Leaflet measures the content to decide whether a height-limited popup
+   scrolls, so spacing there could add a scrollbar with nothing but empty
+   space to scroll to. */
 .leaflet-popup-content-wrapper:has(.geolocation-popup) {
     overflow: hidden;
-    padding: 0;
+    padding: 0 0 13px;
 }
 
 /* Leaflet sizes popup content 1px wider than it measures. Our popup has a fixed
@@ -58,7 +62,14 @@ div#geolocation {
     width: 200px;
     /* Top padding spaces the content of a popup with no header. A header
        cancels it with a negative margin so it still bleeds to the edge. */
-    padding: 13px 20px;
+    padding: 13px 20px 0;
+}
+
+/* The wrapper provides the bottom spacing, so the last element, and whatever
+   ends it, need no bottom margin. */
+.leaflet-popup-content .geolocation-popup > :last-child,
+.leaflet-popup-content .geolocation-popup > :last-child > :last-child {
+    margin-bottom: 0;
 }
 
 .geolocation-popup-header {
